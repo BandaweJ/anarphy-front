@@ -1,3 +1,3 @@
 export const environment = {
-  apiUrl: 'https://server-cv68.onrender.com',
+  apiUrl: 'https://anarphy-server.onrender.com',
 };
