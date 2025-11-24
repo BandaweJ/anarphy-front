@@ -161,10 +161,16 @@ export class SignupComponent implements OnInit, OnDestroy {
     this.router.navigateByUrl('/signin');
   }
 
+  // Helper method to check if role uses I.D Number
+  private usesIdNumber(role: string): boolean {
+    const idNumberRoles = ['teacher', 'director', 'admin', 'reception', 'hod', 'auditor', 'editor'];
+    return idNumberRoles.includes(role);
+  }
+
   // Helper methods for dynamic field labels and hints
   getPlaceholder(): string {
     const role = this.role?.value;
-    if (role === 'teacher') {
+    if (this.usesIdNumber(role)) {
       return '03123456F98';
     } else if (role === 'student') {
       return 'S2405234';
@@ -176,7 +182,7 @@ export class SignupComponent implements OnInit, OnDestroy {
 
   getHint(): string {
     const role = this.role?.value;
-    if (role === 'teacher') {
+    if (this.usesIdNumber(role)) {
       return 'Format: 03123456F98';
     } else if (role === 'student') {
       return 'Format: S2405234';
@@ -188,7 +194,7 @@ export class SignupComponent implements OnInit, OnDestroy {
 
   getFieldLabel(): string {
     const role = this.role?.value;
-    if (role === 'teacher') {
+    if (this.usesIdNumber(role)) {
       return 'I.D Number';
     } else if (role === 'student') {
       return 'Student Number';
@@ -196,6 +202,18 @@ export class SignupComponent implements OnInit, OnDestroy {
       return 'Email Address';
     }
     return 'Identifier';
+  }
+
+  getFieldIcon(): string {
+    const role = this.role?.value;
+    if (this.usesIdNumber(role)) {
+      return 'badge';
+    } else if (role === 'student') {
+      return 'school';
+    } else if (role === 'parent') {
+      return 'email';
+    }
+    return 'person';
   }
 
   private markFormGroupTouched(): void {
