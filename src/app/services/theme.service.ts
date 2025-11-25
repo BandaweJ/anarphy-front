@@ -63,16 +63,47 @@ export class ThemeService {
     if (colors.primaryColor) {
       root.style.setProperty('--primary-blue', colors.primaryColor);
       root.style.setProperty('--primary-blue-dark', this.darkenColor(colors.primaryColor, 0.1));
+      root.style.setProperty('--primary-blue-light', this.lightenColor(colors.primaryColor, 0.2));
     }
     
     if (colors.accentColor) {
       root.style.setProperty('--accent-gold', colors.accentColor);
       root.style.setProperty('--accent-gold-light', this.lightenColor(colors.accentColor, 0.2));
+      root.style.setProperty('--accent-gold-dark', this.darkenColor(colors.accentColor, 0.1));
     }
     
     if (colors.warnColor) {
       root.style.setProperty('--warn-brown', colors.warnColor);
       root.style.setProperty('--warn-brown-light', this.lightenColor(colors.warnColor, 0.1));
+      root.style.setProperty('--warn-brown-dark', this.darkenColor(colors.warnColor, 0.1));
+    }
+
+    // Update gradients with school colors
+    this.updateGradients(colors);
+  }
+
+  /**
+   * Update gradient backgrounds with school colors
+   */
+  private updateGradients(colors: SchoolColors): void {
+    const root = document.documentElement;
+    
+    if (colors.primaryColor && colors.accentColor) {
+      const primary = colors.primaryColor;
+      const accent = colors.accentColor;
+      const primaryLight = this.lightenColor(primary, 0.3);
+      const accentLight = this.lightenColor(accent, 0.2);
+      
+      // Create dynamic gradients using school colors
+      const lightGradient = `linear-gradient(135deg, ${primary} 0%, ${primaryLight} 25%, ${accent} 50%, ${accentLight} 75%, ${this.lightenColor(accent, 0.4)} 100%)`;
+      const darkGradient = `linear-gradient(135deg, ${this.darkenColor(primary, 0.3)} 0%, ${this.darkenColor(primary, 0.2)} 25%, ${this.darkenColor(accent, 0.2)} 50%, ${this.darkenColor(accent, 0.1)} 75%, ${accent} 100%)`;
+      
+      root.style.setProperty('--bg-gradient-light', lightGradient);
+      root.style.setProperty('--bg-gradient-dark', darkGradient);
+      
+      // Update animated background classes
+      root.style.setProperty('--animated-bg-light', lightGradient);
+      root.style.setProperty('--animated-bg-dark', darkGradient);
     }
   }
 
