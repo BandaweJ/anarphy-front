@@ -1,7 +1,10 @@
 <mat-toolbar class="title">
-
-  <div *ngIf="currentTerm$ |async as currentTerm">{{ today.toDateString() }}, Term {{ currentTerm.num }} {{
-    currentTerm.year}}</div>
+  <div *ngIf="currentTerm$ | async as currentTerm; else noTerm">
+    {{ today.toDateString() }}, Term {{ currentTerm.num }} {{ currentTerm.year }}
+  </div>
+  <ng-template #noTerm>
+    <div>{{ today.toDateString() }}, Current Academic Year</div>
+  </ng-template>
 </mat-toolbar>
 
 <!-- Teachers, Admins and HODs dashboard -->
