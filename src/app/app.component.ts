@@ -73,7 +73,7 @@ export class AppComponent implements OnInit, OnDestroy {
     map(role => this.roleAccess.hasAnyRole(role, ROLES.reception, ROLES.director, ROLES.auditor))
   );
   canAccessReceipting$ = this.roleAccess.getCurrentRole$().pipe(
-    map(role => this.roleAccess.hasAnyRole(role, ROLES.auditor, ROLES.director))
+    map(role => this.roleAccess.hasAnyRole(role, ROLES.auditor, ROLES.director, ROLES.reception))
   );
   canAccessFinancialReports$ = this.roleAccess.getCurrentRole$().pipe(
     map(role => this.roleAccess.hasAnyRole(role, ROLES.reception, ROLES.auditor, ROLES.director))
@@ -88,13 +88,13 @@ export class AppComponent implements OnInit, OnDestroy {
     map(role => this.roleAccess.hasRole(ROLES.reception, role))
   );
   canAccessExemptions$ = this.roleAccess.getCurrentRole$().pipe(
-    map(role => this.roleAccess.hasAnyRole(role, ROLES.auditor, ROLES.director))
+    map(role => this.roleAccess.hasAnyRole(role, ROLES.auditor, ROLES.director, ROLES.reception))
   );
   canAccessRevenueRecognition$ = this.roleAccess.getCurrentRole$().pipe(
-    map(role => this.roleAccess.hasAnyRole(role, ROLES.auditor, ROLES.director))
+    map(role => this.roleAccess.hasAnyRole(role, ROLES.auditor, ROLES.director, ROLES.reception))
   );
   canAccessFeesCollection$ = this.roleAccess.getCurrentRole$().pipe(
-    map(role => this.roleAccess.hasAnyRole(role, ROLES.auditor, ROLES.director))
+    map(role => this.roleAccess.hasAnyRole(role, ROLES.auditor, ROLES.director, ROLES.reception))
   );
   
   // Helper methods for specific role checks
