@@ -1,6 +1,7 @@
 {
-  "name": "Junior High School Management System",
-  "short_name": "JHS",
+  "name": "Anarphy High School Management System",
+  "short_name": "Anarphy",
+  "description": "Comprehensive school management system for Anarphy High School",
   "icons": [
     {
       "src": "android-chrome-192x192.png",
@@ -15,5 +16,7 @@
   ],
   "theme_color": "#2196f3",
   "background_color": "#ffffff",
-  "display": "standalone"
+  "display": "standalone",
+  "start_url": "/",
+  "scope": "/"
 }
