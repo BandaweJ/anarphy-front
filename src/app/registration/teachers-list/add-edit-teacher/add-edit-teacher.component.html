@@ -78,7 +78,7 @@
           
           <div>
             <mat-form-field appearance="outline">
-              <mat-label>Date of Birth</mat-label>
+              <mat-label>Date of Birth (Optional)</mat-label>
               <input formControlName="dob" matInput [matDatepicker]="picker" placeholder="Select date of birth" />
               <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
               <mat-datepicker #picker></mat-datepicker>
@@ -186,7 +186,7 @@
           
           <div>
             <mat-form-field appearance="outline">
-              <mat-label>Address</mat-label>
+              <mat-label>Address (Optional)</mat-label>
               <input formControlName="address" matInput type="text" placeholder="Enter address" />
               <mat-hint>e.g. 123 Main Street, City</mat-hint>
             </mat-form-field>
@@ -199,7 +199,7 @@
         <div class="qualifications-header">
           <div class="section-title">
             <mat-icon>school</mat-icon>
-            Qualifications
+            Qualifications (Optional)
           </div>
           <button mat-mini-fab (click)="addControl()" class="add-qualification-btn" type="button" 
                   matTooltip="Add Qualification" aria-label="Add Qualification">

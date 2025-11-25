@@ -137,31 +137,38 @@ export class AppComponent implements OnInit, OnDestroy {
       this.currentTheme = theme;
     });
     
-    // Load system settings and initialize school information observables
-    const settings$ = this.systemSettingsService.getSettings().pipe(
+    // Load initial system settings
+    this.systemSettingsService.getSettings().pipe(
       catchError(error => {
         console.error('Error loading system settings:', error);
-        // Return default settings on error
-        return of({
+        // Return default settings on error and update the service state
+        const defaultSettings = {
           schoolName: 'Junior High School',
-          schoolLogo: 'assets/jhs_logo.jpg',
-        } as SystemSettings);
+          schoolLogo: 'assets/anarphy_logo.png',
+        } as SystemSettings;
+        return of(defaultSettings);
       }),
-      shareReplay(1) // Cache the result to avoid multiple HTTP calls
+      takeUntil(this.destroy$)
+    ).subscribe();
+    
+    // Subscribe to settings changes from the service
+    const settings$ = this.systemSettingsService.settings$.pipe(
+      filter(settings => settings !== null), // Only emit when settings are loaded
+      shareReplay(1) // Cache the latest settings
     );
     
     // Initialize school information observables
     this.schoolName$ = settings$.pipe(
-      map(settings => settings.schoolName || 'Junior High School')
+      map(settings => settings!.schoolName || 'Junior High School')
     );
     
     this.schoolLogo$ = settings$.pipe(
-      map(settings => settings.schoolLogo || 'assets/jhs_logo.jpg')
+      map(settings => settings!.schoolLogo || 'assets/anarphy_logo.png')
     );
     
     this.schoolNameAbbr$ = settings$.pipe(
       map(settings => {
-        const name = settings.schoolName || 'Junior High School';
+        const name = settings!.schoolName || 'Junior High School';
         // Generate abbreviation from school name (first letters of each word)
         return name
           .split(' ')
@@ -173,16 +180,16 @@ export class AppComponent implements OnInit, OnDestroy {
     
     // Update page title and apply school colors
     settings$.pipe(takeUntil(this.destroy$)).subscribe(settings => {
-      const schoolName = settings.schoolName || 'Junior High School';
+      const schoolName = settings!.schoolName || 'Junior High School';
       this.title = schoolName;
       this.titleService.setTitle(schoolName);
       
       // Apply school colors to theme
-      if (settings.primaryColor || settings.accentColor || settings.warnColor) {
+      if (settings!.primaryColor || settings!.accentColor || settings!.warnColor) {
         this.themeService.applySchoolColors({
-          primaryColor: settings.primaryColor,
-          accentColor: settings.accentColor,
-          warnColor: settings.warnColor,
+          primaryColor: settings!.primaryColor,
+          accentColor: settings!.accentColor,
+          warnColor: settings!.warnColor,
         });
       }
     });

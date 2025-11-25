@@ -71,7 +71,7 @@
           <span class="detail-value">{{ teacher.id }}</span>
         </div>
 
-        <div class="detail-card">
+        <div class="detail-card" *ngIf="teacher.dob">
           <span class="detail-label">Age</span>
           <span class="detail-value">{{ sharedService.calculateAge(teacher.dob) }} years</span>
         </div>
@@ -101,7 +101,7 @@
           </span>
         </div>
 
-        <div class="detail-card">
+        <div class="detail-card" *ngIf="teacher.address">
           <span class="detail-label">Address</span>
           <span class="detail-value">
             <mat-icon>location_on</mat-icon>

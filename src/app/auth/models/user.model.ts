@@ -7,4 +7,5 @@ export interface User {
   iat: number;
   exp: number;
   permissions?: string[]; // Permissions assigned to the user's role
+  isBootstrap?: boolean;
 }

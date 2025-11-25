@@ -50,8 +50,8 @@ export class AuthService {
     }
   }
 
-  signin(signinData: SigninInterface): Observable<{ accessToken: string; permissions: string[] }> {
-    return this.http.post<{ accessToken: string; permissions: string[] }>(
+  signin(signinData: SigninInterface): Observable<{ accessToken: string; permissions: string[]; isBootstrap?: boolean }> {
+    return this.http.post<{ accessToken: string; permissions: string[]; isBootstrap?: boolean }>(
       this.baseUrl + 'signin',
 
       signinData

@@ -16,9 +16,9 @@ export class TeachersService {
     return this.httpClient.get<TeachersModel[]>(this.baseUrl);
   }
 
-  addTeacher(teacher: TeachersModel): Observable<TeachersModel> {
+  addTeacher(teacher: TeachersModel): Observable<{ teacher: TeachersModel; isFirstTeacher: boolean }> {
     // console.log(teacher);
-    return this.httpClient.post<TeachersModel>(this.baseUrl, teacher);
+    return this.httpClient.post<{ teacher: TeachersModel; isFirstTeacher: boolean }>(this.baseUrl, teacher);
   }
 
   deleteTeacher(id: string): Observable<{ id: string }> {

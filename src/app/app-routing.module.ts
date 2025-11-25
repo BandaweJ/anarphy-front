@@ -4,6 +4,7 @@ import { SigninComponent } from './auth/signin/signin.component';
 import { SignupComponent } from './auth/signup/signup.component';
 import { DashboardComponent } from './dashboard/dashboard/dashboard.component';
 import { AuthGuardService } from './auth/auth-guard.service';
+import { BootstrapTeachersGuard } from './auth/bootstrap-teachers-guard.service';
 import { StudentsListComponent } from './registration/students-list/students-list.component';
 import { TeachersListComponent } from './registration/teachers-list/teachers-list.component';
 import { TermsClassesComponent } from './enrolment/terms-classes/terms-classes.component';
@@ -61,6 +62,7 @@ const routes: Routes = [
     path: 'teachers',
     component: TeachersListComponent,
     canActivate: [AuthGuardService],
+    canDeactivate: [BootstrapTeachersGuard],
     title: 'Manage Teachers',
   },
   {

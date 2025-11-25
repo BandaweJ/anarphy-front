@@ -53,7 +53,7 @@ export class AddEditTeacherComponent implements OnInit, OnDestroy {
       id: new FormControl('', [Validators.required, Validators.minLength(10), Validators.pattern(/^[0-9]{2}[0-9]{6}[A-Z]{1}[0-9]{2}$/)]),
       name: new FormControl('', [Validators.required, Validators.minLength(2), Validators.pattern(/^[a-zA-Z\s]+$/)]),
       surname: new FormControl('', [Validators.required, Validators.minLength(2), Validators.pattern(/^[a-zA-Z\s]+$/)]),
-      dob: new FormControl('', [Validators.required]),
+      dob: new FormControl(''),
       gender: new FormControl('', [Validators.required]),
       title: new FormControl('', [Validators.required]),
       dateOfJoining: new FormControl('', [Validators.required]),
@@ -81,10 +81,8 @@ export class AddEditTeacherComponent implements OnInit, OnDestroy {
           this.addQualification(qual);
         });
       }
-    } else {
-      // Add one empty qualification field for new teachers
-      this.addQualification();
     }
+    // Don't automatically add qualification field - let it be optional
   }
 
   private setupObservables(): void {
@@ -161,9 +159,9 @@ export class AddEditTeacherComponent implements OnInit, OnDestroy {
     const formValue = this.addTeacherForm.value;
     const teacher: TeachersModel = {
       ...formValue,
-      dob: formValue.dob ? formValue.dob.toISOString() : new Date().toISOString(),
+      dob: formValue.dob ? formValue.dob.toISOString() : undefined,
       dateOfJoining: formValue.dateOfJoining ? formValue.dateOfJoining.toISOString() : new Date().toISOString(),
-      dateOfLeaving: formValue.dateOfLeaving ? formValue.dateOfLeaving.toISOString() : '',
+      dateOfLeaving: formValue.dateOfLeaving ? formValue.dateOfLeaving.toISOString() : undefined,
       qualifications: formValue.qualifications.filter((qual: string) => qual && qual.trim().length > 0)
     };
 
@@ -200,7 +198,7 @@ export class AddEditTeacherComponent implements OnInit, OnDestroy {
   }
 
   addQualification(value: string = '') {
-    const qual = new FormControl(value, [Validators.required, Validators.minLength(2)]);
+    const qual = new FormControl(value, [Validators.minLength(2)]);
     this.qualifications.push(qual);
     this.cdr.markForCheck();
   }

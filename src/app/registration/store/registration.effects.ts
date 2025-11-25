@@ -39,16 +39,43 @@ export class RegistrationEffects {
       ofType(fromRegistrationActions.addTeacherAction),
       switchMap((data) =>
         this.teachersService.addTeacher(data.teacher).pipe(
-          tap((teacher) =>
+          tap((response) => {
             this.snackBar.open('Teacher added Successfully', 'OK', {
               duration: 3000,
               verticalPosition: 'top',
               horizontalPosition: 'center',
-            })
-          ),
-          map((teacher) => {
-            // console.log(teacher);
-            return fromRegistrationActions.addTeacherActionSuccess({ teacher });
+            });
+            
+            // If this is the first teacher and user is bootstrap, logout
+            if (response.isFirstTeacher) {
+              const token = localStorage.getItem('token');
+              if (token) {
+                try {
+                  const decoded: any = JSON.parse(atob(token.split('.')[1]));
+                  if (decoded.isBootstrap === true) {
+                    // Logout bootstrap user
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    localStorage.removeItem('jhs_session');
+                    this.snackBar.open('First teacher created! Please sign up with your teacher ID and sign in.', 'OK', {
+                      duration: 5000,
+                      verticalPosition: 'top',
+                      horizontalPosition: 'center',
+                    });
+                    // Navigate to signup after a delay
+                    setTimeout(() => {
+                      window.location.href = '/signup';
+                    }, 2000);
+                  }
+                } catch (e) {
+                  // Token decode failed, continue normally
+                }
+              }
+            }
+          }),
+          map((response) => {
+            // console.log(response);
+            return fromRegistrationActions.addTeacherActionSuccess({ teacher: response.teacher });
           }),
           catchError((error: HttpErrorResponse) =>
             of(fromRegistrationActions.addTeacherActionFail({ ...error }))

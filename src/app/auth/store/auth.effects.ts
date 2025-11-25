@@ -47,7 +47,12 @@ export class AuthEffects {
               user,
             };
 
-            this.router.navigateByUrl('/dashboard');
+            // Redirect bootstrap users to teachers page
+            if (resp.isBootstrap) {
+              this.router.navigateByUrl('/teachers');
+            } else {
+              this.router.navigateByUrl('/dashboard');
+            }
             return signinActions.signinSuccess(payload); // Use grouped action
           }),
           catchError(
@@ -150,9 +155,13 @@ export class AuthEffects {
             authStatus.user &&
             authStatus.accessToken
           ) {
-            // Note: Permissions are not stored in JWT, so they won't be available on page refresh
-            // They will be empty array until user logs in again or we fetch them separately
-            this.router.navigateByUrl('/dashboard');
+            // Check if user is bootstrap user and redirect accordingly
+            if (authStatus.user.isBootstrap) {
+              this.router.navigateByUrl('/teachers');
+            } else {
+              this.router.navigateByUrl('/dashboard');
+            }
+            
             return signinActions.signinSuccess({
               // Use grouped action for dispatch
               user: authStatus.user,

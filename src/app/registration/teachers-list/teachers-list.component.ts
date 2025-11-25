@@ -52,6 +52,7 @@ export class TeachersListComponent implements OnInit, AfterViewInit, OnDestroy {
   filteredTeachers$!: Observable<TeachersModel[]>;
   public errorMsg$!: Observable<string>;
   public isLoading$ = this.store.select(selectIsLoading);
+  hasTeachers = false; // For CanDeactivate guard
 
   filtersForm!: FormGroup;
 
@@ -94,6 +95,12 @@ export class TeachersListComponent implements OnInit, AfterViewInit, OnDestroy {
   private setupObservables(): void {
     this.teachers$ = this.store.select(selectTeachers);
     this.errorMsg$ = this.store.select(selectRegErrorMsg);
+    
+    // Track if teachers exist for bootstrap guard
+    this.teachers$.pipe(takeUntil(this.destroy$)).subscribe(teachers => {
+      this.hasTeachers = teachers && teachers.length > 0;
+      this.cdr.markForCheck();
+    });
   }
 
   private setupSearch(): void {

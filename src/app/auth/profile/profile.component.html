@@ -117,11 +117,11 @@
           <h2>Teacher Details</h2>
           <div class="profile-field">
             <label>Qualifications:</label>
-            <span>{{ teacher.qualifications.join(', ') }}</span>
+            <span>{{ teacher.qualifications?.join(', ') || 'No qualifications listed' }}</span>
           </div>
           <div class="profile-field">
             <label>Date of Leaving:</label>
-            <span>{{ teacher.dateOfLeaving | date }}</span>
+            <span>{{ teacher.dateOfLeaving ? (teacher.dateOfLeaving | date) : 'Currently employed' }}</span>
           </div>
         </div>
       </ng-container>
