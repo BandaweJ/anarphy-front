@@ -42,6 +42,8 @@ import { RevenueRecognitionReportComponent } from './finance/reports/revenue-rec
 import { ResultsAnalysisComponent } from './results-analysis/results-analysis.component';
 import { ExemptionReportsComponent } from './finance/reports/exemption-reports/exemption-reports/exemption-reports.component';
 // Lazy loaded - removed direct import
+import { ParentDashboardComponent } from './dashboard/parent-dashboard/parent-dashboard.component';
+import { ParentsListComponent } from './registration/parents-list/parents-list.component';
 
 const routes: Routes = [
   { path: 'signin', component: SigninComponent, title: 'Sign In' },
@@ -59,11 +61,26 @@ const routes: Routes = [
     canActivate: [AuthGuardService],
   },
   {
+    path: 'parent-dashboard',
+    loadComponent: () =>
+      import('./dashboard/parent-dashboard/parent-dashboard.component').then(
+        (m) => m.ParentDashboardComponent
+      ),
+    canActivate: [AuthGuardService],
+    title: 'Parent Dashboard',
+  },
+  {
     path: 'teachers',
     component: TeachersListComponent,
     canActivate: [AuthGuardService],
     canDeactivate: [BootstrapTeachersGuard],
     title: 'Manage Teachers',
+  },
+  {
+    path: 'parents',
+    component: ParentsListComponent,
+    canActivate: [AuthGuardService],
+    title: 'Manage Parents',
   },
   {
     path: 'teacher-view/:id',
@@ -189,12 +206,6 @@ const routes: Routes = [
     loadComponent: () => import('./finance/fees/fees.component').then(m => m.FeesComponent),
     canActivate: [AuthGuardService],
     title: 'Manage Fees',
-  },
-  {
-    path: 'balances',
-    loadComponent: () => import('./finance/student-balances/student-balances.component').then(m => m.StudentBalancesComponent),
-    canActivate: [AuthGuardService],
-    title: 'Manage Balances',
   },
   {
     path: 'invoice',

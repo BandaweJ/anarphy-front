@@ -1,0 +1,77 @@
+<div class="parent-dashboard" [ngClass]="currentTheme">
+  <header class="parent-dashboard__header" *ngIf="systemSettings as settings">
+    <div class="school-brand">
+      <div class="school-logo" *ngIf="settings.schoolLogo">
+        <img [src]="settings.schoolLogo" [alt]="settings.schoolName || 'School Logo'" />
+      </div>
+      <div class="school-meta">
+        <h1 class="school-name">{{ settings.schoolName || 'Parent Dashboard' }}</h1>
+        <p class="school-address" *ngIf="settings.schoolAddress">
+          {{ settings.schoolAddress }}
+        </p>
+      </div>
+    </div>
+  </header>
+
+  <section class="children-section">
+    <h2 class="section-title">Your Children</h2>
+
+    <div *ngIf="children.length === 0" class="empty-state">
+      <mat-icon class="empty-state__icon">family_restroom</mat-icon>
+      <p>You do not have any linked students yet.</p>
+      <p class="empty-state__hint">
+        Please contact the school office to have your account linked to your child.
+      </p>
+    </div>
+
+    <div class="children-grid" *ngIf="children.length > 0">
+      <mat-card
+        class="child-card"
+        *ngFor="let child of children"
+        appearance="outlined"
+      >
+        <mat-card-header>
+          <div mat-card-avatar class="child-avatar">
+            <span>{{ child.name[0] }}{{ child.surname[0] }}</span>
+          </div>
+          <mat-card-title>
+            {{ child.name }} {{ child.surname }}
+          </mat-card-title>
+          <mat-card-subtitle>
+            Student No: {{ child.studentNumber }}
+          </mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div class="child-meta">
+            <div class="meta-row" *ngIf="child.gender">
+              <span class="meta-label">Gender</span>
+              <span class="meta-value">{{ child.gender }}</span>
+            </div>
+          </div>
+        </mat-card-content>
+
+        <mat-card-actions align="end">
+          <button mat-stroked-button color="primary" (click)="openStudentProfile(child)">
+            <mat-icon>person</mat-icon>
+            <span>Student Profile</span>
+          </button>
+          <button mat-stroked-button color="accent" (click)="openStudentReports(child)">
+            <mat-icon>description</mat-icon>
+            <span>Reports</span>
+          </button>
+          <button mat-stroked-button color="accent" (click)="openStudentMarks(child)">
+            <mat-icon>school</mat-icon>
+            <span>Marks</span>
+          </button>
+          <button mat-flat-button color="primary" (click)="openStudentFinancials(child)">
+            <mat-icon>account_balance_wallet</mat-icon>
+            <span>Financials</span>
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </section>
+</div>
+
+

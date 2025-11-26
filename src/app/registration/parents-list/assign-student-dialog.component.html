@@ -1,0 +1,22 @@
+<h2 mat-dialog-title>Assign Student to {{ data.parent.email }}</h2>
+
+<mat-dialog-content [formGroup]="assignForm" class="dialog-content">
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Student Number</mat-label>
+    <input matInput formControlName="studentNumber" />
+    <mat-error
+      *ngIf="assignForm.get('studentNumber')?.hasError('required')"
+    >
+      Student number is required
+    </mat-error>
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Cancel</button>
+  <button mat-flat-button color="primary" (click)="submit()">
+    Assign
+  </button>
+</mat-dialog-actions>
+
+

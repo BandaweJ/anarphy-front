@@ -89,11 +89,15 @@
           </div>
           <div class="detail-item">
             <span class="detail-label">Date of Birth</span>
-            <span class="detail-value">{{ student.dob | date:'mediumDate' }}</span>
+            <span class="detail-value">
+              {{ student.dob ? (student.dob | date:'mediumDate') : 'Not provided' }}
+            </span>
           </div>
           <div class="detail-item">
             <span class="detail-label">Age</span>
-            <span class="detail-value age-value">{{ sharedService.calculateAge(student.dob) }} years old</span>
+            <span class="detail-value age-value">
+              {{ student.dob ? (sharedService.calculateAge(student.dob) + ' years old') : 'Not available' }}
+            </span>
           </div>
           <div class="detail-item">
             <span class="detail-label">Gender</span>

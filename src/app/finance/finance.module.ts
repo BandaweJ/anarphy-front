@@ -16,9 +16,7 @@ import { StudentEnrolmentDetailsComponent } from './student-finance/student-enro
 import { CurrentEnrolmentComponent } from './student-finance/current-enrolment/current-enrolment.component';
 import { InvoiceComponent } from './student-finance/invoice/invoice.component';
 // BillingComponent is dynamically loaded
-import { StudentBalancesComponent } from './student-balances/student-balances.component';
 import { SharedModule } from '../shared/shared.module';
-import { AddEditBalancesComponent } from './student-balances/add-edit-balances/add-edit-balances.component';
 import { EnrolmentModule } from '../enrolment/enrolment.module';
 import { InvoiceItemComponent } from './student-finance/invoice/invoice-item/invoice-item.component';
 import { SearchInvoiceComponent } from './student-finance/invoice/search-invoice/search-invoice.component';
@@ -58,8 +56,6 @@ import { ExemptionSummaryByEnrolmentTableComponent } from './reports/exemption-r
     CurrentEnrolmentComponent,
     // InvoiceComponent is now standalone
     // BillingComponent is dynamically loaded, not declared here
-    // StudentBalancesComponent is now standalone and lazy loaded
-    // AddEditBalancesComponent is now standalone
     // InvoiceItemComponent is now standalone
     // SearchInvoiceComponent is now standalone
     // InvoiceListComponent is now standalone

@@ -19,6 +19,8 @@ import { TeacherViewComponent } from './teachers-list/teacher-view/teacher-view.
 import { StudentViewComponent } from './students-list/student-view/student-view.component';
 import { SharedService } from '../shared.service';
 import { StudentIdCardComponent } from './students-list/student-id-card/student-id-card.component';
+import { AddParentDialogComponent } from './parents-list/add-parent-dialog.component';
+import { AssignStudentDialogComponent } from './parents-list/assign-student-dialog.component';
 
 @NgModule({
   declarations: [
@@ -32,6 +34,8 @@ import { StudentIdCardComponent } from './students-list/student-id-card/student-
     TeacherViewComponent,
     StudentViewComponent,
     StudentIdCardComponent,
+    AddParentDialogComponent,
+    AssignStudentDialogComponent,
   ],
   imports: [
     CommonModule,

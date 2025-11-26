@@ -7,7 +7,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription, Subject, combineLatest } from 'rxjs';
+import { Observable, Subscription, Subject, BehaviorSubject, combineLatest, of } from 'rxjs';
 import { filter, tap, takeUntil, take, switchMap, map } from 'rxjs/operators';
 import {
   getStudentLedger,
@@ -25,6 +25,7 @@ import {
 import { User } from 'src/app/auth/models/user.model';
 import { selectUser } from 'src/app/auth/store/auth.selectors';
 import { ThemeService, Theme } from 'src/app/services/theme.service';
+import { ROLES } from 'src/app/registration/models/roles.enum';
 
 @Component({
   selector: 'app-student-financials-dashboard',
@@ -56,6 +57,7 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
   // Lifecycle Management
   private ngUnsubscribe = new Subject<void>();
   private routeSubscription: Subscription | undefined;
+  private studentNumberSubject = new BehaviorSubject<string | null>(null);
 
   // Navigation
   navLinks = [
@@ -100,14 +102,14 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
     
     // Initialize computed properties
     this.currentUser$ = this.user$;
-    this.studentNumber$ = this.user$.pipe(
-      map(user => user?.id || null)
-    );
+    this.studentNumber$ = this.studentNumberSubject.asObservable();
     
-    // Get student name from invoices or receipts in the store
-    this.studentName$ = this.user$.pipe(
-      filter((user): user is User => !!user && !!user.id),
-      switchMap((user) => {
+    // Get student name from invoices or receipts in the store, based on active student number
+    this.studentName$ = this.studentNumberSubject.asObservable().pipe(
+      switchMap((studentNumber) => {
+        if (!studentNumber) {
+          return of(null);
+        }
         return combineLatest([
           this.store.select(selectAllInvoices),
           this.store.select(selectAllNonVoidedReceipts)
@@ -115,7 +117,7 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
           map(([invoices, receipts]) => {
             // Try to get student name from invoices first
             const studentInvoice = (invoices || []).find(
-              (inv) => inv.student?.studentNumber === user.id
+              (inv) => inv.student?.studentNumber === studentNumber
             );
             if (studentInvoice?.student) {
               return `${studentInvoice.student.name} ${studentInvoice.student.surname}`.trim();
@@ -123,7 +125,7 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
             
             // If not found in invoices, try receipts
             const studentReceipt = (receipts || []).find(
-              (rec) => rec.student?.studentNumber === user.id
+              (rec) => rec.student?.studentNumber === studentNumber
             );
             if (studentReceipt?.student) {
               return `${studentReceipt.student.name} ${studentReceipt.student.surname}`.trim();
@@ -145,33 +147,45 @@ export class StudentFinancialsDashboardComponent implements OnInit, OnDestroy {
         this.cdr.markForCheck();
       });
     
-    this.loadUserData();
+    this.initializeStudentContext();
     this.setupNavigation();
   }
 
-  loadUserData(): void {
-    this.user$
+  private initializeStudentContext(): void {
+    combineLatest([this.user$, this.route.queryParamMap])
       .pipe(
-        filter((user): user is User => !!user && !!user.id),
-        // Take only the first emission to prevent multiple dispatches
+        filter(([user]) => !!user && !!user.id),
         take(1),
-        tap((user) => {
-          // Fetch only this student's invoices and receipts (more efficient than fetching all)
-          // This will only run once when the component initializes
+        tap(([user, params]) => {
+          const baseUser = user as User;
+          const queryStudentNumber = params.get('studentNumber');
+
+          // If a studentNumber is provided in the query params (e.g. parent viewing child),
+          // use that. Otherwise, default to the logged-in user's ID (student self-service).
+          const activeStudentNumber =
+            queryStudentNumber && queryStudentNumber.trim().length > 0
+              ? queryStudentNumber
+              : baseUser.id;
+
+          this.studentNumberSubject.next(activeStudentNumber);
+
+          // Fetch invoices and receipts for the active student number
           this.store.dispatch(
             invoiceActions.fetchStudentInvoices({
-              studentNumber: user.id,
+              studentNumber: activeStudentNumber,
             })
           );
           this.store.dispatch(
             receiptActions.fetchStudentReceipts({
-              studentNumber: user.id,
+              studentNumber: activeStudentNumber,
             })
           );
-        })
+        }),
+        takeUntil(this.ngUnsubscribe)
       )
       .subscribe({
-        error: (error) => console.error('Failed to load user data:', error)
+        error: (error) =>
+          console.error('Failed to initialize student financial context:', error),
       });
   }
 

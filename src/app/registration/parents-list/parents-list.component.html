@@ -1,1 +1,150 @@
-<p>parents-list works!</p>
+<div class="parents-container" [ngClass]="currentTheme">
+  <mat-toolbar class="parents-toolbar">
+    <div class="toolbar-content">
+      <div class="title-section">
+        <mat-icon class="title-icon">family_restroom</mat-icon>
+        <h1 class="page-title">Parents</h1>
+      </div>
+      <div class="toolbar-actions">
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="openAddParentDialog()"
+        >
+          <mat-icon>person_add</mat-icon>
+          Add Parent
+        </button>
+      </div>
+    </div>
+  </mat-toolbar>
+
+  <section class="parents-layout">
+    <div class="parents-left">
+      <div class="table-container">
+        <div class="filters-panel">
+          <div class="filters-row">
+            <mat-form-field appearance="outline" class="search-field">
+              <mat-label>Search parents</mat-label>
+              <input
+                matInput
+                placeholder="Search by email, surname or phone"
+                (keyup)="applyFilter($event)"
+              />
+              <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table
+            mat-table
+            [dataSource]="dataSource"
+            matSort
+            class="mat-elevation-z1"
+          >
+            <!-- Email -->
+            <ng-container matColumnDef="email">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Email</th>
+              <td mat-cell *matCellDef="let parent">
+                {{ parent.email }}
+              </td>
+            </ng-container>
+
+            <!-- Surname -->
+            <ng-container matColumnDef="surname">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Surname</th>
+              <td mat-cell *matCellDef="let parent">
+                {{ parent.surname }}
+              </td>
+            </ng-container>
+
+            <!-- Title -->
+            <ng-container matColumnDef="title">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Title</th>
+              <td mat-cell *matCellDef="let parent">
+                {{ parent.title }}
+              </td>
+            </ng-container>
+
+            <!-- Cell -->
+            <ng-container matColumnDef="cell">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Phone</th>
+              <td mat-cell *matCellDef="let parent">
+                {{ parent.cell }}
+              </td>
+            </ng-container>
+
+            <!-- Address -->
+            <ng-container matColumnDef="address">
+              <th mat-header-cell *matHeaderCellDef>Address</th>
+              <td mat-cell *matCellDef="let parent">
+                {{ parent.address }}
+              </td>
+            </ng-container>
+
+            <!-- Actions -->
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let parent">
+                <button mat-button color="primary" (click)="loadChildren(parent)">
+                  <mat-icon>family_restroom</mat-icon>
+                  Linked Students
+                </button>
+                <button
+                  mat-button
+                  color="accent"
+                  (click)="openAssignStudentDialog(parent)"
+                >
+                  <mat-icon>link</mat-icon>
+                  Assign Student
+                </button>
+                <button mat-button color="warn" (click)="deleteParent(parent)">
+                  <mat-icon>delete</mat-icon>
+                  Delete
+                </button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr
+              mat-row
+              *matRowDef="let row; columns: displayedColumns"
+              [attr.data-email]="row.email"
+            ></tr>
+          </table>
+
+        </div>
+        <mat-paginator
+          [pageSizeOptions]="[10, 25, 50]"
+          showFirstLastButtons
+        >
+        </mat-paginator>
+      </div>
+    </div>
+
+    <div class="parents-right">
+      <mat-card class="assign-card">
+        <mat-card-title>Assign Student to Parent</mat-card-title>
+        <mat-card-subtitle>
+          Select a parent in the list, then use "Assign Student" to link a
+          student number.
+        </mat-card-subtitle>
+
+        <div class="children-list" *ngIf="childrenForSelectedParent.length > 0">
+          <h3>Linked Students for {{ selectedParent?.email }}</h3>
+          <ul>
+            <li *ngFor="let child of childrenForSelectedParent">
+              {{ child.studentNumber }} - {{ child.surname }}, {{ child.name }}
+            </li>
+          </ul>
+        </div>
+
+        <p class="hint" *ngIf="!selectedParent">
+          Select a parent from the list and click "Linked Students" to view or
+          refresh their linked students.
+        </p>
+      </mat-card>
+    </div>
+  </section>
+</div>
+

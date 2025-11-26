@@ -119,14 +119,18 @@ export class StudentsListComponent implements OnInit, AfterViewInit, OnDestroy {
       takeUntil(this.destroy$)
     ).subscribe(([search, gender]) => {
       this.dataSource.filterPredicate = (data: StudentsModel, filter: string) => {
-        const searchMatch = !search || 
-          data.name.toLowerCase().includes(search.toLowerCase()) ||
-          data.surname.toLowerCase().includes(search.toLowerCase()) ||
-          data.studentNumber.toLowerCase().includes(search.toLowerCase()) ||
-          data.cell.toLowerCase().includes(search.toLowerCase()) ||
-          data.email?.toLowerCase().includes(search.toLowerCase());
+        const normalizedSearch = (search || '').toLowerCase();
+        const normalizedGender = gender || '';
+
+        const searchMatch =
+          !normalizedSearch ||
+          data.name.toLowerCase().includes(normalizedSearch) ||
+          data.surname.toLowerCase().includes(normalizedSearch) ||
+          data.studentNumber.toLowerCase().includes(normalizedSearch) ||
+          (data.cell || '').toLowerCase().includes(normalizedSearch) ||
+          (data.email || '').toLowerCase().includes(normalizedSearch);
         
-        const genderMatch = !gender || data.gender === gender;
+        const genderMatch = !normalizedGender || data.gender === normalizedGender;
         
         return searchMatch && genderMatch;
       };

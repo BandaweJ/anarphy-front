@@ -17,6 +17,7 @@ import { Router } from '@angular/router';
 import jwt_decode from 'jwt-decode';
 import { User } from '../models/user.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { ROLES } from 'src/app/registration/models/roles.enum';
 
 @Injectable()
 export class AuthEffects {
@@ -47,9 +48,11 @@ export class AuthEffects {
               user,
             };
 
-            // Redirect bootstrap users to teachers page
+            // Redirect based on user role / bootstrap status
             if (resp.isBootstrap) {
               this.router.navigateByUrl('/teachers');
+            } else if (user.role === ROLES.parent) {
+              this.router.navigateByUrl('/parent-dashboard');
             } else {
               this.router.navigateByUrl('/dashboard');
             }
@@ -158,6 +161,8 @@ export class AuthEffects {
             // Check if user is bootstrap user and redirect accordingly
             if (authStatus.user.isBootstrap) {
               this.router.navigateByUrl('/teachers');
+            } else if (authStatus.user.role === ROLES.parent) {
+              this.router.navigateByUrl('/parent-dashboard');
             } else {
               this.router.navigateByUrl('/dashboard');
             }
