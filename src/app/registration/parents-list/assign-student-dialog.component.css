@@ -8,4 +8,31 @@
   width: 100%;
 }
 
+.results-container {
+  max-height: 300px;
+  overflow: auto;
+}
+
+.students-table {
+  width: 100%;
+}
+
+.clickable-row {
+  cursor: pointer;
+}
+
+.clickable-row:hover {
+  background-color: rgba(59, 130, 246, 0.08);
+}
+
+.student-id {
+  font-weight: 600;
+}
+
+.hint {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
 

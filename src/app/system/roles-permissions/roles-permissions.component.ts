@@ -194,11 +194,6 @@ export class RolesPermissionsComponent implements OnInit, OnDestroy {
   }
 
   onEditRole(role: Role): void {
-    if (role.isSystemRole) {
-      this.snackBar.open('Cannot edit system roles', 'Dismiss', { duration: 3000 });
-      return;
-    }
-    
     this.selectedRole = role;
     this.isEditingRole = true;
     

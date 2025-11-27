@@ -139,6 +139,14 @@
           </ul>
         </div>
 
+        <div
+          class="children-list empty"
+          *ngIf="selectedParent && childrenForSelectedParent.length === 0"
+        >
+          <h3>Linked Students for {{ selectedParent.email }}</h3>
+          <p>No students are linked to this parent yet.</p>
+        </div>
+
         <p class="hint" *ngIf="!selectedParent">
           Select a parent from the list and click "Linked Students" to view or
           refresh their linked students.

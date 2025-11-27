@@ -100,7 +100,7 @@
                   <ng-container matColumnDef="actions">
                     <th mat-header-cell *matHeaderCellDef>Actions</th>
                     <td mat-cell *matCellDef="let role">
-                      <button mat-icon-button (click)="onEditRole(role)" [disabled]="role.isSystemRole" matTooltip="Edit Role">
+                      <button mat-icon-button (click)="onEditRole(role)" matTooltip="Edit Role">
                         <mat-icon>edit</mat-icon>
                       </button>
                       <button mat-icon-button color="warn" (click)="onDeleteRole(role)" [disabled]="role.isSystemRole" matTooltip="Delete Role">
