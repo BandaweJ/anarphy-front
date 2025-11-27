@@ -148,4 +148,74 @@ export class StudentReceiptsComponent implements OnInit, OnDestroy {
         return 'payment';
     }
   }
+
+  /**
+   * Print a specific receipt using the on-screen layout.
+   * Captures the rendered receipt card via html2canvas and opens a
+   * print window so the printed version matches what the user sees.
+   */
+  async printReceipt(receiptNumber: string): Promise<void> {
+    try {
+      const elementId = `receipt-card-${receiptNumber}`;
+      const receiptElement = document.getElementById(elementId);
+      if (!receiptElement) {
+        console.warn('Cannot print receipt: element not found', elementId);
+        return;
+      }
+
+      const html2canvas = (await import('html2canvas')).default;
+      const canvas = await html2canvas(receiptElement, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+      });
+
+      const dataUrl = canvas.toDataURL('image/png');
+      const printWindow = window.open('', '_blank', 'width=900,height=1200');
+      if (!printWindow) {
+        return;
+      }
+
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Receipt ${receiptNumber}</title>
+            <style>
+              @page { size: A4 portrait; margin: 10mm; }
+              body {
+                margin: 0;
+                padding: 0;
+                display: flex;
+                align-items: flex-start;
+                justify-content: center;
+                background: #ffffff;
+              }
+              img {
+                width: 190mm;
+                max-width: 190mm;
+                height: auto;
+                page-break-inside: avoid;
+              }
+            </style>
+          </head>
+          <body>
+            <img src="${dataUrl}" alt="Receipt ${receiptNumber}" />
+          </body>
+        </html>
+      `);
+
+      printWindow.document.close();
+      printWindow.onload = () => {
+        setTimeout(() => {
+          printWindow.focus();
+          printWindow.print();
+          printWindow.close();
+        }, 300);
+      };
+    } catch (error) {
+      console.error('Failed to print receipt', error);
+    }
+  }
 }

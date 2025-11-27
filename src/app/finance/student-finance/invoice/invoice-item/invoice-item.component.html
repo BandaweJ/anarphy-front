@@ -159,15 +159,6 @@
         </tr>
       </thead>
       <tbody>
-        <!-- Balance Brought Forward -->
-        <tr *ngIf="invoice.balanceBfwd && invoice.balanceBfwd.amount" class="balance-forward-row">
-          <td>
-            <span class="item-label">Balance Brought Forward</span>
-            <span class="item-date">as at {{ formatDate(invoice.balanceBfwd.dateCreated) }}</span>
-          </td>
-          <td class="amount-cell">{{ invoice.balanceBfwd.amount | currency:'USD':'symbol':'1.2-2' }}</td>
-        </tr>
-
         <!-- Invoice Items -->
         <tr *ngFor="let bill of invoice.bills" class="invoice-item-row">
           <td>

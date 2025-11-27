@@ -124,7 +124,7 @@ export class InvoiceComponent implements OnInit, OnDestroy {
       case 'science':
         return 'Scie Levy';
       case 'desk':
-        return 'Desk Fee';
+        return 'Admission Fee';
       case 'development':
         return 'Dev Levy';
       case 'application':

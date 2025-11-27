@@ -59,8 +59,8 @@ export class SharedService {
         return 'A Level Day Tuition';
       case FeesNames.alevelScienceFee:
         return 'A Level Science Fee';
-      case FeesNames.deskFee:
-        return 'Desk Fee';
+      case FeesNames.admissionFee:
+        return 'Admission Fee';
       case FeesNames.developmentFee:
         return 'Development Fee';
       case FeesNames.foodFee:

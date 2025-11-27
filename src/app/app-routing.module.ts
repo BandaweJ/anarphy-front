@@ -25,7 +25,6 @@ import { ClassListsComponent } from './enrolment/terms-classes/class-lists/class
 import { MarksProgressComponent } from './marks/marks-progress/marks-progress.component';
 // FeesComponent is lazy loaded
 // StudentFinanceComponent is lazy loaded
-// StudentBalancesComponent is now standalone and lazy loaded
 // InvoiceComponent is lazy loaded
 // PaymentsComponent is now standalone and lazy loaded
 // StudentFinancialsDashboardComponent is now standalone and lazy loaded

@@ -85,8 +85,69 @@ export class ReceiptItemComponent implements OnInit, OnChanges, OnDestroy {
     this.destroy$.complete();
   }
 
-  printReceipt(): void {
-    window.print();
+  async printReceipt(): Promise<void> {
+    if (!this.receiptContainerRef) {
+      console.warn('Receipt container not found for printing');
+      return;
+    }
+
+    try {
+      const card: HTMLElement = this.receiptContainerRef.nativeElement;
+      const html2canvas = (await import('html2canvas')).default;
+
+      const canvas = await html2canvas(card, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+      });
+
+      const dataUrl = canvas.toDataURL('image/png');
+      const printWindow = window.open('', '_blank', 'width=900,height=1200');
+      if (!printWindow) {
+        return;
+      }
+
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Receipt ${this.receipt?.receiptNumber || ''}</title>
+            <style>
+              @page { size: A4 portrait; margin: 10mm; }
+              body {
+                margin: 0;
+                padding: 0;
+                display: flex;
+                align-items: flex-start;
+                justify-content: center;
+                background: #ffffff;
+              }
+              img {
+                width: 190mm;
+                max-width: 190mm;
+                height: auto;
+                page-break-inside: avoid;
+              }
+            </style>
+          </head>
+          <body>
+            <img src="${dataUrl}" alt="Receipt ${this.receipt?.receiptNumber || ''}" />
+          </body>
+        </html>
+      `);
+
+      printWindow.document.close();
+      printWindow.onload = () => {
+        setTimeout(() => {
+          printWindow.focus();
+          printWindow.print();
+          printWindow.close();
+        }, 300);
+      };
+    } catch (error) {
+      console.error('Failed to print receipt', error);
+    }
   }
 
   download(): void {

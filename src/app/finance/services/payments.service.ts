@@ -31,17 +31,7 @@ export class PaymentsService {
       .pipe(
         timeout(30000), // 30 second timeout
         map((response) => {
-          // Ensure balanceBfwd and its amount exist and convert if it's a string
-          if (
-            response.invoice.balanceBfwd &&
-            typeof response.invoice.balanceBfwd.amount === 'string'
-          ) {
-            response.invoice.balanceBfwd.amount = parseFloat(
-              response.invoice.balanceBfwd.amount
-            );
-          }
-          // Apply similar conversions for other numeric fields if needed
-          // ...
+          // Apply numeric conversions for other fields if needed
           return response;
         }),
         catchError((error) => {

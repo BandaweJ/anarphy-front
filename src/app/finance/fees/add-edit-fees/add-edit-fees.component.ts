@@ -121,7 +121,7 @@ export class AddEditFeesComponent implements OnInit, OnDestroy {
     const displayNames: { [key in FeesNames]: string } = {
       [FeesNames.oLevelApplicationFee]: 'O Level Application Fee',
       [FeesNames.aLevelApplicationFee]: 'A Level Application Fee',
-      [FeesNames.deskFee]: 'Desk Fee',
+      [FeesNames.admissionFee]: 'Admission Fee',
       [FeesNames.oLevelTuitionDay]: 'O Level Day Tuition',
       [FeesNames.aLevelTuitionDay]: 'A Level Day Tuition',
       [FeesNames.oLevelTuitionBoarder]: 'O Level Boarder Tuition',
@@ -139,7 +139,7 @@ export class AddEditFeesComponent implements OnInit, OnDestroy {
     const categories: { [key in FeesNames]: string } = {
       [FeesNames.oLevelApplicationFee]: 'New Student Fees',
       [FeesNames.aLevelApplicationFee]: 'New Student Fees',
-      [FeesNames.deskFee]: 'New Student Fees',
+      [FeesNames.admissionFee]: 'New Student Fees',
       [FeesNames.oLevelTuitionDay]: 'O Level Fees',
       [FeesNames.aLevelTuitionDay]: 'A Level Fees',
       [FeesNames.oLevelTuitionBoarder]: 'O Level Fees',
@@ -157,7 +157,7 @@ export class AddEditFeesComponent implements OnInit, OnDestroy {
     const descriptions: { [key in FeesNames]: string } = {
       [FeesNames.oLevelApplicationFee]: 'One-time application fee for new O Level students',
       [FeesNames.aLevelApplicationFee]: 'One-time application fee for new A Level students',
-      [FeesNames.deskFee]: 'One-time fee for furniture/desk for new students',
+      [FeesNames.admissionFee]: 'One-time admission fee for new students (non-refundable)',
       [FeesNames.oLevelTuitionDay]: 'Termly tuition fee for O Level day scholars',
       [FeesNames.aLevelTuitionDay]: 'Termly tuition fee for A Level day scholars',
       [FeesNames.oLevelTuitionBoarder]: 'Termly tuition fee for O Level boarders',
@@ -175,7 +175,7 @@ export class AddEditFeesComponent implements OnInit, OnDestroy {
     const classes: { [key in FeesNames]: string } = {
       [FeesNames.oLevelApplicationFee]: 'new-student',
       [FeesNames.aLevelApplicationFee]: 'new-student',
-      [FeesNames.deskFee]: 'new-student',
+      [FeesNames.admissionFee]: 'new-student',
       [FeesNames.oLevelTuitionDay]: 'o-level',
       [FeesNames.aLevelTuitionDay]: 'a-level',
       [FeesNames.oLevelTuitionBoarder]: 'o-level',

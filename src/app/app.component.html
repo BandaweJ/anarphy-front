@@ -279,12 +279,6 @@
               <mat-icon>money_off</mat-icon>
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Exemptions</span>
             </button>
-
-            <!-- Student Balances -->
-            <button mat-button routerLink="/balances" routerLinkActive="active" *ngIf="canAccessStudentBalances$ | async">
-              <mat-icon>account_balance_wallet</mat-icon>
-              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Student Balances</span>
-            </button>
           </div>
         </mat-expansion-panel>
 

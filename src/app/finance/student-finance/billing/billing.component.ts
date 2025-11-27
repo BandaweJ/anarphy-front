@@ -270,16 +270,16 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
     // Individual Form Control Change Listeners (Modify `toBill` locally)
     this.subscriptions.push(
       this.oLevelNewComer.valueChanges.subscribe((value) => {
-        const deskFee = this.findFee('deskFee');
+        const admissionFee = this.findFee('admissionFee');
         const oLevelApplicationFee = this.findFee('oLevelApplicationFee');
 
         if (value) {
-          this.addFeeToToBill(deskFee);
+          this.addFeeToToBill(admissionFee);
           this.addFeeToToBill(oLevelApplicationFee);
         } else {
-          // Only remove deskFee if ALevelNewComer is also false
+          // Only remove admission fee if A-Level New Comer is also false
           if (!this.aLevelNewComer.value) {
-            this.removeFeeFromToBill(deskFee);
+            this.removeFeeFromToBill(admissionFee);
           }
           this.removeFeeFromToBill(oLevelApplicationFee);
         }
@@ -288,16 +288,16 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
 
     this.subscriptions.push(
       this.aLevelNewComer.valueChanges.subscribe((value) => {
-        const deskFee = this.findFee('deskFee');
+        const admissionFee = this.findFee('admissionFee');
         const aLevelApplicationFee = this.findFee('aLevelApplicationFee');
 
         if (value) {
-          this.addFeeToToBill(deskFee);
+          this.addFeeToToBill(admissionFee);
           this.addFeeToToBill(aLevelApplicationFee);
         } else {
-          // Only remove deskFee if OLevelNewComer is also false
+          // Only remove admission fee if O-Level New Comer is also false
           if (!this.oLevelNewComer.value) {
-            this.removeFeeFromToBill(deskFee);
+            this.removeFeeFromToBill(admissionFee);
           }
           this.removeFeeFromToBill(aLevelApplicationFee);
         }
@@ -524,14 +524,17 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
       'oLevelApplicationFee'
     );
     const oLevelApplicationFee = findFee('oLevelApplicationFee');
-    const deskFee = findFee('deskFee');
+    const admissionFee = findFee('admissionFee');
 
     if (oLevelApplicationBill) {
       formUpdates['oLevelNewComer'] = true;
       addBillToInitial(oLevelApplicationBill, oLevelApplicationFee);
-      // Desk fee is only added if not already added by A-Level newcomer
+      // Admission fee is only added if not already added by A-Level newcomer
       if (!findBillByFeeName(bills, 'aLevelApplicationFee')) {
-        addBillToInitial(findBillByFeeName(bills, 'deskFee'), deskFee);
+        addBillToInitial(
+          findBillByFeeName(bills, 'admissionFee'),
+          admissionFee,
+        );
       }
     }
 
@@ -544,9 +547,12 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
     if (aLevelApplicationBill) {
       formUpdates['aLevelNewComer'] = true;
       addBillToInitial(aLevelApplicationBill, aLevelApplicationFee);
-      // Desk fee is only added if not already added by O-Level newcomer
+      // Admission fee is only added if not already added by O-Level newcomer
       if (!findBillByFeeName(bills, 'oLevelApplicationFee')) {
-        addBillToInitial(findBillByFeeName(bills, 'deskFee'), deskFee);
+        addBillToInitial(
+          findBillByFeeName(bills, 'admissionFee'),
+          admissionFee,
+        );
       }
     }
 
@@ -745,13 +751,13 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
         this.oLevelNewComer.setValue(false, { emitEvent: false });
         this.removeFeeFromToBill(this.findFee('oLevelApplicationFee'));
       }
-      // Handle deskFee: remove if OLevelNewComer was true AND ALevelNewComer is false
-      // This is crucial to avoid removing deskFee if ALevelNewComer is still true
+      // Handle admission fee: remove if OLevelNewComer was true AND ALevelNewComer is false
+      // This is crucial to avoid removing admission fee if ALevelNewComer is still true
       if (
         !this.aLevelNewComer.value &&
-        this.toBill.some((b) => b.fees?.name.includes('deskFee'))
+        this.toBill.some((b) => b.fees?.name.includes('admissionFee'))
       ) {
-        this.removeFeeFromToBill(this.findFee('deskFee'));
+        this.removeFeeFromToBill(this.findFee('admissionFee'));
       }
 
       if (this.oLevelAccommodationType.value) {
@@ -771,12 +777,12 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
         this.aLevelNewComer.setValue(false, { emitEvent: false });
         this.removeFeeFromToBill(this.findFee('aLevelApplicationFee'));
       }
-      // Handle deskFee: remove if ALevelNewComer was true AND OLevelNewComer is false
+      // Handle admission fee: remove if ALevelNewComer was true AND OLevelNewComer is false
       if (
         !this.oLevelNewComer.value &&
-        this.toBill.some((b) => b.fees?.name.includes('deskFee'))
+        this.toBill.some((b) => b.fees?.name.includes('admissionFee'))
       ) {
-        this.removeFeeFromToBill(this.findFee('deskFee'));
+        this.removeFeeFromToBill(this.findFee('admissionFee'));
       }
 
       if (this.aLevelScienceLevy.value) {

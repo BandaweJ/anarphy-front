@@ -32,6 +32,7 @@
         <mat-accordion multi="true" class="receipts-accordion">
           <mat-expansion-panel *ngFor="let receipt of receipts$ | async; trackBy: trackByReceiptId" 
                                class="receipt-panel"
+                               [attr.id]="'receipt-card-' + receipt.receiptNumber"
                                [class.approved]="isReceiptApproved(receipt)"
                                [class.recent]="isReceiptRecent(receipt)">
             
@@ -85,6 +86,13 @@
                         aria-label="Download receipt PDF"
                         class="download-button">
                   <mat-icon>file_download</mat-icon>
+                </button>
+                <button mat-icon-button
+                        (click)="printReceipt(receipt.receiptNumber); $event.stopPropagation()"
+                        matTooltip="Print receipt as shown"
+                        aria-label="Print receipt"
+                        class="print-button">
+                  <mat-icon>print</mat-icon>
                 </button>
               </div>
             </mat-expansion-panel-header>

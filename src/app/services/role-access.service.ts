@@ -155,12 +155,6 @@ export class RoleAccessService {
     return this.hasAnyRole$(ROLES.admin, ROLES.teacher, ROLES.hod, ROLES.director);
   }
 
-  /**
-   * Check if user can access student balances (reception)
-   */
-  canAccessStudentBalances$(currentRole: string | null): Observable<boolean> {
-    return this.hasAnyRole$(ROLES.reception);
-  }
 
   /**
    * Check if user can access exemptions (auditor, director)

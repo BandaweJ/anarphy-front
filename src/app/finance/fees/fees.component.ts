@@ -125,7 +125,7 @@ export class FeesComponent implements OnInit, OnDestroy {
         // New Student Fees
         case FeesNames.oLevelApplicationFee:
         case FeesNames.aLevelApplicationFee:
-        case FeesNames.deskFee:
+      case FeesNames.admissionFee:
           this.newStudentFees.push(fee);
           break;
 
@@ -142,7 +142,7 @@ export class FeesComponent implements OnInit, OnDestroy {
     const displayNames: { [key in FeesNames]: string } = {
       [FeesNames.oLevelApplicationFee]: 'O Level Application Fee',
       [FeesNames.aLevelApplicationFee]: 'A Level Application Fee',
-      [FeesNames.deskFee]: 'Desk Fee',
+      [FeesNames.admissionFee]: 'Admission Fee',
       [FeesNames.oLevelTuitionDay]: 'O Level Day Tuition',
       [FeesNames.aLevelTuitionDay]: 'A Level Day Tuition',
       [FeesNames.oLevelTuitionBoarder]: 'O Level Boarder Tuition',
