@@ -17,6 +17,7 @@ import { ConfirmationDialogComponent } from 'src/app/shared/confirmation-dialo/c
 import { MatDialogRef } from '@angular/material/dialog';
 import { RoleAccessService } from 'src/app/services/role-access.service';
 import { ROLES } from 'src/app/registration/models/roles.enum';
+import { SystemSettingsService, SystemSettings } from 'src/app/system/services/system-settings.service';
 @Component({
   selector: 'app-invoice-item',
   standalone: true,
@@ -39,6 +40,7 @@ export class InvoiceItemComponent implements OnInit, OnChanges, OnDestroy {
   private destroy$ = new Subject<void>();
   userRole$: Observable<string | null>;
   canVoidInvoice$!: Observable<boolean>; // Observable for void invoice permission
+  systemSettings$: Observable<SystemSettings | null>;
 
   @Input() invoice!: InvoiceModel | null;
   @Input() downloadable!: boolean;
@@ -49,7 +51,8 @@ export class InvoiceItemComponent implements OnInit, OnChanges, OnDestroy {
     private cdr: ChangeDetectorRef,
     private themeService: ThemeService,
     private dialog: MatDialog,
-    private roleAccess: RoleAccessService
+    private roleAccess: RoleAccessService,
+    private systemSettingsService: SystemSettingsService
   ) {
     this.userRole$ = this.store.select(selectAuthUserRole).pipe(
       map(role => role ?? null)
@@ -57,6 +60,9 @@ export class InvoiceItemComponent implements OnInit, OnChanges, OnDestroy {
     
     // Set up canVoidInvoice$ observable using permission check
     this.canVoidInvoice$ = this.roleAccess.canVoidInvoice$();
+    
+    // Fetch system settings
+    this.systemSettings$ = this.systemSettingsService.getSettings();
   }
 
   ngOnInit(): void {
@@ -124,6 +130,11 @@ export class InvoiceItemComponent implements OnInit, OnChanges, OnDestroy {
       month: 'short',
       day: 'numeric'
     });
+  }
+
+  getPhoneNumbers(phoneString: string | undefined): string[] {
+    if (!phoneString) return [];
+    return phoneString.split(/[\/,]/).map(p => p.trim()).filter(p => p);
   }
 
   onImageError(event: Event): void {

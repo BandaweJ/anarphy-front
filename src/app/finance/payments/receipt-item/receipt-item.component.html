@@ -95,17 +95,18 @@
           <p *ngIf="receipt.student?.email"><mat-icon class="inline-icon">email</mat-icon>{{ receipt.student.email }}</p>
         </div>
       </div>
-      <div class="party-block to-block">
+      <div class="party-block to-block" *ngIf="systemSettings$ | async as settings">
         <div class="section-header">
           <mat-icon class="section-icon">business</mat-icon>
           <h3 class="section-heading">To</h3>
         </div>
         <div class="party-details">
-          <p class="party-name">Junior High School</p>
-          <p><mat-icon class="inline-icon">location_on</mat-icon>30588 Lundi Drive, Rhodene, Masvingo</p>
-          <p><mat-icon class="inline-icon">phone</mat-icon>+263 392 263 293</p>
-          <p><mat-icon class="inline-icon">phone</mat-icon>+263 78 223 8026</p>
-          <p><mat-icon class="inline-icon">email</mat-icon>info@juniorhighschool.ac.zw</p>
+          <p class="party-name">{{ settings.schoolName || 'Junior High School' }}</p>
+          <p *ngIf="settings.schoolAddress"><mat-icon class="inline-icon">location_on</mat-icon>{{ settings.schoolAddress }}</p>
+          <p *ngFor="let phone of getPhoneNumbers(settings.schoolPhone)">
+            <mat-icon class="inline-icon">phone</mat-icon>{{ phone }}
+          </p>
+          <p *ngIf="settings.schoolEmail"><mat-icon class="inline-icon">email</mat-icon>{{ settings.schoolEmail }}</p>
         </div>
       </div>
     </div>

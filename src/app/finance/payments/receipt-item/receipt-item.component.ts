@@ -28,6 +28,7 @@ import { selectAuthUserRole } from 'src/app/auth/store/auth.selectors';
 import { ConfirmationDialogComponent } from 'src/app/shared/confirmation-dialo/confirmation-dialo.component';
 import { ThemeService, Theme } from 'src/app/services/theme.service';
 import { RoleAccessService } from 'src/app/services/role-access.service';
+import { SystemSettingsService, SystemSettings } from 'src/app/system/services/system-settings.service';
 
 @Component({
   selector: 'app-receipt-item',
@@ -52,6 +53,7 @@ export class ReceiptItemComponent implements OnInit, OnChanges, OnDestroy {
   userRole$!: Observable<ROLES | undefined>; // To get the current user's role
   canVoidReceipt$!: Observable<boolean>; // Observable for void receipt permission
   currentTheme: Theme = 'light';
+  systemSettings$: Observable<SystemSettings | null>;
   private destroy$ = new Subject<void>();
 
   @ViewChild('receiptContainerRef') receiptContainerRef!: ElementRef;
@@ -61,8 +63,12 @@ export class ReceiptItemComponent implements OnInit, OnChanges, OnDestroy {
     private dialog: MatDialog,
     public themeService: ThemeService,
     private cdr: ChangeDetectorRef,
-    private roleAccess: RoleAccessService
-  ) {}
+    private roleAccess: RoleAccessService,
+    private systemSettingsService: SystemSettingsService
+  ) {
+    // Fetch system settings
+    this.systemSettings$ = this.systemSettingsService.getSettings();
+  }
 
   ngOnInit(): void {
     // Get the user's role from the store on init
@@ -203,6 +209,11 @@ export class ReceiptItemComponent implements OnInit, OnChanges, OnDestroy {
           }
         }
       });
+  }
+
+  getPhoneNumbers(phoneString: string | undefined): string[] {
+    if (!phoneString) return [];
+    return phoneString.split(/[\/,]/).map(p => p.trim()).filter(p => p);
   }
 
   ngOnChanges(changes: SimpleChanges): void {

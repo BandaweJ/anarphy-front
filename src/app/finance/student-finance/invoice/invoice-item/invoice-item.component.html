@@ -37,27 +37,30 @@
         alt="Junior High School Logo" 
         class="logo"
         (error)="onImageError($event)">
-      <address class="school-address">
-        <h2 class="school-name">Junior High School</h2>
-        <p class="contact-detail">
-          <mat-icon class="contact-icon">location_on</mat-icon>
-          30588 Lundi Drive, Rhodene, Masvingo
-        </p>
-        <p class="contact-detail">
-          <mat-icon class="contact-icon">phone</mat-icon>
-          <a href="tel:+263392263293">+263 392 263 293</a> / 
-          <a href="tel:+263782238026">+263 78 223 8026</a>
-        </p>
-        <p class="contact-detail">
-          <mat-icon class="contact-icon">email</mat-icon>
-          <a href="mailto:info@juniorhighschool.ac.zw">info@juniorhighschool.ac.zw</a>
-          <span class="contact-separator">|</span>
-          <mat-icon class="contact-icon">language</mat-icon>
-          <a href="http://www.juniorhighschool.ac.zw" target="_blank" rel="noopener noreferrer">
-            www.juniorhighschool.ac.zw
-          </a>
-        </p>
-      </address>
+      <ng-container *ngIf="systemSettings$ | async as settings">
+        <address class="school-address">
+          <h2 class="school-name">{{ settings.schoolName || 'Junior High School' }}</h2>
+          <p class="contact-detail" *ngIf="settings.schoolAddress">
+            <mat-icon class="contact-icon">location_on</mat-icon>
+            {{ settings.schoolAddress }}
+          </p>
+          <p class="contact-detail" *ngIf="settings.schoolPhone">
+            <mat-icon class="contact-icon">phone</mat-icon>
+            <ng-container *ngFor="let phone of getPhoneNumbers(settings.schoolPhone); let isLast = last">
+              <a [href]="'tel:' + phone.trim()">{{ phone.trim() }}</a><span *ngIf="!isLast"> / </span>
+            </ng-container>
+          </p>
+          <p class="contact-detail" *ngIf="settings.schoolEmail || settings.schoolWebsite">
+            <mat-icon class="contact-icon" *ngIf="settings.schoolEmail">email</mat-icon>
+            <a *ngIf="settings.schoolEmail" [href]="'mailto:' + settings.schoolEmail">{{ settings.schoolEmail }}</a>
+            <span class="contact-separator" *ngIf="settings.schoolEmail && settings.schoolWebsite">|</span>
+            <mat-icon class="contact-icon" *ngIf="settings.schoolWebsite">language</mat-icon>
+            <a *ngIf="settings.schoolWebsite" [href]="(settings.schoolWebsite.startsWith('http') ? '' : 'http://') + settings.schoolWebsite" target="_blank" rel="noopener noreferrer">
+              {{ settings.schoolWebsite }}
+            </a>
+          </p>
+        </address>
+      </ng-container>
     </div>
   </header>
 
