@@ -1,6 +1,69 @@
 <!-- Teachers, Admins and HODs dashboard -->
-<div *ngIf="role === 'teacher' || role === 'admin' || role === 'hod'">
-  <div class="summaries-row">
+<div class="teacher-dashboard-container" [ngClass]="currentTheme" *ngIf="role === 'teacher' || role === 'admin' || role === 'hod'">
+  <!-- Teacher's Personal Information Card -->
+  <div class="teacher-info-section" *ngIf="currentTeacher$ | async as teacher">
+    <mat-card class="teacher-info-card">
+      <mat-card-header>
+        <div mat-card-avatar class="teacher-avatar">
+          <span>{{ teacher.name[0] }}{{ teacher.surname[0] }}</span>
+        </div>
+        <mat-card-title>{{ teacher.title }} {{ teacher.name }} {{ teacher.surname }}</mat-card-title>
+        <mat-card-subtitle>{{ teacher.email }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="teacher-details-grid">
+          <div class="detail-item" *ngIf="teacher.cell">
+            <mat-icon>phone</mat-icon>
+            <span>{{ teacher.cell }}</span>
+          </div>
+          <div class="detail-item" *ngIf="teacher.gender">
+            <mat-icon>{{ teacher.gender === 'Male' ? 'male' : 'female' }}</mat-icon>
+            <span>{{ teacher.gender }}</span>
+          </div>
+          <div class="detail-item" *ngIf="teacher.dateOfJoining">
+            <mat-icon>calendar_today</mat-icon>
+            <span>Joined: {{ teacher.dateOfJoining | date:'shortDate' }}</span>
+          </div>
+          <div class="detail-item" *ngIf="teacher.qualifications && teacher.qualifications.length > 0">
+            <mat-icon>school</mat-icon>
+            <span>{{ teacher.qualifications.length }} Qualification(s)</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Quick Access Cards -->
+  <div class="quick-access-section" *ngIf="role === 'teacher' || role === 'admin' || role === 'hod'">
+    <h2 class="section-title">Quick Access</h2>
+    <div class="quick-access-grid">
+      <mat-card class="quick-access-card" (click)="navigateToAttendance()">
+        <mat-icon class="quick-access-icon">event_available</mat-icon>
+        <h3>Take Attendance</h3>
+        <p>Record student attendance</p>
+      </mat-card>
+      <mat-card class="quick-access-card" (click)="navigateToMarks()">
+        <mat-icon class="quick-access-icon">assignment</mat-icon>
+        <h3>Enter Marks</h3>
+        <p>Record student marks</p>
+      </mat-card>
+      <mat-card class="quick-access-card" (click)="navigateToContinuousAssessment()">
+        <mat-icon class="quick-access-icon">assessment</mat-icon>
+        <h3>Continuous Assessment</h3>
+        <p>Record CA marks</p>
+      </mat-card>
+      <mat-card class="quick-access-card" (click)="navigateToClassLists()">
+        <mat-icon class="quick-access-icon">groups</mat-icon>
+        <h3>My Classes</h3>
+        <p>View class lists</p>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Summary Statistics -->
+  <div class="summaries-section">
+    <h2 class="section-title">School Statistics</h2>
+    <div class="summaries-row">
     <mat-card class="summaries-container" (click)="navigateToTeachersSummary()">
 
       <mat-icon class="icon summary-icon">school</mat-icon>
@@ -76,12 +139,15 @@
         SUBJECTS
       </div>
     </mat-card>
+    </div>
   </div>
-  <div class="enrolment-graph">
-    <app-enrolment-chart></app-enrolment-chart>
-    <!-- <div class="accounts-graph">
-      <app-accounts-chart></app-accounts-chart>
-    </div> -->
+
+  <!-- Enrolment Chart -->
+  <div class="enrolment-graph-section">
+    <h2 class="section-title">Enrolment Overview</h2>
+    <div class="enrolment-graph">
+      <app-enrolment-chart></app-enrolment-chart>
+    </div>
   </div>
 </div>
 <!-- End Teacher, Admin and HODs dashboard -->

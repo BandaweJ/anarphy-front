@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { combineLatest, filter, Subject, takeUntil, tap } from 'rxjs';
+import { combineLatest, filter, Subject, takeUntil, tap, map } from 'rxjs';
 import { selectUser } from 'src/app/auth/store/auth.selectors';
+import { Theme, ThemeService } from 'src/app/services/theme.service';
 import {
   currentTermActions,
   fetchClasses,
@@ -39,16 +40,25 @@ import { Residence } from 'src/app/enrolment/models/residence.enum';
   selector: 'app-teachers-dashboard',
   templateUrl: './teachers-dashboard.component.html',
   styleUrls: ['./teachers-dashboard.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TeachersDashboardComponent {
-  private destroy$ = new Subject<void>(); // Used for unsubscribing from observables
-
+export class TeachersDashboardComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+  
+  currentTheme: Theme = 'light';
   teachers$ = this.store.select(selectTeachers);
   students$ = this.store.select(selectStudents);
   classes$ = this.store.select(selectClasses);
   subjects$ = this.store.select(selectSubjects);
   user$ = this.store.select(selectUser);
   termEnrols$ = this.store.select(selectTermEnrols);
+  
+  currentTeacher$ = combineLatest([this.user$, this.teachers$]).pipe(
+    map(([user, teachers]) => {
+      if (!user || !teachers) return null;
+      return teachers.find(t => t.id === user.id) || null;
+    })
+  );
 
   currentTerm$ = this.store.select(selectCurrentTerm);
 
@@ -72,7 +82,9 @@ export class TeachersDashboardComponent {
   constructor(
     private store: Store,
     public title: Title,
-    private router: Router
+    private router: Router,
+    private themeService: ThemeService,
+    private cdr: ChangeDetectorRef
   ) {
     // Initial dispatches based on user role when user data is available
     this.user$
@@ -97,6 +109,7 @@ export class TeachersDashboardComponent {
             this.store.dispatch(fetchClasses());
             this.store.dispatch(fetchSubjects());
             this.store.dispatch(currentTermActions.fetchCurrentTerm());
+            this.store.dispatch(fetchEnrolsStats());
           }
         }),
         takeUntil(this.destroy$) // Unsubscribe when component is destroyed
@@ -128,6 +141,14 @@ export class TeachersDashboardComponent {
   }
 
   ngOnInit(): void {
+    // Subscribe to theme changes
+    this.themeService.theme$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((theme) => {
+        this.currentTheme = theme;
+        this.cdr.markForCheck();
+      });
+
     // Calculate male/female teachers reactively
     this.teachers$
       .pipe(
@@ -195,6 +216,18 @@ export class TeachersDashboardComponent {
 
   navigateToSubjects() {
     this._navigateToRoleBased('/subjects');
+  }
+
+  navigateToAttendance(): void {
+    this._navigateToRoleBased('/mark-register');
+  }
+
+  navigateToMarks(): void {
+    this._navigateToRoleBased('/input');
+  }
+
+  navigateToContinuousAssessment(): void {
+    this._navigateToRoleBased('/marks/continuous');
   }
 
   // changeSelectedReport(report: ReportsModel): void {

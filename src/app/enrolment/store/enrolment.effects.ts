@@ -434,6 +434,45 @@ export class EnrolmentEffects {
     )
   );
 
+  fetchLatestEnrolmentWithStatus$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(
+        fromEnrolmentActions.currentEnrolementActions.fetchLatestEnrolmentWithStatus
+      ),
+      switchMap((data) =>
+        this.enrolService.getLatestEnrolmentWithStatus(data.studentNumber).pipe(
+          map((result) => {
+            if (!result || !result.enrolment) {
+              // If no enrolment found, still dispatch success but with null enrolment
+              // The component will handle showing "no enrolment" message
+              return fromEnrolmentActions.currentEnrolementActions.fetchLatestEnrolmentWithStatusSuccess(
+                {
+                  enrolment: null as any,
+                  status: 'past' as const,
+                }
+              );
+            }
+            return fromEnrolmentActions.currentEnrolementActions.fetchLatestEnrolmentWithStatusSuccess(
+              {
+                enrolment: result.enrolment,
+                status: result.status,
+              }
+            );
+          }),
+          catchError((error: HttpErrorResponse) =>
+            of(
+              fromEnrolmentActions.currentEnrolementActions.fetchLatestEnrolmentWithStatusFail(
+                {
+                  ...error,
+                }
+              )
+            )
+          )
+        )
+      )
+    )
+  );
+
   editCurrentEnrolment$ = createEffect(() =>
     this.actions$.pipe(
       ofType(

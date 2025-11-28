@@ -10,11 +10,17 @@
               {{ clas.name }} (Form {{ clas.form }})
             </mat-option>
           </mat-select>
+          <mat-error *ngIf="filtersForm.get('classId')?.invalid && filtersForm.get('classId')?.touched">
+            Class is required
+          </mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline">
           <mat-label>Topic / Skill</mat-label>
           <input matInput formControlName="topic" />
+          <mat-error *ngIf="filtersForm.get('topic')?.invalid && filtersForm.get('topic')?.touched">
+            Topic/Skill is required
+          </mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline">
@@ -22,6 +28,9 @@
           <input matInput [matDatepicker]="picker" formControlName="assessmentDate" />
           <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
           <mat-datepicker #picker></mat-datepicker>
+          <mat-error *ngIf="filtersForm.get('assessmentDate')?.invalid && filtersForm.get('assessmentDate')?.touched">
+            Date is required
+          </mat-error>
         </mat-form-field>
       </div>
 
@@ -45,8 +54,14 @@
           <button mat-stroked-button color="primary" type="button" (click)="applyMaxScoreToAll()">
             Apply "Out of" to All Rows
           </button>
-          <button mat-raised-button color="primary" type="button" (click)="loadRoster()" [disabled]="!canCreate">
-            Load Class List
+          <button 
+            mat-raised-button 
+            color="primary" 
+            type="button" 
+            (click)="loadRoster()" 
+            [disabled]="!canCreate || isLoadingRoster || filtersForm.invalid">
+            <mat-icon *ngIf="isLoadingRoster">sync</mat-icon>
+            {{ isLoadingRoster ? 'Loading...' : 'Load Class List' }}
           </button>
         </div>
       </div>
@@ -102,7 +117,16 @@
     </div>
   </mat-card>
 
-  <mat-card class="roster-card" *ngIf="!isLoadingRoster && roster.length === 0">
+  <mat-card class="roster-card" *ngIf="!isLoadingRoster && roster.length === 0 && selectedClassName">
+    <div class="empty-state">
+      <mat-icon class="empty-icon">group_off</mat-icon>
+      <h3>No Students Found</h3>
+      <p>No students are enrolled in <strong>{{ selectedClassName }}</strong> for the current term.</p>
+      <p class="hint">Please ensure students are enrolled in this class before loading the roster.</p>
+    </div>
+  </mat-card>
+
+  <mat-card class="roster-card" *ngIf="!isLoadingRoster && roster.length === 0 && !selectedClassName">
     <div class="empty-state">
       <p>Select a class, topic, and date, then click "Load Class List" to start recording marks.</p>
     </div>

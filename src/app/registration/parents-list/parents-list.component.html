@@ -21,7 +21,7 @@
   <section class="parents-layout">
     <div class="parents-left">
       <div class="table-container">
-        <div class="filters-panel">
+        <div class="filters-panel" [class.theme-light]="currentTheme === 'light'" [class.theme-dark]="currentTheme === 'dark'">
           <div class="filters-row">
             <mat-form-field appearance="outline" class="search-field">
               <mat-label>Search parents</mat-label>
@@ -35,7 +35,7 @@
           </div>
         </div>
 
-        <div class="table-wrapper">
+        <div class="table-wrapper" [class.theme-light]="currentTheme === 'light'" [class.theme-dark]="currentTheme === 'dark'">
           <table
             mat-table
             [dataSource]="dataSource"
@@ -123,34 +123,47 @@
     </div>
 
     <div class="parents-right">
-      <mat-card class="assign-card">
-        <mat-card-title>Assign Student to Parent</mat-card-title>
-        <mat-card-subtitle>
-          Select a parent in the list, then use "Assign Student" to link a
-          student number.
-        </mat-card-subtitle>
+      <mat-card class="assign-card" [class.theme-light]="currentTheme === 'light'" [class.theme-dark]="currentTheme === 'dark'">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>link</mat-icon>
+            Assign Student to Parent
+          </mat-card-title>
+          <mat-card-subtitle>
+            Select a parent in the list, then use "Assign Student" to link a student.
+          </mat-card-subtitle>
+        </mat-card-header>
 
-        <div class="children-list" *ngIf="childrenForSelectedParent.length > 0">
-          <h3>Linked Students for {{ selectedParent?.email }}</h3>
-          <ul>
-            <li *ngFor="let child of childrenForSelectedParent">
-              {{ child.studentNumber }} - {{ child.surname }}, {{ child.name }}
-            </li>
-          </ul>
-        </div>
+        <mat-card-content>
+          <div class="children-section" *ngIf="selectedParent">
+            <div class="children-header">
+              <mat-icon>family_restroom</mat-icon>
+              <h3>Linked Students for {{ selectedParent.email }}</h3>
+            </div>
 
-        <div
-          class="children-list empty"
-          *ngIf="selectedParent && childrenForSelectedParent.length === 0"
-        >
-          <h3>Linked Students for {{ selectedParent.email }}</h3>
-          <p>No students are linked to this parent yet.</p>
-        </div>
+            <mat-list *ngIf="childrenForSelectedParent.length > 0; else noChildren" class="children-list">
+              <mat-list-item *ngFor="let child of childrenForSelectedParent" class="child-item">
+                <mat-icon matListItemIcon>person</mat-icon>
+                <div matListItemTitle>{{ child.surname }}, {{ child.name }}</div>
+                <div matListItemLine class="student-number">{{ child.studentNumber }}</div>
+              </mat-list-item>
+            </mat-list>
 
-        <p class="hint" *ngIf="!selectedParent">
-          Select a parent from the list and click "Linked Students" to view or
-          refresh their linked students.
-        </p>
+            <ng-template #noChildren>
+              <div class="empty-state">
+                <mat-icon class="empty-icon">sentiment_dissatisfied</mat-icon>
+                <p class="empty-message">No students are linked to this parent yet.</p>
+              </div>
+            </ng-template>
+          </div>
+
+          <div class="hint-section" *ngIf="!selectedParent">
+            <mat-icon>info</mat-icon>
+            <p class="hint-text">
+              Select a parent from the list and click "Linked Students" to view or refresh their linked students.
+            </p>
+          </div>
+        </mat-card-content>
       </mat-card>
     </div>
   </section>

@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { createActionGroup, props } from '@ngrx/store';
-import { AttendanceRecord, AttendanceReport, AttendanceSummary } from '../services/attendance.service';
+import { AttendanceRecord, DetailedAttendanceReport, AttendanceSummary } from '../services/attendance.service';
 
 export const attendanceActions = createActionGroup({
   source: 'Attendance Component',
@@ -35,7 +35,7 @@ export const attendanceActions = createActionGroup({
       startDate?: string;
       endDate?: string;
     }>(),
-    getAttendanceReportsSuccess: props<{ reports: AttendanceReport }>(),
+    getAttendanceReportsSuccess: props<{ reports: DetailedAttendanceReport }>(),
     getAttendanceReportsFail: props<{ error: HttpErrorResponse }>(),
 
     // Get attendance summary

@@ -10,7 +10,6 @@ import { MarksEffects } from './store/marks.effects';
 import { AddEditSubjectComponent } from './subjects/add-edit-subject/add-edit-subject.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgChartsModule } from 'ng2-charts';
-import { TeachersCommentsComponent } from './teachers-comments/teachers-comments.component';
 import { MarksSheetsComponent } from './marks-sheets/marks-sheets.component';
 import { markSheetsReducer } from './marks-sheets/store/reducer';
 import { MarkSheetEffects } from './marks-sheets/store/effects';
@@ -22,7 +21,6 @@ import { SharedModule } from '../shared/shared.module';
     EnterMarksComponent,
     SubjectsComponent,
     AddEditSubjectComponent,
-    TeachersCommentsComponent,
     MarksSheetsComponent,
     MarksProgressComponent,
   ],

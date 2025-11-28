@@ -27,6 +27,12 @@ export interface State {
   currentEnrolmentLoaded: boolean;
   currentEnrolmentLoadError: string;
 
+  latestEnrolment: EnrolsModel | null;
+  latestEnrolmentStatus: 'past' | 'current' | 'upcoming' | null;
+  latestEnrolmentLoading: boolean;
+  latestEnrolmentLoaded: boolean;
+  latestEnrolmentLoadError: string;
+
   currentTerm: TermsModel;
   allEnrols: EnrolsModel[];
   termEnrols: EnrolsModel[];
@@ -49,6 +55,12 @@ export const initialState: State = {
   currentEnrolmentLoading: false,
   currentEnrolmentLoaded: false,
   currentEnrolmentLoadError: '',
+
+  latestEnrolment: null,
+  latestEnrolmentStatus: null,
+  latestEnrolmentLoading: false,
+  latestEnrolmentLoaded: false,
+  latestEnrolmentLoadError: '',
 
   currentTerm: {} as TermsModel,
   allEnrols: [],
@@ -304,6 +316,35 @@ export const enrolmentReducer = createReducer(
       currentEnrolmentLoading: false,
       currentEnrolmentLoaded: false,
       currentEnrolmentLoadError: error.message,
+    })
+  ),
+  on(
+    enrolmentActions.currentEnrolementActions.fetchLatestEnrolmentWithStatus,
+    (state) => ({
+      ...state,
+      latestEnrolmentLoading: true,
+      latestEnrolmentLoaded: false,
+      latestEnrolmentLoadError: '',
+    })
+  ),
+  on(
+    enrolmentActions.currentEnrolementActions.fetchLatestEnrolmentWithStatusSuccess,
+    (state, { enrolment, status }) => ({
+      ...state,
+      latestEnrolmentLoaded: true,
+      latestEnrolmentLoading: false,
+      latestEnrolmentLoadError: '',
+      latestEnrolment: enrolment,
+      latestEnrolmentStatus: status,
+    })
+  ),
+  on(
+    enrolmentActions.currentEnrolementActions.fetchLatestEnrolmentWithStatusFail,
+    (state, { error }) => ({
+      ...state,
+      latestEnrolmentLoading: false,
+      latestEnrolmentLoaded: false,
+      latestEnrolmentLoadError: error.message,
     })
   ),
   on(

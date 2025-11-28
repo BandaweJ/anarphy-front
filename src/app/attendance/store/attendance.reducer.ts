@@ -1,10 +1,10 @@
 import { createReducer, on } from '@ngrx/store';
 import { attendanceActions } from './attendance.actions';
-import { AttendanceRecord, AttendanceReport, AttendanceSummary } from '../services/attendance.service';
+import { AttendanceRecord, DetailedAttendanceReport, AttendanceSummary } from '../services/attendance.service';
 
 export interface State {
   classAttendance: AttendanceRecord[];
-  attendanceReports: AttendanceReport | null;
+  attendanceReports: DetailedAttendanceReport | null;
   attendanceSummary: AttendanceSummary | null;
   isLoading: boolean;
   errorMessage: string;

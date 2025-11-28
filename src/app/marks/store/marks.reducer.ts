@@ -3,13 +3,11 @@ import { SubjectsModel } from '../models/subjects.model';
 import * as marksActions from './marks.actions';
 import { MarksModel } from '../models/marks.model';
 import { ChartConfiguration } from 'chart.js';
-import { StudentComment } from '../models/student-comment';
 import { MarksProgressModel } from '../models/marks-progress.model';
 
 export interface State {
   subjects: SubjectsModel[];
   marks: MarksModel[];
-  comments: StudentComment[];
   isLoading: boolean;
   errorMessage: string;
   data: {
@@ -30,7 +28,6 @@ export interface State {
 export const initialState: State = {
   subjects: [],
   marks: [],
-  comments: [],
   isLoading: false,
   errorMessage: '',
   data: {
@@ -225,48 +222,6 @@ export const marksReducer = createReducer(
       errorMessage: error.message,
     })
   ),
-  on(marksActions.saveCommentActions.saveComment, (state, { comment }) => ({
-    ...state,
-    isLoading: true,
-  })),
-  on(
-    marksActions.saveCommentActions.saveCommentSuccess,
-    (state, { comment }) => ({
-      ...state,
-      comments: [
-        ...state.comments.map((cmmt) =>
-          cmmt.id === comment.id ? (cmmt = comment) : (cmmt = cmmt)
-        ),
-      ],
-      //omments: [...state.comments.map(cmm => cmm.id === comment.id ? cmm.comment = comment.comment : cmm = cmm)],
-      isLoading: false,
-    })
-  ),
-  on(marksActions.saveCommentActions.saveCommentFail, (state, { error }) => ({
-    ...state,
-    isLoading: false,
-    errorMessage: error.message,
-  })),
-  on(
-    marksActions.saveCommentActions.fetchClassComments,
-    (state, { name, num, year }) => ({
-      ...state,
-      isLoading: true,
-    })
-  ),
-  on(
-    marksActions.saveCommentActions.fetchClassCommentsSuccess,
-    (state, { comments }) => ({
-      ...state,
-      isLoading: false,
-      comments: comments,
-    })
-  ),
-  on(marksActions.saveCommentActions.saveCommentFail, (state, { error }) => ({
-    ...state,
-    isLoading: false,
-    error: error.message,
-  })),
   on(marksActions.fetchMarksProgressActions.fetchMarksProgress, (state) => ({
     ...state,
     isLoading: true,

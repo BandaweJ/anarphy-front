@@ -3,7 +3,6 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { SubjectsModel } from '../models/subjects.model';
 import { MarksModel } from '../models/marks.model';
-import { StudentComment } from '../models/student-comment';
 import { environment } from 'src/environments/environment';
 import { ExamType } from '../models/examtype.enum';
 import { MarksProgressModel } from '../models/marks-progress.model';
@@ -75,24 +74,6 @@ export class MarksService {
     );
   }
 
-  saveComment(comment: StudentComment): Observable<StudentComment> {
-    // console.log(comment);
-    return this.httpClient.post<StudentComment>(
-      this.baseUrl + 'comments/',
-      comment
-    );
-  }
-
-  fetchClassComments(
-    name: string,
-    num: number,
-    year: number,
-    examType: ExamType
-  ): Observable<StudentComment[]> {
-    return this.httpClient.get<StudentComment[]>(
-      `${this.baseUrl}comments/${name}/${num}/${year}/${examType}`
-    );
-  }
 
   getPerfomanceData(
     num: number,

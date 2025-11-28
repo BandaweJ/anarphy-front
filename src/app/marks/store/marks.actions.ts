@@ -3,7 +3,6 @@ import { SubjectsModel } from '../models/subjects.model';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MarksModel } from '../models/marks.model';
 import { StudentsModel } from 'src/app/registration/models/students.model';
-import { StudentComment } from '../models/student-comment';
 import { ExamType } from '../models/examtype.enum';
 import { MarksProgressModel } from '../models/marks-progress.model';
 
@@ -127,22 +126,6 @@ export const perfomanceActions = createActionGroup({
   },
 });
 
-export const saveCommentActions = createActionGroup({
-  source: 'Teachers comment component',
-  events: {
-    saveComment: props<{ comment: StudentComment }>(),
-    saveCommentFail: props<{ error: HttpErrorResponse }>(),
-    saveCommentSuccess: props<{ comment: StudentComment }>(),
-    fetchClassComments: props<{
-      name: string;
-      num: number;
-      year: number;
-      examType: ExamType;
-    }>(),
-    fetchClassCommentsSuccess: props<{ comments: StudentComment[] }>(),
-    fetchClassCommentsFail: props<{ error: HttpErrorResponse }>(),
-  },
-});
 
 export const fetchMarksProgressActions = createActionGroup({
   source: 'Marks Progress component',

@@ -42,9 +42,23 @@
       </div>
     </ng-template>
 
-    <ng-container *ngIf="currentEnrolment$ | async as enrolment; else noEnrolmentData">
+    <ng-container *ngIf="latestEnrolment$ | async as enrolment; else noEnrolmentData">
       <div class="summary-card enrolment-details-card">
-        <h4>Current Enrolment</h4>
+        <div class="enrolment-header">
+          <h4>Latest Enrolment</h4>
+          <span 
+            class="enrolment-status-badge" 
+            [class.status-past]="(latestEnrolmentStatus$ | async) === 'past'"
+            [class.status-current]="(latestEnrolmentStatus$ | async) === 'current'"
+            [class.status-upcoming]="(latestEnrolmentStatus$ | async) === 'upcoming'">
+            <mat-icon class="status-icon">
+              {{ (latestEnrolmentStatus$ | async) === 'current' ? 'check_circle' : 
+                  (latestEnrolmentStatus$ | async) === 'upcoming' ? 'schedule' : 'history' }}
+            </mat-icon>
+            {{ (latestEnrolmentStatus$ | async) === 'current' ? 'Current Term' : 
+                (latestEnrolmentStatus$ | async) === 'upcoming' ? 'Upcoming Term' : 'Past Term' }}
+          </span>
+        </div>
         <div class="data-item">
           <label>Class:</label>
           <span>{{ enrolment.name }}</span>
@@ -64,8 +78,8 @@
       </div>
     </ng-container>
     <ng-template #noEnrolmentData>
-      <div *ngIf="!(enrolmentLoading$ | async) && !(currentEnrolment$ | async)" class="no-data-message">
-        No current enrolment data available.
+      <div *ngIf="!(enrolmentLoading$ | async) && !(latestEnrolment$ | async)" class="no-data-message">
+        No enrolment data available.
       </div>
     </ng-template>
 

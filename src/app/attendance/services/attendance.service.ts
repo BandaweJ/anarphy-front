@@ -30,6 +30,58 @@ export interface AttendanceReport {
   [date: string]: AttendanceRecord[];
 }
 
+export interface DailyAttendanceMetrics {
+  date: string;
+  possibleAttendance: number;
+  actualAttendance: number;
+  absentCount: number;
+  attendanceRate: number;
+  absentStudents: AbsentStudent[];
+}
+
+export interface AbsentStudent {
+  studentNumber: string;
+  surname: string;
+  name: string;
+  gender: string;
+}
+
+export interface WeeklyAttendanceSummary {
+  weekStartDate: string;
+  weekEndDate: string;
+  weekNumber: number;
+  totalPossibleAttendance: number;
+  totalActualAttendance: number;
+  averageAttendanceRate: number;
+  daysWithAttendance: number;
+}
+
+export interface AttendanceTrend {
+  period: string;
+  attendanceRate: number;
+  trend: 'improving' | 'declining' | 'stable';
+}
+
+export interface DetailedAttendanceReport {
+  className: string;
+  termNum: number;
+  year: number;
+  reportPeriod: {
+    startDate: string;
+    endDate: string;
+  };
+  totalStudents: number;
+  dailyMetrics: DailyAttendanceMetrics[];
+  weeklySummaries: WeeklyAttendanceSummary[];
+  trends: AttendanceTrend[];
+  overallStats: {
+    totalPossibleAttendance: number;
+    totalActualAttendance: number;
+    overallAttendanceRate: number;
+    totalDaysMarked: number;
+  };
+}
+
 export interface AttendanceSummary {
   className: string;
   termNum: number;
@@ -80,7 +132,7 @@ export class AttendanceService {
     year: number,
     startDate?: string,
     endDate?: string
-  ): Observable<AttendanceReport> {
+  ): Observable<DetailedAttendanceReport> {
     let url = `${this.apiUrl}/reports/${className}/${termNum}/${year}`;
     const params = new URLSearchParams();
     if (startDate) params.append('startDate', startDate);
@@ -88,7 +140,7 @@ export class AttendanceService {
     if (params.toString()) {
       url += `?${params.toString()}`;
     }
-    return this.http.get<AttendanceReport>(url);
+    return this.http.get<DetailedAttendanceReport>(url);
   }
 
   getStudentAttendance(

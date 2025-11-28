@@ -73,4 +73,10 @@ export class EnrolService {
       `${this.baseURL}newcomers/${studentNumber}`
     );
   }
+
+  getLatestEnrolmentWithStatus(studentNumber: string): Observable<{ enrolment: EnrolsModel; status: 'past' | 'current' | 'upcoming' } | null> {
+    return this.httpClient.get<{ enrolment: EnrolsModel; status: 'past' | 'current' | 'upcoming' } | null>(
+      `${this.baseURL}${studentNumber}/latest`
+    );
+  }
 }

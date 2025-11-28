@@ -27,7 +27,7 @@ import {
   selectAttendanceLoading, 
   selectAttendanceError 
 } from '../store/attendance.selectors';
-import { AttendanceReport, AttendanceSummary } from '../services/attendance.service';
+import { DetailedAttendanceReport, AttendanceSummary } from '../services/attendance.service';
 
 @Component({
   selector: 'app-attendance-reports',
@@ -39,7 +39,7 @@ export class AttendanceReportsComponent implements OnInit, OnDestroy {
   terms$!: Observable<TermsModel[]>;
   classes$!: Observable<ClassesModel[]>;
   reportsForm!: FormGroup;
-  attendanceReports$!: Observable<AttendanceReport | null>;
+  attendanceReports$!: Observable<DetailedAttendanceReport | null>;
   attendanceSummary$!: Observable<AttendanceSummary | null>;
   isLoading$!: Observable<boolean>;
   errorMsg$!: Observable<string>;
@@ -81,11 +81,24 @@ export class AttendanceReportsComponent implements OnInit, OnDestroy {
     this.isLoading$ = this.store.select(selectAttendanceLoading);
     this.errorMsg$ = this.store.select(selectAttendanceError);
 
+    // Debug: Log reports when they change
+    this.attendanceReports$.pipe(
+      takeUntil(this.destroy$),
+      tap(reports => {
+        console.log('Attendance Reports:', reports);
+        if (reports) {
+          console.log('Reports keys:', Object.keys(reports));
+          console.log('Reports count:', Object.keys(reports).length);
+        }
+      })
+    ).subscribe();
+
     // Handle error messages
     this.errorMsg$.pipe(
       takeUntil(this.destroy$),
       tap(errorMsg => {
         if (errorMsg) {
+          console.error('Attendance Reports Error:', errorMsg);
           this.snackBar.open(errorMsg, 'Close', {
             duration: 5000,
             panelClass: ['error-snackbar']
@@ -114,9 +127,11 @@ export class AttendanceReportsComponent implements OnInit, OnDestroy {
     const num = term.num;
     const year = term.year;
 
-    // Use term's startDate and endDate
-    const startDate = term.startDate ? new Date(term.startDate).toISOString().split('T')[0] : undefined;
-    const endDate = term.endDate ? new Date(term.endDate).toISOString().split('T')[0] : undefined;
+    // Don't filter by date - get all attendance records for the term
+    // This matches the behavior of getAttendanceSummary which doesn't filter by date
+    // Date filtering can exclude records if attendance was marked outside the term's official dates
+    const startDate = undefined;
+    const endDate = undefined;
 
     // Generate both reports and summary
     this.store.dispatch(
@@ -161,9 +176,8 @@ export class AttendanceReportsComponent implements OnInit, OnDestroy {
     return fieldNames[controlName] || controlName;
   }
 
-  getSortedDates(reports: AttendanceReport | null): string[] {
-    if (!reports) return [];
-    return Object.keys(reports).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+  hasReports(reports: DetailedAttendanceReport | null): boolean {
+    return reports !== null && reports.dailyMetrics && reports.dailyMetrics.length > 0;
   }
 
   getAttendanceStatusIcon(present: boolean): string {
@@ -195,166 +209,217 @@ export class AttendanceReportsComponent implements OnInit, OnDestroy {
     });
   }
 
+  getRateClass(rate: number): string {
+    if (rate >= 90) return 'rate-excellent';
+    if (rate >= 75) return 'rate-good';
+    if (rate >= 60) return 'rate-fair';
+    return 'rate-poor';
+  }
+
+  getTrendIcon(trend: 'improving' | 'declining' | 'stable'): string {
+    switch (trend) {
+      case 'improving':
+        return 'trending_up';
+      case 'declining':
+        return 'trending_down';
+      default:
+        return 'trending_flat';
+    }
+  }
+
   calculateAttendanceRate(summary: AttendanceSummary | null): number {
     if (!summary || summary.totalRecords === 0) return 0;
     return Math.round((summary.presentCount / summary.totalRecords) * 100);
   }
 
   async exportToPDF(): Promise<void> {
-    // Get current reports and summary asynchronously
-    const [reports, summary] = await firstValueFrom(
-      combineLatest([this.attendanceReports$, this.attendanceSummary$])
-    );
+    try {
+      const reports = await firstValueFrom(this.attendanceReports$);
 
-    if (!reports || Object.keys(reports).length === 0) {
-      this.snackBar.open('No reports available to export. Please generate reports first.', 'Close', {
-        duration: 3000,
-        panelClass: ['error-snackbar']
-      });
-      return;
-    }
+      if (!reports || !this.hasReports(reports)) {
+        this.snackBar.open('No reports available to export. Please generate reports first.', 'Close', {
+          duration: 3000,
+          panelClass: ['error-snackbar']
+        });
+        return;
+      }
 
-    // Get class and term info
-    const className = this.clas?.value || 'Unknown Class';
-    const term: TermsModel | null = this.term?.value;
-    const termInfo = term ? `Term ${term.num}, ${term.year}` : '';
+      const doc = new jsPDF('portrait', 'mm', 'a4') as any;
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 15;
+      let yPosition = margin;
 
-    // Create PDF (cast to any to access autoTable method)
-    const doc = new jsPDF('landscape', 'mm', 'a4') as any;
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    const margin = 15;
-    let yPosition = margin;
+      // Header
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Detailed Attendance Report', pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += 8;
 
-    // Header
-    doc.setFontSize(18);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Attendance Report', pageWidth / 2, yPosition, { align: 'center' });
-    yPosition += 8;
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Class: ${reports.className}`, pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += 6;
+      doc.text(`Term ${reports.termNum}, ${reports.year}`, pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += 10;
 
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Class: ${className}`, pageWidth / 2, yPosition, { align: 'center' });
-    yPosition += 6;
-    doc.text(termInfo, pageWidth / 2, yPosition, { align: 'center' });
-    yPosition += 6;
-
-    // Summary section
-    if (summary) {
+      // Overall Stats
       doc.setFontSize(14);
       doc.setFont('helvetica', 'bold');
-      doc.text('Summary', margin, yPosition);
+      doc.text('Overall Statistics', margin, yPosition);
       yPosition += 8;
 
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
-      const summaryData = [
-        ['Total Records', summary.totalRecords.toString()],
-        ['Present', summary.presentCount.toString()],
-        ['Absent', summary.absentCount.toString()],
-        ['Attendance Rate', `${this.calculateAttendanceRate(summary)}%`]
+      const overallStatsData = [
+        ['Total Students', reports.totalStudents.toString()],
+        ['Total Possible Attendance', reports.overallStats.totalPossibleAttendance.toString()],
+        ['Total Actual Attendance', reports.overallStats.totalActualAttendance.toString()],
+        ['Overall Attendance Rate', `${reports.overallStats.overallAttendanceRate}%`],
+        ['Days Marked', reports.overallStats.totalDaysMarked.toString()]
       ];
 
       doc.autoTable({
         startY: yPosition,
         head: [['Metric', 'Value']],
-        body: summaryData,
+        body: overallStatsData,
         theme: 'grid',
         headStyles: { fillColor: [66, 139, 202], textColor: 255, fontStyle: 'bold' },
         styles: { fontSize: 10 },
         margin: { left: margin, right: margin },
       });
 
-      yPosition = (doc as any).lastAutoTable.finalY + 10;
-    }
+      yPosition = (doc as any).lastAutoTable?.finalY ? (doc as any).lastAutoTable.finalY + 10 : yPosition + 30;
 
-    // Attendance records by date
-    const sortedDates = this.getSortedDates(reports);
-    
-    sortedDates.forEach((date, dateIndex) => {
-      // Check if we need a new page
-      if (yPosition > pageHeight - 60) {
-        doc.addPage();
-        yPosition = margin;
+      // Weekly Summaries
+      if (reports.weeklySummaries.length > 0) {
+        if (yPosition > pageHeight - 60) {
+          doc.addPage();
+          yPosition = margin;
+        }
+
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Weekly Attendance Summary', margin, yPosition);
+        yPosition += 8;
+
+        const weeklyData = reports.weeklySummaries.map(week => [
+          `Week ${week.weekNumber}`,
+          this.formatDate(week.weekStartDate),
+          this.formatDate(week.weekEndDate),
+          week.totalPossibleAttendance.toString(),
+          week.totalActualAttendance.toString(),
+          `${week.averageAttendanceRate}%`,
+          week.daysWithAttendance.toString()
+        ]);
+
+        doc.autoTable({
+          startY: yPosition,
+          head: [['Week', 'Start Date', 'End Date', 'Possible', 'Actual', 'Rate', 'Days']],
+          body: weeklyData,
+          theme: 'striped',
+          headStyles: { fillColor: [66, 139, 202], textColor: 255, fontStyle: 'bold' },
+          bodyStyles: { fontSize: 9 },
+          margin: { left: margin, right: margin },
+        });
+
+        yPosition = (doc as any).lastAutoTable?.finalY ? (doc as any).lastAutoTable.finalY + 10 : yPosition + 30;
       }
 
-      const records = reports![date];
-      const formattedDate = this.formatDate(date);
+      // Daily Metrics
+      reports.dailyMetrics.forEach((day) => {
+        if (yPosition > pageHeight - 80) {
+          doc.addPage();
+          yPosition = margin;
+        }
 
-      // Date header
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
-      doc.text(formattedDate, margin, yPosition);
-      yPosition += 8;
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text(this.formatDate(day.date), margin, yPosition);
+        yPosition += 8;
 
-      // Prepare table data
-      const tableData = records.map((record, index) => [
-        (index + 1).toString(),
-        record.studentNumber || '',
-        record.surname || '',
-        record.name || '',
-        record.gender || '',
-        record.present ? 'Present' : 'Absent'
-      ]);
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        const dayMetricsData = [
+          ['Possible Attendance', day.possibleAttendance.toString()],
+          ['Actual Attendance', day.actualAttendance.toString()],
+          ['Number Absent', day.absentCount.toString()],
+          ['Attendance Rate', `${day.attendanceRate}%`]
+        ];
 
-      // Create table
-      doc.autoTable({
-        startY: yPosition,
-        head: [['#', 'Student Number', 'Surname', 'Name', 'Gender', 'Status']],
-        body: tableData,
-        theme: 'striped',
-        headStyles: { fillColor: [66, 139, 202], textColor: 255, fontStyle: 'bold' },
-        bodyStyles: { fontSize: 9 },
-        alternateRowStyles: { fillColor: [245, 245, 245] },
-        columnStyles: {
-          0: { cellWidth: 15 }, // #
-          1: { cellWidth: 40 }, // Student Number
-          2: { cellWidth: 50 }, // Surname
-          3: { cellWidth: 50 }, // Name
-          4: { cellWidth: 30 }, // Gender
-          5: { cellWidth: 35 } // Status
-        },
-        margin: { left: margin, right: margin },
-        didParseCell: (data: any) => {
-          // Color code status column
-          if (data.column.index === 5) {
-            if (data.cell.text[0] === 'Present') {
-              data.cell.styles.fillColor = [76, 175, 80];
-              data.cell.styles.textColor = 255;
-            } else if (data.cell.text[0] === 'Absent') {
-              data.cell.styles.fillColor = [244, 67, 54];
-              data.cell.styles.textColor = 255;
-            }
-          }
+        doc.autoTable({
+          startY: yPosition,
+          head: [['Metric', 'Value']],
+          body: dayMetricsData,
+          theme: 'grid',
+          headStyles: { fillColor: [66, 139, 202], textColor: 255, fontStyle: 'bold' },
+          styles: { fontSize: 10 },
+          margin: { left: margin, right: margin },
+        });
+
+        yPosition = (doc as any).lastAutoTable?.finalY ? (doc as any).lastAutoTable.finalY + 8 : yPosition + 25;
+
+        // Absent Students
+        if (day.absentStudents.length > 0) {
+          doc.setFontSize(11);
+          doc.setFont('helvetica', 'bold');
+          doc.text(`Absent Students (${day.absentStudents.length}):`, margin, yPosition);
+          yPosition += 6;
+
+          const absentData = day.absentStudents.map(student => [
+            student.studentNumber,
+            `${student.surname}, ${student.name}`,
+            student.gender
+          ]);
+
+          doc.autoTable({
+            startY: yPosition,
+            head: [['Student Number', 'Name', 'Gender']],
+            body: absentData,
+            theme: 'striped',
+            headStyles: { fillColor: [244, 67, 54], textColor: 255, fontStyle: 'bold' },
+            bodyStyles: { fontSize: 9 },
+            margin: { left: margin, right: margin },
+          });
+
+          yPosition = (doc as any).lastAutoTable?.finalY ? (doc as any).lastAutoTable.finalY + 10 : yPosition + 25;
+        } else {
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'italic');
+          doc.text('All students present', margin, yPosition);
+          yPosition += 6;
         }
       });
 
-      yPosition = (doc as any).lastAutoTable.finalY + 10;
-    });
+      // Footer
+      const totalPages = doc.getNumberOfPages();
+      for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.text(
+          `Page ${i} of ${totalPages} | Generated on ${new Date().toLocaleDateString()}`,
+          pageWidth / 2,
+          pageHeight - 10,
+          { align: 'center' }
+        );
+      }
 
-    // Footer
-    const totalPages = doc.getNumberOfPages();
-    for (let i = 1; i <= totalPages; i++) {
-      doc.setPage(i);
-      doc.setFontSize(8);
-      doc.text(
-        `Page ${i} of ${totalPages} | Generated on ${new Date().toLocaleDateString()}`,
-        pageWidth / 2,
-        pageHeight - 10,
-        { align: 'center' }
-      );
+      const sanitizedClassName = reports.className.replace(/[^a-zA-Z0-9]/g, '_');
+      const fileName = `Attendance_Report_${sanitizedClassName}_Term${reports.termNum}_${reports.year}_${new Date().toISOString().split('T')[0]}.pdf`;
+
+      doc.save(fileName);
+
+      this.snackBar.open('PDF exported successfully', 'Close', {
+        duration: 2000,
+        panelClass: ['success-snackbar']
+      });
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      this.snackBar.open('Failed to export PDF. Please try again.', 'Close', {
+        duration: 3000,
+        panelClass: ['error-snackbar']
+      });
     }
-
-    // Generate filename
-    const fileName = `Attendance_Report_${className}_${termInfo.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
-
-    // Save PDF
-    doc.save(fileName);
-
-    this.snackBar.open('PDF exported successfully', 'Close', {
-      duration: 2000,
-      panelClass: ['success-snackbar']
-    });
   }
 }
 

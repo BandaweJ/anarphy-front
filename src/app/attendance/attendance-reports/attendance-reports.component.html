@@ -74,67 +74,18 @@
     </div>
   </div>
 
-  <!-- Summary Section -->
-  <div class="summary-section" *ngIf="attendanceSummary$ | async as summary">
-    <div class="summary-card">
+  <!-- Overall Stats Section -->
+  <div class="overall-stats-section" *ngIf="attendanceReports$ | async as reports">
+    <div class="stats-card" *ngIf="hasReports(reports)">
       <div class="card-header">
         <div class="header-content">
           <mat-icon class="section-icon">analytics</mat-icon>
           <div class="header-text">
-            <h2 class="section-title">Attendance Summary</h2>
-            <p class="section-subtitle">Overall attendance statistics for {{ summary.className }}</p>
+            <h2 class="section-title">Overall Statistics</h2>
+            <p class="section-subtitle">{{ reports.className }} - Term {{ reports.termNum }}, {{ reports.year }}</p>
           </div>
         </div>
-      </div>
-      <div class="card-content">
-        <div class="summary-grid">
-          <div class="summary-item total">
-            <mat-icon class="summary-icon">group</mat-icon>
-            <div class="summary-content">
-              <div class="summary-label">Total Records</div>
-              <div class="summary-value">{{ summary.totalRecords }}</div>
-            </div>
-          </div>
-          <div class="summary-item present">
-            <mat-icon class="summary-icon">check_circle</mat-icon>
-            <div class="summary-content">
-              <div class="summary-label">Present</div>
-              <div class="summary-value">{{ summary.presentCount }}</div>
-            </div>
-          </div>
-          <div class="summary-item absent">
-            <mat-icon class="summary-icon">cancel</mat-icon>
-            <div class="summary-content">
-              <div class="summary-label">Absent</div>
-              <div class="summary-value">{{ summary.absentCount }}</div>
-            </div>
-          </div>
-          <div class="summary-item rate">
-            <mat-icon class="summary-icon">trending_up</mat-icon>
-            <div class="summary-content">
-              <div class="summary-label">Attendance Rate</div>
-              <div class="summary-value">{{ calculateAttendanceRate(summary) }}%</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Reports Section -->
-  <div class="reports-section" *ngIf="attendanceReports$ | async as reports">
-    <div class="reports-card">
-      <div class="card-header">
-        <div class="header-content">
-          <mat-icon class="section-icon">table_chart</mat-icon>
-          <div class="header-text">
-            <h2 class="section-title">Attendance Reports</h2>
-            <p class="section-subtitle">Detailed attendance records by date</p>
-          </div>
-        </div>
-      </div>
-      <div class="card-content">
-        <div class="export-button-container" *ngIf="attendanceReports$ | async">
+        <div class="export-button-container">
           <button
             mat-raised-button
             color="accent"
@@ -145,71 +96,178 @@
             Export to PDF
           </button>
         </div>
-        <div class="reports-container-inner">
-          <div class="date-section" *ngFor="let date of getSortedDates(reports)">
+      </div>
+      <div class="card-content">
+        <div class="stats-grid">
+          <div class="stat-item total-students">
+            <mat-icon class="stat-icon">group</mat-icon>
+            <div class="stat-content">
+              <div class="stat-label">Total Students</div>
+              <div class="stat-value">{{ reports.totalStudents }}</div>
+            </div>
+          </div>
+          <div class="stat-item possible">
+            <mat-icon class="stat-icon">event_available</mat-icon>
+            <div class="stat-content">
+              <div class="stat-label">Possible Attendance</div>
+              <div class="stat-value">{{ reports.overallStats.totalPossibleAttendance }}</div>
+            </div>
+          </div>
+          <div class="stat-item actual">
+            <mat-icon class="stat-icon">check_circle</mat-icon>
+            <div class="stat-content">
+              <div class="stat-label">Actual Attendance</div>
+              <div class="stat-value">{{ reports.overallStats.totalActualAttendance }}</div>
+            </div>
+          </div>
+          <div class="stat-item rate">
+            <mat-icon class="stat-icon">trending_up</mat-icon>
+            <div class="stat-content">
+              <div class="stat-label">Overall Attendance Rate</div>
+              <div class="stat-value">{{ reports.overallStats.overallAttendanceRate }}%</div>
+            </div>
+          </div>
+          <div class="stat-item days">
+            <mat-icon class="stat-icon">calendar_today</mat-icon>
+            <div class="stat-content">
+              <div class="stat-label">Days Marked</div>
+              <div class="stat-value">{{ reports.overallStats.totalDaysMarked }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Weekly Summaries Section -->
+  <div class="weekly-section" *ngIf="attendanceReports$ | async as reports">
+    <div class="weekly-card" *ngIf="hasReports(reports) && reports.weeklySummaries.length > 0">
+      <div class="card-header">
+        <div class="header-content">
+          <mat-icon class="section-icon">view_week</mat-icon>
+          <div class="header-text">
+            <h2 class="section-title">Weekly Attendance Summary</h2>
+            <p class="section-subtitle">Weekly totals of actual attendance</p>
+          </div>
+        </div>
+      </div>
+      <div class="card-content">
+        <div class="weekly-table-container">
+          <table class="weekly-table">
+            <thead>
+              <tr>
+                <th>Week</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Possible Attendance</th>
+                <th>Actual Attendance</th>
+                <th>Average Rate</th>
+                <th>Days Marked</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let week of reports.weeklySummaries">
+                <td><strong>Week {{ week.weekNumber }}</strong></td>
+                <td>{{ formatDate(week.weekStartDate) }}</td>
+                <td>{{ formatDate(week.weekEndDate) }}</td>
+                <td>{{ week.totalPossibleAttendance }}</td>
+                <td>{{ week.totalActualAttendance }}</td>
+                <td>
+                  <span class="rate-badge" [ngClass]="getRateClass(week.averageAttendanceRate)">
+                    {{ week.averageAttendanceRate }}%
+                  </span>
+                </td>
+                <td>{{ week.daysWithAttendance }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trends Section -->
+  <div class="trends-section" *ngIf="attendanceReports$ | async as reports">
+    <div class="trends-card" *ngIf="hasReports(reports) && reports.trends.length > 0">
+      <div class="card-header">
+        <div class="header-content">
+          <mat-icon class="section-icon">show_chart</mat-icon>
+          <div class="header-text">
+            <h2 class="section-title">Attendance Trends</h2>
+            <p class="section-subtitle">Weekly attendance trends</p>
+          </div>
+        </div>
+      </div>
+      <div class="card-content">
+        <div class="trends-list">
+          <div class="trend-item" *ngFor="let trend of reports.trends">
+            <div class="trend-period">{{ trend.period }}</div>
+            <div class="trend-rate">{{ trend.attendanceRate }}%</div>
+            <div class="trend-indicator" [ngClass]="'trend-' + trend.trend">
+              <mat-icon>{{ getTrendIcon(trend.trend) }}</mat-icon>
+              <span>{{ trend.trend }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Daily Metrics Section -->
+  <div class="daily-section" *ngIf="attendanceReports$ | async as reports">
+    <div class="daily-card" *ngIf="hasReports(reports)">
+      <div class="card-header">
+        <div class="header-content">
+          <mat-icon class="section-icon">table_chart</mat-icon>
+          <div class="header-text">
+            <h2 class="section-title">Daily Attendance Metrics</h2>
+            <p class="section-subtitle">Number absent, actual attendance, possible attendance, and absent students per date</p>
+          </div>
+        </div>
+      </div>
+      <div class="card-content">
+        <div class="daily-metrics-container">
+          <div class="daily-metric-item" *ngFor="let day of reports.dailyMetrics">
             <div class="date-header">
               <mat-icon class="date-icon">event</mat-icon>
-              <h3 class="date-title">{{ formatDate(date) }}</h3>
+              <h3 class="date-title">{{ formatDate(day.date) }}</h3>
             </div>
-            <div class="attendance-table-container">
-              <table class="attendance-table">
-                <thead>
-                  <tr class="table-header">
-                    <th class="index-header">
-                      <mat-icon>format_list_numbered</mat-icon>
-                      <span>#</span>
-                    </th>
-                    <th class="student-number-header">
-                      <mat-icon>badge</mat-icon>
-                      <span>Student Number</span>
-                    </th>
-                    <th class="surname-header">
-                      <mat-icon>person</mat-icon>
-                      <span>Surname</span>
-                    </th>
-                    <th class="name-header">
-                      <mat-icon>person_outline</mat-icon>
-                      <span>Name</span>
-                    </th>
-                    <th class="gender-header">
-                      <mat-icon>wc</mat-icon>
-                      <span>Gender</span>
-                    </th>
-                    <th class="status-header">
-                      <mat-icon>check_circle</mat-icon>
-                      <span>Status</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr class="table-row" *ngFor="let record of reports[date]; let i = index">
-                    <td class="index-cell">
-                      <div class="index-number">{{ i + 1 }}</div>
-                    </td>
-                    <td class="student-number-cell">
-                      <div class="student-number">{{ record.studentNumber }}</div>
-                    </td>
-                    <td class="surname-cell">
-                      <div class="student-name">{{ record.surname }}</div>
-                    </td>
-                    <td class="name-cell">
-                      <div class="student-name">{{ record.name }}</div>
-                    </td>
-                    <td class="gender-cell">
-                      <div class="gender-badge" [ngClass]="'gender-' + getGenderColor(record.gender)">
-                        <mat-icon>{{ getGenderIcon(record.gender) }}</mat-icon>
-                        <span>{{ record.gender }}</span>
-                      </div>
-                    </td>
-                    <td class="status-cell">
-                      <div class="status-badge" [ngClass]="'status-' + getAttendanceStatusColor(record.present)">
-                        <mat-icon>{{ getAttendanceStatusIcon(record.present) }}</mat-icon>
-                        <span>{{ getAttendanceStatusText(record.present) }}</span>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+            <div class="metrics-row">
+              <div class="metric-box possible">
+                <div class="metric-label">Possible Attendance</div>
+                <div class="metric-value">{{ day.possibleAttendance }}</div>
+              </div>
+              <div class="metric-box actual">
+                <div class="metric-label">Actual Attendance</div>
+                <div class="metric-value">{{ day.actualAttendance }}</div>
+              </div>
+              <div class="metric-box absent">
+                <div class="metric-label">Number Absent</div>
+                <div class="metric-value">{{ day.absentCount }}</div>
+              </div>
+              <div class="metric-box rate">
+                <div class="metric-label">Attendance Rate</div>
+                <div class="metric-value">{{ day.attendanceRate }}%</div>
+              </div>
+            </div>
+            <div class="absent-students-section" *ngIf="day.absentStudents.length > 0">
+              <h4 class="absent-header">
+                <mat-icon>person_off</mat-icon>
+                Absent Students ({{ day.absentStudents.length }})
+              </h4>
+              <div class="absent-students-list">
+                <div class="absent-student-item" *ngFor="let student of day.absentStudents">
+                  <div class="student-info">
+                    <span class="student-number">{{ student.studentNumber }}</span>
+                    <span class="student-name">{{ student.surname }}, {{ student.name }}</span>
+                    <span class="student-gender">{{ student.gender }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="no-absent-message" *ngIf="day.absentStudents.length === 0">
+              <mat-icon>check_circle</mat-icon>
+              <span>All students present</span>
             </div>
           </div>
         </div>
@@ -227,6 +285,19 @@
       </div>
     </div>
   </div>
+
+  <!-- Empty Reports State -->
+  <ng-container *ngIf="(attendanceReports$ | async) as reports">
+    <div class="empty-state" *ngIf="!hasReports(reports) && !(isLoading$ | async)">
+      <div class="empty-card">
+        <div class="empty-content">
+          <mat-icon class="empty-icon">table_chart</mat-icon>
+          <h2>No Attendance Records Found</h2>
+          <p>No attendance records were found for the selected class and term. Please ensure attendance has been marked for this class.</p>
+        </div>
+      </div>
+    </div>
+  </ng-container>
 
   <!-- Loading State -->
   <div class="loading-container" *ngIf="isLoading$ | async">

@@ -217,59 +217,6 @@ export class MarksEffects {
     )
   );
 
-  fetchClassComments$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(marksActions.saveCommentActions.fetchClassComments),
-      switchMap((data) =>
-        this.marksService
-          .fetchClassComments(data.name, data.num, data.year, data.examType)
-          .pipe(
-            map((comments) =>
-              marksActions.saveCommentActions.fetchClassCommentsSuccess({
-                comments,
-              })
-            ),
-            catchError((error: HttpErrorResponse) =>
-              of(
-                marksActions.saveCommentActions.fetchClassCommentsFail({
-                  ...error,
-                })
-              )
-            )
-          )
-      )
-    )
-  );
-
-  saveComment$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(marksActions.saveCommentActions.saveComment),
-      switchMap((data) =>
-        this.marksService.saveComment(data.comment).pipe(
-          tap((data) =>
-            this.snackBar.open(
-              `${data.comment} for Student ${data.student.name} ${data.student.surname} Saved`,
-              'OK',
-              {
-                duration: 3000,
-                verticalPosition: 'top',
-                horizontalPosition: 'center',
-              }
-            )
-          ),
-          map((comment) => {
-            // console.log(teacher);
-            return marksActions.saveCommentActions.saveCommentSuccess({
-              comment,
-            });
-          }),
-          catchError((error: HttpErrorResponse) =>
-            of(marksActions.saveCommentActions.saveCommentFail({ ...error }))
-          )
-        )
-      )
-    )
-  );
 
   fetchMarksProgress$ = createEffect(() =>
     this.actions$.pipe(

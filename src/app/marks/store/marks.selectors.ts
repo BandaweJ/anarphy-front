@@ -29,10 +29,6 @@ export const selectLineChartData = createSelector(
   (state: fromMarksReducer.State) => state.lineChartData
 );
 
-export const selectComments = createSelector(
-  marksState,
-  (state: fromMarksReducer.State) => state.comments
-);
 
 export const selectMarksProgress = createSelector(
   marksState,

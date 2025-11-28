@@ -16,7 +16,6 @@ import { ReportsComponent } from './reports/reports/reports.component';
 import { MarkRegisterComponent } from './attendance/mark-register/mark-register.component';
 import { AttendanceReportsComponent } from './attendance/attendance-reports/attendance-reports.component';
 import { MigrateClassEnrolmentComponent } from './enrolment/migrate-class-enrolment/migrate-class-enrolment.component';
-import { TeachersCommentsComponent } from './marks/teachers-comments/teachers-comments.component';
 import { MarksSheetsComponent } from './marks/marks-sheets/marks-sheets.component';
 import { ProfileComponent } from './auth/profile/profile.component';
 import { TeacherViewComponent } from './registration/teachers-list/teacher-view/teacher-view.component';
@@ -187,12 +186,6 @@ const routes: Routes = [
     component: AttendanceReportsComponent,
     canActivate: [AuthGuardService],
     title: 'Attendance Reports',
-  },
-  {
-    path: 'teachers-comments',
-    component: TeachersCommentsComponent,
-    canActivate: [AuthGuardService],
-    title: 'Teacher Comments',
   },
   {
     path: 'results-analysis',

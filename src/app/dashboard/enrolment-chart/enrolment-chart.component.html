@@ -1,8 +1,19 @@
-<canvas class="chart"
-  baseChart
-  [data]="barChartData"
-  [options]="barChartOptions"
-  [type]="'bar'"
->
-</canvas>
+<div class="chart-container">
+  <div *ngIf="hasData; else noDataTemplate">
+    <canvas class="chart"
+      baseChart
+      [data]="barChartData"
+      [options]="barChartOptions"
+      [type]="'bar'"
+    >
+    </canvas>
+  </div>
+  <ng-template #noDataTemplate>
+    <div class="no-data-message">
+      <mat-icon>bar_chart</mat-icon>
+      <p>No enrolment data available for the current term.</p>
+      <p class="hint">Enrolment statistics will appear here once students are enrolled.</p>
+    </div>
+  </ng-template>
+</div>
 

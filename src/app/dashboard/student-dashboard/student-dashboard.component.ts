@@ -6,10 +6,12 @@ import {
   filter,
   map,
   Observable,
+  of,
   Subscription,
   switchMap,
   take,
   tap,
+  catchError,
 } from 'rxjs';
 import { selectUser } from 'src/app/auth/store/auth.selectors';
 import { StudentDashboardSummary } from '../models/student-dashboard-summary';
@@ -26,6 +28,10 @@ import {
   selectCurrentEnrolment,
   selectCurrentEnrolmentLoaded,
   selectCurrentEnrolmentLoading,
+  selectLatestEnrolment,
+  selectLatestEnrolmentStatus,
+  selectLatestEnrolmentLoading,
+  selectLatestEnrolmentLoaded,
 } from 'src/app/enrolment/store/enrolment.selectors';
 import { currentEnrolementActions } from 'src/app/enrolment/store/enrolment.actions';
 import { StudentsModel } from 'src/app/registration/models/students.model';
@@ -35,6 +41,7 @@ import {
 } from 'src/app/finance/store/finance.actions';
 import { selectStudentBalance } from 'src/app/finance/store/finance.selector';
 import { ContinuousAssessmentService, ContinuousAssessmentAnalytics } from 'src/app/marks/continuous-assessment/continuous-assessment.service';
+import { StudentsService } from 'src/app/registration/services/students.service';
 
 @Component({
   selector: 'app-student-dashboard',
@@ -47,7 +54,8 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   public summaryLoaded$: Observable<boolean>;
 
   public studentDetails$: Observable<StudentsModel | null>;
-  public currentEnrolment$: Observable<EnrolsModel | null>;
+  public latestEnrolment$: Observable<EnrolsModel | null>;
+  public latestEnrolmentStatus$: Observable<'past' | 'current' | 'upcoming' | null>;
   public enrolmentLoading$: Observable<boolean>;
   public enrolmentLoaded$: Observable<boolean>;
   
@@ -60,17 +68,39 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
 
   private subscriptions: Subscription = new Subscription();
 
-  constructor(private store: Store, private caService: ContinuousAssessmentService) {
+  constructor(
+    private store: Store, 
+    private caService: ContinuousAssessmentService,
+    private studentsService: StudentsService
+  ) {
     this.dashboardSummary$ = this.store.select(selectStudentDashboardSummary);
     this.summaryLoading$ = this.store.select(selectStudentDashboardLoading);
     this.summaryLoaded$ = this.store.select(selectStudentDashboardLoaded);
 
-    this.currentEnrolment$ = this.store.select(selectCurrentEnrolment);
-    this.enrolmentLoading$ = this.store.select(selectCurrentEnrolmentLoading);
-    this.enrolmentLoaded$ = this.store.select(selectCurrentEnrolmentLoaded);
+    this.latestEnrolment$ = this.store.select(selectLatestEnrolment);
+    this.latestEnrolmentStatus$ = this.store.select(selectLatestEnrolmentStatus);
+    this.enrolmentLoading$ = this.store.select(selectLatestEnrolmentLoading);
+    this.enrolmentLoaded$ = this.store.select(selectLatestEnrolmentLoaded);
 
-    this.studentDetails$ = this.currentEnrolment$.pipe(
-      map((enrolment) => (enrolment ? enrolment.student : null))
+    // Fetch student details independently of enrolment
+    // First try from latest enrolment, then fetch directly by student number
+    this.studentDetails$ = combineLatest([
+      this.latestEnrolment$,
+      this.store.select(selectUser)
+    ]).pipe(
+      switchMap(([enrolment, user]) => {
+        // If enrolment has student, use it
+        if (enrolment?.student) {
+          return of(enrolment.student);
+        }
+        // Otherwise, fetch student directly by student number
+        if (user?.id) {
+          return this.studentsService.getStudent(user.id).pipe(
+            catchError(() => of(null))
+          );
+        }
+        return of(null);
+      })
     );
     
     // Calculate amount owed using student-specific invoices and receipts (more efficient)
@@ -112,7 +142,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
               })
             );
             this.store.dispatch(
-              currentEnrolementActions.fetchCurrentEnrolment({
+              currentEnrolementActions.fetchLatestEnrolmentWithStatus({
                 studentNumber,
               })
             );
@@ -133,8 +163,8 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
             combineLatest([
               this.store.select(selectStudentDashboardLoaded),
               this.store.select(selectStudentDashboardLoading),
-              this.store.select(selectCurrentEnrolmentLoaded),
-              this.store.select(selectCurrentEnrolmentLoading),
+              this.store.select(selectLatestEnrolmentLoaded),
+              this.store.select(selectLatestEnrolmentLoading),
             ]).pipe(
               filter(
                 ([
@@ -163,7 +193,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
                   }
                   if (!enrolmentLoaded && !enrolmentLoading) {
                     this.store.dispatch(
-                      currentEnrolementActions.fetchCurrentEnrolment({
+                      currentEnrolementActions.fetchLatestEnrolmentWithStatus({
                         studentNumber: studentId,
                       })
                     );

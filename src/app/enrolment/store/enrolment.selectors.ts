@@ -54,6 +54,26 @@ export const selectCurrentEnrolmentLoaded = createSelector(
   (state: fromEnrolmentReducer.State) => state.currentEnrolmentLoaded
 );
 
+export const selectLatestEnrolment = createSelector(
+  enrolmentState,
+  (state: fromEnrolmentReducer.State) => state.latestEnrolment
+);
+
+export const selectLatestEnrolmentStatus = createSelector(
+  enrolmentState,
+  (state: fromEnrolmentReducer.State) => state.latestEnrolmentStatus
+);
+
+export const selectLatestEnrolmentLoading = createSelector(
+  enrolmentState,
+  (state: fromEnrolmentReducer.State) => state.latestEnrolmentLoading
+);
+
+export const selectLatestEnrolmentLoaded = createSelector(
+  enrolmentState,
+  (state: fromEnrolmentReducer.State) => state.latestEnrolmentLoaded
+);
+
 export const selectCurrentTerm = createSelector(
   enrolmentState,
   (state: fromEnrolmentReducer.State) => state.currentTerm

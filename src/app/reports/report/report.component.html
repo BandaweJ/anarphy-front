@@ -75,9 +75,32 @@
     </div>
   </mat-card-content>
   <mat-card-footer class="footer">
-    <div class="comment-section">
+    <div class="comment-section form-teacher-comment-section">
       <h3 class="underline">Form Teacher's Comment</h3>
-      <p>{{ report.report.classTrComment }}</p>
+      <form [formGroup]="formTeacherCommentForm" class="form-teacher-comment-form">
+        <mat-form-field *ngIf="(canEditCommentAndNotStudent$ | async) && (!report.report.classTrComment || editFormTeacherCommentState)" appearance="outline"
+          class="full-width-textarea">
+          <mat-label>Type Form Teacher's Comment here</mat-label>
+          <textarea matInput cdkTextareaAutosize cdkAutosizeMinRows="3" cdkAutosizeMaxRows="7" formControlName="comment"
+            (blur)="saveFormTeacherComment()"></textarea>
+          <mat-error *ngIf="formTeacherCommentForm.get('comment')?.hasError('required')">Comment is required</mat-error>
+        </mat-form-field>
+
+        <p *ngIf="(canEditCommentAndNotStudent$ | async) && report.report.classTrComment && !editFormTeacherCommentState" class="displayed-form-teacher-comment">
+          {{ report.report.classTrComment }}
+          <button mat-icon-button aria-label="Edit icon" color="accent" (click)="toggleFormTeacherCommentEditState()">
+            <mat-icon>edit</mat-icon>
+          </button>
+        </p>
+
+        <p *ngIf="isStudent$ | async" class="student-view-form-teacher-comment">
+          {{ report.report.classTrComment || 'No Form Teacher\'s comment yet.' }}
+        </p>
+
+        <p class="missing-comment-cue" *ngIf="(canEditCommentAndNotStudent$ | async) && !report.report.classTrComment && !editFormTeacherCommentState">
+          No Form Teacher's comment entered. Click the field to add.
+        </p>
+      </form>
     </div>
     <div class="comment-section headmaster-comment-section">
       <h3 class="underline">Head's Comment</h3>

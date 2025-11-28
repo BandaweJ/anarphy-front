@@ -7,6 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
@@ -48,6 +49,7 @@ interface RosterRow extends ClassRosterEntry {
     MatIconModule,
     MatSelectModule,
     MatInputModule,
+    MatFormFieldModule,
     MatDatepickerModule,
     MatNativeDateModule,
     MatSnackBarModule,
@@ -111,14 +113,41 @@ export class ContinuousAssessmentComponent implements OnInit, OnDestroy {
   }
 
   loadRoster(): void {
+    console.log('loadRoster called', {
+      formValid: this.filtersForm.valid,
+      formValue: this.filtersForm.value,
+      canCreate: this.canCreate,
+    });
+
+    // Check if form is valid
     if (this.filtersForm.invalid) {
+      console.log('Form is invalid', this.filtersForm.errors);
       this.filtersForm.markAllAsTouched();
-      this.snackBar.open('Select class, topic, and date to load students.', 'Close', { duration: 4000 });
+      this.cdr.markForCheck();
+      
+      // Show specific validation errors
+      const errors: string[] = [];
+      if (this.filtersForm.get('classId')?.invalid) {
+        errors.push('Class is required');
+      }
+      if (this.filtersForm.get('topic')?.invalid) {
+        errors.push('Topic/Skill is required');
+      }
+      if (this.filtersForm.get('assessmentDate')?.invalid) {
+        errors.push('Date is required');
+      }
+      
+      this.snackBar.open(
+        errors.length > 0 ? errors.join(', ') : 'Select class, topic, and date to load students.',
+        'Close',
+        { duration: 5000 }
+      );
       return;
     }
 
     const { classId, topic, assessmentDate, assessmentType } = this.filtersForm.value;
     if (!classId || !topic || !assessmentDate) {
+      console.log('Missing required fields', { classId, topic, assessmentDate });
       this.snackBar.open('Class, topic, and date are required.', 'Close', { duration: 4000 });
       return;
     }
@@ -132,7 +161,16 @@ export class ContinuousAssessmentComponent implements OnInit, OnDestroy {
         : new Date(assessmentDate as any).toISOString();
 
     this.isLoadingRoster = true;
+    this.cdr.markForCheck();
     this.clearSaveTimers();
+    
+    console.log('Loading roster with params', {
+      classId: Number(classId),
+      assessmentDate: isoDate,
+      topic: topic.trim(),
+      assessmentType: assessmentType || undefined,
+    });
+
     this.continuousService
       .getClassRoster(Number(classId), {
         assessmentDate: isoDate,
@@ -142,17 +180,29 @@ export class ContinuousAssessmentComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (rows) => {
+          console.log('Roster loaded successfully', rows);
           this.roster = rows.map((row) => ({
             ...row,
             maxScore: row.maxScore ?? (this.filtersForm.value.maxScore ?? null),
             status: { state: row.score != null ? 'saved' : 'idle' },
           }));
           this.isLoadingRoster = false;
+          
+          if (rows.length === 0) {
+            this.snackBar.open(
+              `No students found in ${this.selectedClassName} for the current term. Please check that students are enrolled in this class.`,
+              'Close',
+              { duration: 6000 }
+            );
+          }
+          
           this.cdr.markForCheck();
         },
-        error: () => {
+        error: (error) => {
+          console.error('Failed to load roster', error);
           this.isLoadingRoster = false;
-          this.snackBar.open('Failed to load class list', 'Close', { duration: 4000 });
+          const errorMessage = error?.error?.message || error?.message || 'Failed to load class list';
+          this.snackBar.open(errorMessage, 'Close', { duration: 5000 });
           this.cdr.markForCheck();
         },
       });

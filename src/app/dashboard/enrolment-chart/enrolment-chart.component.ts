@@ -13,7 +13,14 @@ export class EnrolmentChartComponent implements OnInit {
   public barChartType: ChartType = 'bar';
   public barChartLegend = true;
   public barChartPlugins = [];
-  public barChartData!: ChartConfiguration<'bar'>['data'];
+  public barChartData: ChartConfiguration<'bar'>['data'] = {
+    labels: [],
+    datasets: [
+      { data: [], label: 'Boys' },
+      { data: [], label: 'Girls' },
+    ],
+  };
+  public hasData = false;
 
   constructor(private store: Store) {
     this.store.dispatch(fetchEnrolsStats());
@@ -21,7 +28,8 @@ export class EnrolmentChartComponent implements OnInit {
 
   ngOnInit(): void {
     this.store.select(selectEnrolsStats).subscribe((res) => {
-      if (res) {
+      if (res && res.clas && res.clas.length > 0) {
+        this.hasData = true;
         this.barChartData = {
           labels: [...res.clas],
           datasets: [
@@ -29,6 +37,8 @@ export class EnrolmentChartComponent implements OnInit {
             { data: [...res.girls], label: 'Girls' },
           ],
         };
+      } else {
+        this.hasData = false;
       }
     });
   }

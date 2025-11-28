@@ -98,10 +98,45 @@ export const reportsReducer = createReducer(
             : (rep = rep)
         ),
       ],
+      selectedReport: state.selectedReport?.studentNumber === report.studentNumber
+        ? report
+        : state.selectedReport,
     })
   ),
   on(
     reportsActions.saveHeadCommentActions.saveHeadCommentFail,
+    (state, { error }) => ({
+      ...state,
+      // isLoading: false,
+      errorMessage: error.message,
+    })
+  ),
+  on(
+    reportsActions.saveFormTeacherCommentActions.saveFormTeacherComment,
+    (state, { comment }) => ({
+      ...state,
+      // isLoading: true,
+    })
+  ),
+  on(
+    reportsActions.saveFormTeacherCommentActions.saveFormTeacherCommentSuccess,
+    (state, { report }) => ({
+      ...state,
+      // isLoading: false,
+      reports: [
+        ...state.reports.map((rep) =>
+          rep.studentNumber === report.studentNumber
+            ? (rep = report)
+            : (rep = rep)
+        ),
+      ],
+      selectedReport: state.selectedReport?.studentNumber === report.studentNumber
+        ? report
+        : state.selectedReport,
+    })
+  ),
+  on(
+    reportsActions.saveFormTeacherCommentActions.saveFormTeacherCommentFail,
     (state, { error }) => ({
       ...state,
       // isLoading: false,

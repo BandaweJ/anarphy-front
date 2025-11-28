@@ -7,7 +7,7 @@ import {
 import { ReportsModel } from '../models/reports.model';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ReportModel } from '../models/report.model';
-import { HeadCommentModel } from '../models/comment.model';
+import { HeadCommentModel, FormTeacherCommentModel } from '../models/comment.model';
 import { ExamType } from 'src/app/marks/models/examtype.enum';
 
 export const generateReports = createAction(
@@ -70,6 +70,15 @@ export const saveHeadCommentActions = createActionGroup({
     saveHeadComment: props<{ comment: HeadCommentModel }>(),
     saveHeadCommentSuccess: props<{ report: ReportsModel }>(),
     saveHeadCommentFail: props<{ error: HttpErrorResponse }>(),
+  },
+});
+
+export const saveFormTeacherCommentActions = createActionGroup({
+  source: 'Report Component',
+  events: {
+    saveFormTeacherComment: props<{ comment: FormTeacherCommentModel }>(),
+    saveFormTeacherCommentSuccess: props<{ report: ReportsModel }>(),
+    saveFormTeacherCommentFail: props<{ error: HttpErrorResponse }>(),
   },
 });
 

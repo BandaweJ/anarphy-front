@@ -157,4 +157,26 @@ export class ReportsEffects {
       )
     )
   );
+
+  saveFormTeacherComment$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(reportsActions.saveFormTeacherCommentActions.saveFormTeacherComment),
+      switchMap((data) =>
+        this.reportsService.saveFormTeacherComment(data.comment).pipe(
+          map((report) =>
+            reportsActions.saveFormTeacherCommentActions.saveFormTeacherCommentSuccess({
+              report,
+            })
+          ),
+          catchError((error: HttpErrorResponse) =>
+            of(
+              reportsActions.saveFormTeacherCommentActions.saveFormTeacherCommentFail({
+                ...error,
+              })
+            )
+          )
+        )
+      )
+    )
+  );
 }
