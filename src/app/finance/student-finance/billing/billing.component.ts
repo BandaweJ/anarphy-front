@@ -154,6 +154,30 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
     }
     return this.academicSettingsForm.get('transportOption') as FormControl;
   }
+  get juniorGirlsUniform(): FormControl {
+    if (!this.academicSettingsForm) {
+      this.initializeForm();
+    }
+    return this.academicSettingsForm.get('juniorGirlsUniform') as FormControl;
+  }
+  get juniorBoysUniform(): FormControl {
+    if (!this.academicSettingsForm) {
+      this.initializeForm();
+    }
+    return this.academicSettingsForm.get('juniorBoysUniform') as FormControl;
+  }
+  get seniorGirlsUniform(): FormControl {
+    if (!this.academicSettingsForm) {
+      this.initializeForm();
+    }
+    return this.academicSettingsForm.get('seniorGirlsUniform') as FormControl;
+  }
+  get seniorBoysUniform(): FormControl {
+    if (!this.academicSettingsForm) {
+      this.initializeForm();
+    }
+    return this.academicSettingsForm.get('seniorBoysUniform') as FormControl;
+  }
 
   ngOnInit(): void {
     // Subscribe to theme changes
@@ -181,6 +205,10 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
       aLevelAccommodationType: [null, Validators.required],
       foodOption: [false],
       transportOption: [false],
+      juniorGirlsUniform: [false],
+      juniorBoysUniform: [false],
+      seniorGirlsUniform: [false],
+      seniorBoysUniform: [false],
     });
   }
 
@@ -338,6 +366,51 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
       })
     );
 
+    // Uniform fee listeners
+    this.subscriptions.push(
+      this.juniorGirlsUniform.valueChanges.subscribe((value) => {
+        const juniorGirlsUniformFee = this.findFee('juniorGirlsUniform');
+        if (value) {
+          this.addFeeToToBill(juniorGirlsUniformFee);
+        } else {
+          this.removeFeeFromToBill(juniorGirlsUniformFee);
+        }
+      })
+    );
+
+    this.subscriptions.push(
+      this.juniorBoysUniform.valueChanges.subscribe((value) => {
+        const juniorBoysUniformFee = this.findFee('juniorBoysUniform');
+        if (value) {
+          this.addFeeToToBill(juniorBoysUniformFee);
+        } else {
+          this.removeFeeFromToBill(juniorBoysUniformFee);
+        }
+      })
+    );
+
+    this.subscriptions.push(
+      this.seniorGirlsUniform.valueChanges.subscribe((value) => {
+        const seniorGirlsUniformFee = this.findFee('seniorGirlsUniform');
+        if (value) {
+          this.addFeeToToBill(seniorGirlsUniformFee);
+        } else {
+          this.removeFeeFromToBill(seniorGirlsUniformFee);
+        }
+      })
+    );
+
+    this.subscriptions.push(
+      this.seniorBoysUniform.valueChanges.subscribe((value) => {
+        const seniorBoysUniformFee = this.findFee('seniorBoysUniform');
+        if (value) {
+          this.addFeeToToBill(seniorBoysUniformFee);
+        } else {
+          this.removeFeeFromToBill(seniorBoysUniformFee);
+        }
+      })
+    );
+
     this.subscriptions.push(
       this.oLevelAccommodationType.valueChanges
         .pipe(distinctUntilChanged())
@@ -397,14 +470,18 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
       aLevelNewComer: this.aLevelNewComer,
       aLevelScienceLevy: this.aLevelScienceLevy,
       aLevelAccommodationType: this.aLevelAccommodationType,
+      juniorGirlsUniform: this.juniorGirlsUniform,
+      juniorBoysUniform: this.juniorBoysUniform,
+      seniorGirlsUniform: this.seniorGirlsUniform,
+      seniorBoysUniform: this.seniorBoysUniform,
     };
 
     for (const key in controls) {
       if (controls.hasOwnProperty(key)) {
         const control = controls[key as keyof typeof controls];
         if (
-          (level === 'O Level' && key.startsWith('oLevel')) ||
-          (level === 'A Level' && key.startsWith('aLevel'))
+          (level === 'O Level' && (key.startsWith('oLevel') || key.startsWith('junior'))) ||
+          (level === 'A Level' && (key.startsWith('aLevel') || key.startsWith('senior')))
         ) {
           control.enable({ emitEvent: false });
         } else {
@@ -633,6 +710,35 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
       addBillToInitial(transportBill, transportFee);
     }
 
+    // Uniform bills
+    const juniorGirlsUniformBill = findBillByFeeName(bills, 'juniorGirlsUniform');
+    const juniorGirlsUniformFee = findFee('juniorGirlsUniform');
+    if (juniorGirlsUniformBill) {
+      formUpdates['juniorGirlsUniform'] = true;
+      addBillToInitial(juniorGirlsUniformBill, juniorGirlsUniformFee);
+    }
+
+    const juniorBoysUniformBill = findBillByFeeName(bills, 'juniorBoysUniform');
+    const juniorBoysUniformFee = findFee('juniorBoysUniform');
+    if (juniorBoysUniformBill) {
+      formUpdates['juniorBoysUniform'] = true;
+      addBillToInitial(juniorBoysUniformBill, juniorBoysUniformFee);
+    }
+
+    const seniorGirlsUniformBill = findBillByFeeName(bills, 'seniorGirlsUniform');
+    const seniorGirlsUniformFee = findFee('seniorGirlsUniform');
+    if (seniorGirlsUniformBill) {
+      formUpdates['seniorGirlsUniform'] = true;
+      addBillToInitial(seniorGirlsUniformBill, seniorGirlsUniformFee);
+    }
+
+    const seniorBoysUniformBill = findBillByFeeName(bills, 'seniorBoysUniform');
+    const seniorBoysUniformFee = findFee('seniorBoysUniform');
+    if (seniorBoysUniformBill) {
+      formUpdates['seniorBoysUniform'] = true;
+      addBillToInitial(seniorBoysUniformBill, seniorBoysUniformFee);
+    }
+
     this.academicSettingsForm.patchValue(formUpdates, { emitEvent: false });
     // Filter initialToBill to ensure unique fees (in case deskFee logic caused temporary duplicates)
     this.toBill = Array.from(
@@ -713,6 +819,10 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
         aLevelAccommodationType: null,
         foodOption: false,
         transportOption: false,
+        juniorGirlsUniform: false,
+        juniorBoysUniform: false,
+        seniorGirlsUniform: false,
+        seniorBoysUniform: false,
       },
       { emitEvent: false }
     );
@@ -771,6 +881,16 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
       }
       // Remove O Level Science Fee if A Level is selected, as it's an O Level specific fee
       this.removeFeeFromToBill(this.findFee('oLevelScienceFee'));
+      
+      // Remove Junior uniform fees if A Level is selected
+      if (this.juniorGirlsUniform.value) {
+        this.juniorGirlsUniform.setValue(false, { emitEvent: false });
+        this.removeFeeFromToBill(this.findFee('juniorGirlsUniform'));
+      }
+      if (this.juniorBoysUniform.value) {
+        this.juniorBoysUniform.setValue(false, { emitEvent: false });
+        this.removeFeeFromToBill(this.findFee('juniorBoysUniform'));
+      }
     } else if (activeLevel === 'O Level') {
       // Reset A Level specific fields
       if (this.aLevelNewComer.value) {
@@ -798,6 +918,16 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
         );
         removeAndReset(this.aLevelAccommodationType, 'aLevelTuitionBoarder');
         this.currentALevelAccommodationFee = undefined;
+      }
+      
+      // Remove Senior uniform fees if O Level is selected
+      if (this.seniorGirlsUniform.value) {
+        this.seniorGirlsUniform.setValue(false, { emitEvent: false });
+        this.removeFeeFromToBill(this.findFee('seniorGirlsUniform'));
+      }
+      if (this.seniorBoysUniform.value) {
+        this.seniorBoysUniform.setValue(false, { emitEvent: false });
+        this.removeFeeFromToBill(this.findFee('seniorBoysUniform'));
       }
     }
   }

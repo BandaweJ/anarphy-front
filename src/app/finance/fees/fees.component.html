@@ -253,6 +253,36 @@
           </div>
         </div>
       </div>
+
+      <!-- Uniform Fees -->
+      <div class="fee-category" *ngIf="uniformFees.length > 0">
+        <div class="category-header">
+          <mat-icon class="category-icon">checkroom</mat-icon>
+          <h2>Uniform Fees</h2>
+          <div class="category-subtitle">School uniform charges by level and gender</div>
+        </div>
+
+        <div class="fee-group">
+          <div class="group-header">
+            <mat-icon class="group-icon">checkroom</mat-icon>
+            <h3>Uniform Options</h3>
+          </div>
+          <div class="fee-items">
+            <div class="fee-item" *ngFor="let fee of uniformFees">
+              <div class="fee-info">
+                <div class="fee-name">{{ getFeeDisplayName(fee.name) }}</div>
+                <div class="fee-description">{{ fee.description }}</div>
+              </div>
+              <div class="fee-amount">${{ fee.amount }}</div>
+              <div class="fee-actions" *ngIf="canManageFees$ | async">
+                <button mat-icon-button color="primary" (click)="openEditFeesDialog(fee)" class="edit-btn">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>

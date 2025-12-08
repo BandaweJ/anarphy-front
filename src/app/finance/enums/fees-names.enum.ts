@@ -11,4 +11,8 @@ export enum FeesNames {
   developmentFee = 'developmentFee',
   foodFee = 'foodFee',
   transportFee = 'transportFee',
+  juniorGirlsUniform = 'juniorGirlsUniform',
+  juniorBoysUniform = 'juniorBoysUniform',
+  seniorGirlsUniform = 'seniorGirlsUniform',
+  seniorBoysUniform = 'seniorBoysUniform',
 }

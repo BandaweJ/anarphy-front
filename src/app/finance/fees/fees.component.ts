@@ -51,6 +51,7 @@ export class FeesComponent implements OnInit, OnDestroy {
   aLevelScienceFees: FeesModel[] = [];
   newStudentFees: FeesModel[] = [];
   optionalServiceFees: FeesModel[] = [];
+  uniformFees: FeesModel[] = [];
 
   private destroy$ = new Subject<void>();
   currentTheme: Theme = 'light';
@@ -96,6 +97,7 @@ export class FeesComponent implements OnInit, OnDestroy {
     this.aLevelScienceFees = [];
     this.newStudentFees = [];
     this.optionalServiceFees = [];
+    this.uniformFees = [];
 
     fees.forEach(fee => {
       switch (fee.name) {
@@ -134,6 +136,14 @@ export class FeesComponent implements OnInit, OnDestroy {
         case FeesNames.transportFee:
           this.optionalServiceFees.push(fee);
           break;
+
+        // Uniform Fees
+        case FeesNames.juniorGirlsUniform:
+        case FeesNames.juniorBoysUniform:
+        case FeesNames.seniorGirlsUniform:
+        case FeesNames.seniorBoysUniform:
+          this.uniformFees.push(fee);
+          break;
       }
     });
   }
@@ -151,7 +161,11 @@ export class FeesComponent implements OnInit, OnDestroy {
       [FeesNames.alevelScienceFee]: 'A Level Science Fee',
       [FeesNames.developmentFee]: 'Development Fee',
       [FeesNames.foodFee]: 'Food Fee',
-      [FeesNames.transportFee]: 'Transport Fee'
+      [FeesNames.transportFee]: 'Transport Fee',
+      [FeesNames.juniorGirlsUniform]: 'Junior Girls Uniform',
+      [FeesNames.juniorBoysUniform]: 'Junior Boys Uniform',
+      [FeesNames.seniorGirlsUniform]: 'Senior Girls Uniform',
+      [FeesNames.seniorBoysUniform]: 'Senior Boys Uniform'
     };
     return displayNames[feeName] || feeName;
   }

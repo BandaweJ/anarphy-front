@@ -130,7 +130,11 @@ export class AddEditFeesComponent implements OnInit, OnDestroy {
       [FeesNames.alevelScienceFee]: 'A Level Science Fee',
       [FeesNames.developmentFee]: 'Development Fee',
       [FeesNames.foodFee]: 'Food Fee',
-      [FeesNames.transportFee]: 'Transport Fee'
+      [FeesNames.transportFee]: 'Transport Fee',
+      [FeesNames.juniorGirlsUniform]: 'Junior Girls Uniform',
+      [FeesNames.juniorBoysUniform]: 'Junior Boys Uniform',
+      [FeesNames.seniorGirlsUniform]: 'Senior Girls Uniform',
+      [FeesNames.seniorBoysUniform]: 'Senior Boys Uniform'
     };
     return displayNames[feeName] || feeName;
   }
@@ -148,7 +152,11 @@ export class AddEditFeesComponent implements OnInit, OnDestroy {
       [FeesNames.alevelScienceFee]: 'A Level Fees',
       [FeesNames.developmentFee]: 'O Level Fees',
       [FeesNames.foodFee]: 'Optional Services',
-      [FeesNames.transportFee]: 'Optional Services'
+      [FeesNames.transportFee]: 'Optional Services',
+      [FeesNames.juniorGirlsUniform]: 'Uniform Fees',
+      [FeesNames.juniorBoysUniform]: 'Uniform Fees',
+      [FeesNames.seniorGirlsUniform]: 'Uniform Fees',
+      [FeesNames.seniorBoysUniform]: 'Uniform Fees'
     };
     return categories[feeName] || 'General';
   }
@@ -166,7 +174,11 @@ export class AddEditFeesComponent implements OnInit, OnDestroy {
       [FeesNames.alevelScienceFee]: 'Science fee for A Level students doing science subjects',
       [FeesNames.developmentFee]: 'Development fee for O Level students',
       [FeesNames.foodFee]: 'Optional fee for day scholars who eat at school',
-      [FeesNames.transportFee]: 'Optional fee for day scholars who use school transport'
+      [FeesNames.transportFee]: 'Optional fee for day scholars who use school transport',
+      [FeesNames.juniorGirlsUniform]: 'Uniform fee for O Level female students',
+      [FeesNames.juniorBoysUniform]: 'Uniform fee for O Level male students',
+      [FeesNames.seniorGirlsUniform]: 'Uniform fee for A Level female students',
+      [FeesNames.seniorBoysUniform]: 'Uniform fee for A Level male students'
     };
     return descriptions[feeName] || 'General fee description';
   }
@@ -184,7 +196,11 @@ export class AddEditFeesComponent implements OnInit, OnDestroy {
       [FeesNames.alevelScienceFee]: 'a-level',
       [FeesNames.developmentFee]: 'o-level',
       [FeesNames.foodFee]: 'optional',
-      [FeesNames.transportFee]: 'optional'
+      [FeesNames.transportFee]: 'optional',
+      [FeesNames.juniorGirlsUniform]: 'uniform',
+      [FeesNames.juniorBoysUniform]: 'uniform',
+      [FeesNames.seniorGirlsUniform]: 'uniform',
+      [FeesNames.seniorBoysUniform]: 'uniform'
     };
     return classes[feeName] || 'general';
   }

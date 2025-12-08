@@ -61,8 +61,9 @@ export class ConfirmDialogComponent implements OnInit, OnDestroy {
     }
     // Try to match the fee name to the FeesNames enum
     const feeNameKey = feeName as keyof typeof FeesNames;
-    if (FeesNames[feeNameKey]) {
-      return this.sharedService.feesNamesToString(FeesNames[feeNameKey]);
+    const enumKeyValue = FeesNames[feeNameKey];
+    if (enumKeyValue) {
+      return this.sharedService.feesNamesToString(enumKeyValue);
     }
     // Fallback: if it's already a string value from enum, try to convert it
     const enumValue = Object.values(FeesNames).find(value => value === feeName);
