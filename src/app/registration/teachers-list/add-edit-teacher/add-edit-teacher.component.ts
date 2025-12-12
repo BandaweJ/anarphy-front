@@ -50,7 +50,7 @@ export class AddEditTeacherComponent implements OnInit, OnDestroy {
 
   private initializeForm(): void {
     this.addTeacherForm = new FormGroup({
-      id: new FormControl('', [Validators.required, Validators.minLength(10), Validators.pattern(/^[0-9]{2}[0-9]{6}[A-Z]{1}[0-9]{2}$/)]),
+      id: new FormControl('', [Validators.required, Validators.minLength(10), Validators.pattern(/^[0-9]{2}[0-9]{6,8}[A-Z]{1}[0-9]{2}$/)]),
       name: new FormControl('', [Validators.required, Validators.minLength(2), Validators.pattern(/^[a-zA-Z\s]+$/)]),
       surname: new FormControl('', [Validators.required, Validators.minLength(2), Validators.pattern(/^[a-zA-Z\s]+$/)]),
       dob: new FormControl(''),
