@@ -56,7 +56,7 @@ export class AddEditStudentComponent implements OnInit, OnDestroy {
       idnumber: new FormControl('', [
         // Validators.required,
         Validators.minLength(10),
-        Validators.pattern(/^[0-9]{2}[0-9]{6}[A-Z]{1}[0-9]{2}$/)
+        Validators.pattern(/^[0-9]{2}[0-9]{6,8}[A-Z]{1}[0-9]{2}$/)
       ]),
       name: new FormControl('', [Validators.required, Validators.minLength(2)]),
       surname: new FormControl('', [Validators.required, Validators.minLength(2)]),

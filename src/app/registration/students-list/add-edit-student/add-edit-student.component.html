@@ -50,12 +50,12 @@
         <div class="form-group two-column">
           <mat-form-field appearance="outline" class="form-field">
             <mat-label>ID Number *</mat-label>
-            <input matInput formControlName="idnumber" placeholder="e.g., 02086982F22" />
+            <input matInput formControlName="idnumber" placeholder="e.g., 02086982F22 or 0212345678F22" />
             <mat-icon matSuffix>badge</mat-icon>
             <mat-error *ngIf="idnumber?.hasError('required')">ID number is required</mat-error>
             <mat-error *ngIf="idnumber?.hasError('minlength')">At least 10 characters required</mat-error>
             <mat-error *ngIf="idnumber?.hasError('pattern')">Invalid ID format</mat-error>
-            <mat-hint>Format: YYMMDDSSSAA</mat-hint>
+            <mat-hint>Format: 2 digits + 6-8 digits + 1 letter + 2 digits</mat-hint>
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="form-field">
