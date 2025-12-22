@@ -51,7 +51,7 @@ export class InvoiceComponent implements OnInit, OnDestroy {
   invoice: InvoiceModel | null = null;
   currentTheme: Theme = 'light';
   canAccessBilling$ = this.roleAccess.getCurrentRole$().pipe(
-    map(role => this.roleAccess.hasAnyRole(role, ROLES.reception, ROLES.director, ROLES.auditor))
+    map(role => this.roleAccess.hasAnyRole(role, ROLES.admin, ROLES.reception, ROLES.director, ROLES.auditor))
   );
   
   private destroy$ = new Subject<void>();
