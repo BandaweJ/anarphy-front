@@ -206,6 +206,10 @@ export class MarkRegisterComponent implements OnInit, OnDestroy {
     const term: TermsModel = this.term?.value;
     const date = this.date?.value;
 
+    // Update the local attendance record immediately for instant UI feedback
+    attendance.present = present;
+    this.cdr.markForCheck();
+
     this.store.dispatch(
       attendanceActions.markAttendance({
         studentNumber: attendance.studentNumber,
