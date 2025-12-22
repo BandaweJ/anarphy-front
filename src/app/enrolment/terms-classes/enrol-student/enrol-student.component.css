@@ -90,17 +90,25 @@ table {
   background-color: #f0f0f0;
   font-weight: bold;
   color: rgba(0, 0, 0, 0.87);
+  vertical-align: middle; /* Vertically center header cells */
+}
+
+.mat-cell {
+  vertical-align: middle; /* Vertically center all table cells */
 }
 
 .mat-column-action {
   width: 80px; /* Fixed width for action column */
   text-align: center;
+  vertical-align: middle; /* Vertically center the cell content */
 }
 
 .btns {
   display: flex;
   justify-content: center;
   align-items: center;
+  height: 100%; /* Ensure the flex container takes full cell height */
+  min-height: 48px; /* Match typical table row height */
 }
 
 .mat-row:hover {
