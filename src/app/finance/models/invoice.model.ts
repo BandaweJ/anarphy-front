@@ -19,7 +19,7 @@ export interface InvoiceModel {
   allocations: ReceiptInvoiceAllocationsModel[];
   creditAllocations?: CreditInvoiceAllocationModel[]; // Credit allocations (overpayments applied to invoices)
   // NEW: Fields for tracking payments and status specific to THIS invoice
-  amountPaidOnInvoice: number; // Tracks actual payments (receipt allocations only) towards THIS invoice. Credits reduce balance but are not counted here.
+  amountPaidOnInvoice: number; // Tracks total amount applied to THIS invoice (receipt allocations + credit allocations). Matches ledger calculation.
   status: InvoiceStatus; // The current status of THIS invoice
   exemptedAmount?: number;
 
