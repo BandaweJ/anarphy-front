@@ -70,13 +70,13 @@ export class AppComponent implements OnInit, OnDestroy {
     map(role => this.roleAccess.hasAnyRole(role, ROLES.admin, ROLES.teacher, ROLES.hod, ROLES.director))
   );
   canAccessBilling$ = this.roleAccess.getCurrentRole$().pipe(
-    map(role => this.roleAccess.hasAnyRole(role, ROLES.reception, ROLES.director, ROLES.auditor))
+    map(role => this.roleAccess.hasAnyRole(role, ROLES.admin, ROLES.reception, ROLES.director, ROLES.auditor))
   );
   canAccessReceipting$ = this.roleAccess.getCurrentRole$().pipe(
-    map(role => this.roleAccess.hasAnyRole(role, ROLES.auditor, ROLES.director, ROLES.reception))
+    map(role => this.roleAccess.hasAnyRole(role, ROLES.admin, ROLES.auditor, ROLES.director, ROLES.reception))
   );
   canAccessFinancialReports$ = this.roleAccess.getCurrentRole$().pipe(
-    map(role => this.roleAccess.hasAnyRole(role, ROLES.reception, ROLES.auditor, ROLES.director))
+    map(role => this.roleAccess.hasAnyRole(role, ROLES.admin, ROLES.reception, ROLES.auditor, ROLES.director))
   );
   canAccessSystemAdmin$ = this.roleAccess.getCurrentRole$().pipe(
     map(role => this.roleAccess.hasRole(ROLES.admin, role))
@@ -85,13 +85,13 @@ export class AppComponent implements OnInit, OnDestroy {
     map(role => this.roleAccess.hasAnyRole(role, ROLES.admin, ROLES.reception, ROLES.teacher, ROLES.hod, ROLES.auditor, ROLES.director))
   );
   canAccessExemptions$ = this.roleAccess.getCurrentRole$().pipe(
-    map(role => this.roleAccess.hasAnyRole(role, ROLES.auditor, ROLES.director, ROLES.reception))
+    map(role => this.roleAccess.hasAnyRole(role, ROLES.admin, ROLES.auditor, ROLES.director, ROLES.reception))
   );
   canAccessRevenueRecognition$ = this.roleAccess.getCurrentRole$().pipe(
-    map(role => this.roleAccess.hasAnyRole(role, ROLES.auditor, ROLES.director, ROLES.reception))
+    map(role => this.roleAccess.hasAnyRole(role, ROLES.admin, ROLES.auditor, ROLES.director, ROLES.reception))
   );
   canAccessFeesCollection$ = this.roleAccess.getCurrentRole$().pipe(
-    map(role => this.roleAccess.hasAnyRole(role, ROLES.auditor, ROLES.director, ROLES.reception))
+    map(role => this.roleAccess.hasAnyRole(role, ROLES.admin, ROLES.auditor, ROLES.director, ROLES.reception))
   );
   
   // Helper methods for specific role checks
