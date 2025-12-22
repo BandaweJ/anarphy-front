@@ -19,7 +19,7 @@ export interface InvoiceModel {
   allocations: ReceiptInvoiceAllocationsModel[];
   creditAllocations?: CreditInvoiceAllocationModel[]; // Credit allocations (overpayments applied to invoices)
   // NEW: Fields for tracking payments and status specific to THIS invoice
-  amountPaidOnInvoice: number; // Tracks how much has been paid directly towards THIS invoice
+  amountPaidOnInvoice: number; // Tracks total amount applied to THIS invoice (receipt allocations + credit allocations)
   status: InvoiceStatus; // The current status of THIS invoice
   exemptedAmount?: number;
 
