@@ -1,0 +1,57 @@
+.applications-list-container {
+  padding: 20px;
+}
+
+.filters {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+
+  mat-form-field {
+    flex: 1;
+    min-width: 200px;
+  }
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.applications-table {
+  width: 100%;
+}
+
+.no-data {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+
+// Status chip colors
+.status-chip {
+  &.status-pending,
+  &.status-on_hold {
+    background-color: #ff9800 !important; // Orange for pending/on hold
+    color: white !important;
+  }
+  
+  &.status-accepted {
+    background-color: #4caf50 !important; // Green for accepted
+    color: white !important;
+  }
+  
+  &.status-declined {
+    background-color: #f44336 !important; // Red for declined
+    color: white !important;
+  }
+}
+
+
+

@@ -47,6 +47,22 @@ const routes: Routes = [
   { path: 'signin', component: SigninComponent, title: 'Sign In' },
   { path: 'signup', component: SignupComponent, title: 'Sign Up' },
   {
+    path: 'apply',
+    loadComponent: () =>
+      import('./applications/application-form/application-form.component').then(
+        (m) => m.ApplicationFormComponent,
+      ),
+    title: 'Apply Now',
+  },
+  {
+    path: 'track-application',
+    loadComponent: () =>
+      import('./applications/track-application/track-application.component').then(
+        (m) => m.TrackApplicationComponent,
+      ),
+    title: 'Track Application',
+  },
+  {
     path: 'profile',
     component: ProfileComponent,
     canActivate: [AuthGuardService],
@@ -104,6 +120,24 @@ const routes: Routes = [
     component: StudentViewComponent,
     canActivate: [AuthGuardService],
     title: 'Student Details',
+  },
+  {
+    path: 'applications',
+    loadComponent: () =>
+      import('./applications/admin/applications-list/applications-list.component').then(
+        (m) => m.ApplicationsListComponent,
+      ),
+    canActivate: [AuthGuardService],
+    title: 'Student Applications',
+  },
+  {
+    path: 'applications/:id',
+    loadComponent: () =>
+      import('./applications/admin/application-detail/application-detail.component').then(
+        (m) => m.ApplicationDetailComponent,
+      ),
+    canActivate: [AuthGuardService],
+    title: 'Application Details',
   },
   {
     path: 'classes',

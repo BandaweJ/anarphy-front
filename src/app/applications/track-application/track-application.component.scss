@@ -1,0 +1,142 @@
+.track-container {
+  min-height: 100vh;
+  padding: 20px;
+  background-color: #f5f5f5;
+
+  &.dark-theme {
+    background-color: #1e1e1e;
+  }
+}
+
+.track-card {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.form-actions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.inline-spinner {
+  display: inline-block;
+  margin-right: 8px;
+}
+
+.application-details {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 2px solid #e0e0e0;
+}
+
+.status-section {
+  margin-bottom: 24px;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  strong {
+    color: #666;
+    font-size: 14px;
+  }
+
+  span {
+    font-size: 16px;
+    color: #333;
+  }
+
+  .student-number {
+    font-family: monospace;
+    font-weight: bold;
+    color: #2196f3;
+  }
+}
+
+.next-steps {
+  background-color: #e8f5e9;
+  padding: 16px;
+  border-radius: 4px;
+  margin-top: 24px;
+
+  h4 {
+    margin-top: 0;
+    color: #2e7d32;
+  }
+
+  ol {
+    margin: 8px 0;
+    padding-left: 24px;
+  }
+}
+
+.review-notes {
+  margin-top: 24px;
+  padding: 16px;
+  background-color: #fff3e0;
+  border-radius: 4px;
+  border-left: 4px solid #ff9800;
+
+  h4 {
+    margin-top: 0;
+    color: #e65100;
+  }
+}
+
+.dark-theme {
+  .application-details {
+    border-top-color: #424242;
+  }
+
+  .detail-item {
+    strong {
+      color: #b0b0b0;
+    }
+
+    span {
+      color: #fff;
+    }
+  }
+
+  .next-steps {
+    background-color: #1b5e20;
+    color: #fff;
+
+    h4 {
+      color: #81c784;
+    }
+  }
+
+  .review-notes {
+    background-color: #3e2723;
+    border-left-color: #ff9800;
+    color: #fff;
+
+    h4 {
+      color: #ffb74d;
+    }
+  }
+}
+
+
+

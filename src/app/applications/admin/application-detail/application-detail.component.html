@@ -1,0 +1,153 @@
+<div class="application-detail-container">
+  <button mat-button (click)="goBack()" class="back-button">
+    <mat-icon>arrow_back</mat-icon>
+    Back to Applications
+  </button>
+
+  <mat-card *ngIf="application && !isLoading">
+    <mat-card-header>
+      <mat-card-title>Application Details</mat-card-title>
+      <mat-card-subtitle>Reference: {{ application.applicationId }}</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Application Information -->
+      <div class="info-section">
+        <h3>Applicant Information</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <strong>Name:</strong>
+            <span>{{ application.name }} {{ application.surname }}</span>
+          </div>
+          <div class="info-item">
+            <strong>Gender:</strong>
+            <span>{{ application.gender }}</span>
+          </div>
+          <div class="info-item" *ngIf="application.dob">
+            <strong>Date of Birth:</strong>
+            <span>{{ application.dob | date: 'mediumDate' }}</span>
+          </div>
+          <div class="info-item" *ngIf="application.idnumber">
+            <strong>ID Number:</strong>
+            <span>{{ application.idnumber }}</span>
+          </div>
+          <div class="info-item" *ngIf="application.email">
+            <strong>Email:</strong>
+            <span>{{ application.email }}</span>
+          </div>
+          <div class="info-item" *ngIf="application.cell">
+            <strong>Cell:</strong>
+            <span>{{ application.cell }}</span>
+          </div>
+          <div class="info-item" *ngIf="application.address">
+            <strong>Address:</strong>
+            <span>{{ application.address }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-section">
+        <h3>Academic Information</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <strong>Desired Class:</strong>
+            <span>{{ application.desiredClass }}</span>
+          </div>
+          <div class="info-item" *ngIf="application.prevSchool">
+            <strong>Previous School:</strong>
+            <span>{{ application.prevSchool }}</span>
+          </div>
+          <div class="info-item full-width" *ngIf="application.prevSchoolRecords">
+            <strong>Previous School Records:</strong>
+            <span>{{ application.prevSchoolRecords }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-section">
+        <h3>Parent/Guardian Information</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <strong>Name:</strong>
+            <span>{{ application.parentName }} {{ application.parentSurname }}</span>
+          </div>
+          <div class="info-item" *ngIf="application.parentRelationship">
+            <strong>Relationship:</strong>
+            <span>{{ application.parentRelationship }}</span>
+          </div>
+          <div class="info-item" *ngIf="application.parentEmail">
+            <strong>Email:</strong>
+            <span>{{ application.parentEmail }}</span>
+          </div>
+          <div class="info-item" *ngIf="application.parentCell">
+            <strong>Cell:</strong>
+            <span>{{ application.parentCell }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-section">
+        <h3>Application Status</h3>
+        <div class="status-info">
+          <mat-chip 
+            [color]="getStatusColor(application.status) || undefined" 
+            [class]="'status-chip status-' + (application.status.toLowerCase() || '')"
+            selected>
+            {{ getStatusLabel(application.status) }}
+          </mat-chip>
+          <div *ngIf="application.studentNumber" class="student-number-info">
+            <strong>Student Number:</strong>
+            <span class="student-number">{{ application.studentNumber }}</span>
+          </div>
+          <div class="dates">
+            <p><strong>Submitted:</strong> {{ application.createdAt | date: 'medium' }}</p>
+            <p *ngIf="application.reviewedAt">
+              <strong>Reviewed:</strong> {{ application.reviewedAt | date: 'medium' }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status Update Form -->
+      <div class="status-update-section">
+        <h3>Update Status</h3>
+        <form [formGroup]="statusForm" (ngSubmit)="updateStatus()">
+          <mat-form-field appearance="outline">
+            <mat-label>Status</mat-label>
+            <mat-select formControlName="status" required>
+              <mat-option [value]="ApplicationStatus.PENDING">Pending</mat-option>
+              <mat-option [value]="ApplicationStatus.ON_HOLD">On Hold</mat-option>
+              <mat-option [value]="ApplicationStatus.ACCEPTED">Accepted</mat-option>
+              <mat-option [value]="ApplicationStatus.DECLINED">Declined</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Review Notes</mat-label>
+            <textarea matInput formControlName="reviewNotes" rows="4" placeholder="Optional notes about this application"></textarea>
+          </mat-form-field>
+
+          <div class="form-actions">
+            <button
+              mat-raised-button
+              color="primary"
+              type="submit"
+              [disabled]="statusForm.invalid || isUpdating"
+            >
+              <mat-spinner *ngIf="isUpdating" diameter="20" class="inline-spinner"></mat-spinner>
+              <span *ngIf="!isUpdating">Update Status</span>
+              <span *ngIf="isUpdating">Updating...</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <div *ngIf="isLoading" class="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+</div>
+
+
+

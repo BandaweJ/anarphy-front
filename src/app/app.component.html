@@ -68,6 +68,11 @@
               <mat-icon>school</mat-icon>
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Students</span>
             </button>
+            <!-- Applications -->
+            <button mat-button *ngIf="isAdmin$ | async" routerLink="/applications" routerLinkActive="active">
+              <mat-icon>assignment</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Applications</span>
+            </button>
             <!-- Parents -->
             <button mat-button routerLink="/parents" routerLinkActive="active">
               <mat-icon>family_restroom</mat-icon>

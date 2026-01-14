@@ -191,7 +191,27 @@ export class AppComponent implements OnInit, OnDestroy {
       }
     });
     
-    this.store.dispatch(checkAuthStatus());
+    // Wait for router to finish initial navigation before checking auth status
+    // This ensures we can correctly identify public routes like /apply
+    let authChecked = false;
+    this.router.events
+      .pipe(
+        filter(event => event instanceof NavigationEnd),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(() => {
+        // Only check auth status on the first navigation end (initial load)
+        if (!authChecked) {
+          authChecked = true;
+          this.store.dispatch(checkAuthStatus());
+        }
+      });
+    
+    // Also check immediately if router has already navigated (e.g., on subsequent navigations)
+    if (this.router.navigated && !authChecked) {
+      authChecked = true;
+      this.store.dispatch(checkAuthStatus());
+    }
 
     this.checkScreenSize(); // Initial screen size check
 

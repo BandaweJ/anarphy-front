@@ -1,0 +1,37 @@
+// Colors
+$primary-blue: #2196f3;
+$text-primary-light: rgba(0, 0, 0, 0.87);
+$text-primary-dark: rgba(255, 255, 255, 0.87);
+$background-light: #fafafa;
+$background-dark: #121212;
+$surface-light: #fff;
+$surface-dark: #1e1e1e;
+$border-light: rgba(0, 0, 0, 0.08);
+$border-dark: rgba(255, 255, 255, 0.08);
+$shadow-light: rgba(0, 0, 0, 0.1);
+$shadow-dark: rgba(0, 0, 0, 0.5);
+
+// Spacing
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+
+// Breakpoints
+$breakpoint-sm: 600px;
+$breakpoint-md: 960px;
+$breakpoint-lg: 1280px;
+
+// Transitions
+$transition-fast: 0.2s ease;
+$transition-normal: 0.3s ease;
+
+// Z-index
+$z-index-dropdown: 1000;
+$z-index-sticky: 1020;
+$z-index-fixed: 1030;
+$z-index-modal-backdrop: 1040;
+$z-index-modal: 1050;
+$z-index-popover: 1060;
+$z-index-tooltip: 1070;

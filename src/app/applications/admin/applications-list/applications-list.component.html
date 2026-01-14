@@ -1,0 +1,91 @@
+<div class="applications-list-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Student Applications</mat-card-title>
+      <mat-card-subtitle>Review and manage student applications</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Filters -->
+      <form [formGroup]="filterForm" *ngIf="filterForm" class="filters">
+        <mat-form-field appearance="outline">
+          <mat-label>Status</mat-label>
+          <mat-select formControlName="status">
+            <mat-option value="">All</mat-option>
+            <mat-option [value]="ApplicationStatus.PENDING">Pending</mat-option>
+            <mat-option [value]="ApplicationStatus.ON_HOLD">On Hold</mat-option>
+            <mat-option [value]="ApplicationStatus.ACCEPTED">Accepted</mat-option>
+            <mat-option [value]="ApplicationStatus.DECLINED">Declined</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Search</mat-label>
+          <input matInput formControlName="search" placeholder="Name, email, or reference number">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+      </form>
+
+      <!-- Applications Table -->
+      <div class="table-container" *ngIf="!isLoading">
+        <table mat-table [dataSource]="applications" class="applications-table">
+          <ng-container matColumnDef="applicationId">
+            <th mat-header-cell *matHeaderCellDef>Reference</th>
+            <td mat-cell *matCellDef="let app">{{ app.applicationId }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Applicant</th>
+            <td mat-cell *matCellDef="let app">{{ app.name }} {{ app.surname }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="desiredClass">
+            <th mat-header-cell *matHeaderCellDef>Desired Class</th>
+            <td mat-cell *matCellDef="let app">{{ app.desiredClass }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let app">
+              <mat-chip 
+                [color]="getStatusColor(app.status) || undefined" 
+                [class]="'status-chip status-' + (app.status.toLowerCase() || '')"
+                selected>
+                {{ getStatusLabel(app.status) }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="createdAt">
+            <th mat-header-cell *matHeaderCellDef>Submitted</th>
+            <td mat-cell *matCellDef="let app">{{ app.createdAt | date: 'short' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let app">
+              <button mat-button color="primary" (click)="viewApplication(app)">
+                <mat-icon>visibility</mat-icon>
+                View
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+
+        <div *ngIf="applications.length === 0" class="no-data">
+          <p>No applications found</p>
+        </div>
+      </div>
+
+      <div *ngIf="isLoading" class="loading">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+
+

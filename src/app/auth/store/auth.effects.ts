@@ -140,7 +140,22 @@ export class AuthEffects {
           localStorage.removeItem('jhs_session');
           // Note: We keep 'theme' and 'jhs-theme' as they are user preferences, not auth data
           // We keep 'rememberUsername' as it's a convenience feature
-          this.router.navigateByUrl('/signin');
+          
+          // Don't redirect if user is on a public route
+          const windowPath = typeof window !== 'undefined' ? window.location.pathname : '';
+          const routerUrl = this.router.url || this.router.routerState.snapshot.url || '';
+          const currentUrl = (windowPath || routerUrl).split('?')[0].toLowerCase();
+          
+          const publicRoutes = ['/signin', '/signup', '/apply', '/track-application'];
+          const isPublicRoute = publicRoutes.some(route => {
+            const normalizedRoute = route.toLowerCase();
+            return currentUrl === normalizedRoute || currentUrl.startsWith(normalizedRoute + '/');
+          });
+          
+          // Only redirect to signin if not on a public route
+          if (!isPublicRoute) {
+            this.router.navigateByUrl('/signin');
+          }
         })
       ),
     { dispatch: false }
@@ -158,13 +173,27 @@ export class AuthEffects {
             authStatus.user &&
             authStatus.accessToken
           ) {
-            // Check if user is bootstrap user and redirect accordingly
-            if (authStatus.user.isBootstrap) {
-              this.router.navigateByUrl('/teachers');
-            } else if (authStatus.user.role === ROLES.parent) {
-              this.router.navigateByUrl('/parent-dashboard');
-            } else {
-              this.router.navigateByUrl('/dashboard');
+            // Check current route - don't redirect away from public routes
+            const windowPath = typeof window !== 'undefined' ? window.location.pathname : '';
+            const routerUrl = this.router.url || this.router.routerState.snapshot.url || '';
+            const currentUrl = (windowPath || routerUrl).split('?')[0].toLowerCase();
+            
+            const publicRoutes = ['/signin', '/signup', '/apply', '/track-application'];
+            const isPublicRoute = publicRoutes.some(route => {
+              const normalizedRoute = route.toLowerCase();
+              return currentUrl === normalizedRoute || currentUrl.startsWith(normalizedRoute + '/');
+            });
+            
+            // Only redirect to dashboard if not on a public route
+            if (!isPublicRoute) {
+              // Check if user is bootstrap user and redirect accordingly
+              if (authStatus.user.isBootstrap) {
+                this.router.navigateByUrl('/teachers');
+              } else if (authStatus.user.role === ROLES.parent) {
+                this.router.navigateByUrl('/parent-dashboard');
+              } else {
+                this.router.navigateByUrl('/dashboard');
+              }
             }
             
             return signinActions.signinSuccess({
@@ -174,7 +203,30 @@ export class AuthEffects {
             });
           } else {
             localStorage.removeItem('token');
-            this.router.navigateByUrl('/signin');
+            
+            // Don't redirect if user is on a public route
+            // Use window.location.pathname first as it's always available, even before router processes the route
+            const windowPath = typeof window !== 'undefined' ? window.location.pathname : '';
+            const routerUrl = this.router.url || this.router.routerState.snapshot.url || '';
+            const currentUrl = (windowPath || routerUrl).split('?')[0].toLowerCase(); // Remove query params and normalize
+            
+            const publicRoutes = ['/signin', '/signup', '/apply', '/track-application'];
+            const isPublicRoute = publicRoutes.some(route => {
+              const normalizedRoute = route.toLowerCase();
+              return currentUrl === normalizedRoute || currentUrl.startsWith(normalizedRoute + '/');
+            });
+            
+            // Debug logging (can be removed later)
+            console.log('Auth check - Current URL:', currentUrl, 'Is public route:', isPublicRoute);
+            
+            // Only redirect if not on a public route and not on root
+            if (!isPublicRoute && currentUrl !== '/' && currentUrl !== '') {
+              console.log('Redirecting to /signin from:', currentUrl);
+              this.router.navigateByUrl('/signin');
+            } else {
+              console.log('Not redirecting - public route or root');
+            }
+            
             return logout(); // Still an individual action
           }
         })

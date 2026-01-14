@@ -1,0 +1,92 @@
+<div class="track-container" [class.dark-theme]="currentTheme === 'dark'">
+  <mat-card class="track-card">
+    <mat-card-header>
+      <mat-card-title>Track Application Status</mat-card-title>
+      <mat-card-subtitle>Enter your application reference number to check the status</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="trackForm" (ngSubmit)="trackApplication()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Application Reference Number</mat-label>
+          <input matInput formControlName="applicationId" placeholder="e.g., APP-2025-000001" required>
+          <mat-error *ngIf="trackForm.get('applicationId')?.hasError('required')">
+            Application reference number is required
+          </mat-error>
+          <mat-error *ngIf="trackForm.get('applicationId')?.hasError('minlength')">
+            Please enter a valid reference number
+          </mat-error>
+        </mat-form-field>
+
+        <div class="form-actions">
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            [disabled]="trackForm.invalid || isLoading"
+          >
+            <mat-spinner *ngIf="isLoading" diameter="20" class="inline-spinner"></mat-spinner>
+            <span *ngIf="!isLoading">Track Application</span>
+            <span *ngIf="isLoading">Checking...</span>
+          </button>
+        </div>
+      </form>
+
+      <!-- Application Details -->
+      <div *ngIf="application" class="application-details">
+        <h3>Application Details</h3>
+        
+        <div class="status-section">
+          <mat-chip [color]="getStatusColor(application.status)" selected>
+            {{ getStatusLabel(application.status) }}
+          </mat-chip>
+        </div>
+
+        <div class="detail-grid">
+          <div class="detail-item">
+            <strong>Application Reference:</strong>
+            <span>{{ application.applicationId }}</span>
+          </div>
+          <div class="detail-item">
+            <strong>Applicant Name:</strong>
+            <span>{{ application.name }} {{ application.surname }}</span>
+          </div>
+          <div class="detail-item">
+            <strong>Desired Class:</strong>
+            <span>{{ application.desiredClass }}</span>
+          </div>
+          <div class="detail-item" *ngIf="application.studentNumber">
+            <strong>Student Number:</strong>
+            <span class="student-number">{{ application.studentNumber }}</span>
+          </div>
+          <div class="detail-item">
+            <strong>Submitted:</strong>
+            <span>{{ application.createdAt | date: 'medium' }}</span>
+          </div>
+          <div class="detail-item" *ngIf="application.reviewedAt">
+            <strong>Reviewed:</strong>
+            <span>{{ application.reviewedAt | date: 'medium' }}</span>
+          </div>
+        </div>
+
+        <div *ngIf="application.status === ApplicationStatus.ACCEPTED && application.studentNumber" class="next-steps">
+          <h4>Next Steps:</h4>
+          <ol>
+            <li>Visit the school portal and click on "Sign Up"</li>
+            <li>Use your Student Number: <strong>{{ application.studentNumber }}</strong></li>
+            <li>Create your username and password</li>
+            <li>Complete your profile and start using the system</li>
+          </ol>
+        </div>
+
+        <div *ngIf="application.reviewNotes" class="review-notes">
+          <h4>Review Notes:</h4>
+          <p>{{ application.reviewNotes }}</p>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+
+
