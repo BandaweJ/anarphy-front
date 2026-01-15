@@ -18,6 +18,8 @@ import { MatDialogRef } from '@angular/material/dialog';
 import { RoleAccessService } from 'src/app/services/role-access.service';
 import { ROLES } from 'src/app/registration/models/roles.enum';
 import { SystemSettingsService, SystemSettings } from 'src/app/system/services/system-settings.service';
+import { PaymentsService } from 'src/app/finance/services/payments.service';
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-invoice-item',
   standalone: true,
@@ -44,6 +46,8 @@ export class InvoiceItemComponent implements OnInit, OnChanges, OnDestroy {
 
   @Input() invoice!: InvoiceModel | null;
   @Input() downloadable!: boolean;
+  groupInvoices: InvoiceModel[] | null = null;
+  isLoadingGroup = false;
 
   constructor(
     public sharedService: SharedService,
@@ -52,7 +56,9 @@ export class InvoiceItemComponent implements OnInit, OnChanges, OnDestroy {
     private themeService: ThemeService,
     private dialog: MatDialog,
     private roleAccess: RoleAccessService,
-    private systemSettingsService: SystemSettingsService
+    private systemSettingsService: SystemSettingsService,
+    private paymentsService: PaymentsService,
+    private router: Router
   ) {
     this.userRole$ = this.store.select(selectAuthUserRole).pipe(
       map(role => role ?? null)
@@ -75,6 +81,9 @@ export class InvoiceItemComponent implements OnInit, OnChanges, OnDestroy {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['invoice'] || changes['downloadable']) {
       this.cdr.markForCheck();
+    }
+    if (changes['invoice'] && this.invoice?.groupInvoiceNumber && !this.groupInvoices) {
+      this.loadGroupInvoice();
     }
   }
 
@@ -172,6 +181,26 @@ export class InvoiceItemComponent implements OnInit, OnChanges, OnDestroy {
           this.store.dispatch(
             invoiceActions.voidInvoice({ invoiceId: this.invoice.id })
           );
+        }
+      });
+  }
+
+  loadGroupInvoice(): void {
+    if (!this.invoice?.groupInvoiceNumber) return;
+    
+    this.isLoadingGroup = true;
+    this.paymentsService.getGroupInvoice(this.invoice.groupInvoiceNumber)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (invoices) => {
+          this.groupInvoices = invoices;
+          this.isLoadingGroup = false;
+          this.cdr.markForCheck();
+        },
+        error: (error) => {
+          console.error('Error loading group invoice:', error);
+          this.isLoadingGroup = false;
+          this.cdr.markForCheck();
         }
       });
   }

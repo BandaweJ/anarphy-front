@@ -1,0 +1,107 @@
+  <div class="preview-container" *ngIf="hasValidData">
+  <!-- Header -->
+  <div class="preview-header">
+    <h2>
+      <mat-icon>receipt_long</mat-icon>
+      Group Invoice Preview
+    </h2>
+    <div class="preview-meta">
+      <div class="meta-item">
+        <mat-icon>calendar_today</mat-icon>
+        <span>Term {{ termNum }} - {{ termYear }}</span>
+      </div>
+      <div class="meta-item">
+        <mat-icon>people</mat-icon>
+        <span>{{ studentsCount }} Student(s)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Donor Note -->
+  <div class="donor-note-section" *ngIf="donorNoteText">
+    <mat-icon>info</mat-icon>
+    <div class="donor-note-content">
+      <strong>Donor/Scholarship:</strong>
+      <p>{{ donorNoteText }}</p>
+    </div>
+  </div>
+
+  <!-- Students Table -->
+  <mat-card class="preview-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>list</mat-icon>
+        Student Invoices Breakdown
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <table mat-table [dataSource]="getStudentPreviews()" class="preview-table">
+        <!-- Student Column -->
+        <ng-container matColumnDef="student">
+          <th mat-header-cell *matHeaderCellDef>Student</th>
+          <td mat-cell *matCellDef="let preview">
+            <div class="student-info" *ngIf="preview && preview.student">
+              <div class="student-name">
+                {{ preview.student.student?.surname }} {{ preview.student.student?.name }}
+              </div>
+              <div class="student-details">
+                <span class="student-number">{{ preview.student.student?.studentNumber }}</span>
+                <span class="student-class">{{ preview.student?.name }}</span>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Bills Column -->
+        <ng-container matColumnDef="bills">
+          <th mat-header-cell *matHeaderCellDef>Fees</th>
+          <td mat-cell *matCellDef="let preview">
+            <div class="bills-list" *ngIf="preview">
+              <div class="bill-item" *ngFor="let bill of preview.bills">
+                <span class="bill-name">{{ bill?.feeName }}</span>
+                <span class="bill-amount">{{ (bill?.amount || 0) | currency:'USD':'symbol':'1.2-2' }}</span>
+              </div>
+              <div class="no-bills" *ngIf="!preview.bills || preview.bills.length === 0">
+                <em>No fees assigned</em>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Total Column -->
+        <ng-container matColumnDef="total">
+          <th mat-header-cell *matHeaderCellDef>Total</th>
+          <td mat-cell *matCellDef="let preview">
+            <div class="student-total">
+              {{ getStudentTotal(preview) | currency:'USD':'symbol':'1.2-2' }}
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Summary -->
+  <mat-card class="summary-card">
+    <mat-card-content>
+      <div class="summary-content">
+        <div class="summary-item">
+          <span class="summary-label">Total Students:</span>
+          <span class="summary-value">{{ studentsCount }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Total Fee Types:</span>
+          <span class="summary-value">{{ feeSelectionsCount }}</span>
+        </div>
+        <mat-divider></mat-divider>
+        <div class="summary-item grand-total">
+          <span class="summary-label">Grand Total:</span>
+          <span class="summary-value">{{ getGrandTotal() | currency:'USD':'symbol':'1.2-2' }}</span>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

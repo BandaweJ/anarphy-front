@@ -446,6 +446,71 @@ export class FinanceEffects {
     )
   );
 
+  createGroupInvoice$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(invoiceActions.createGroupInvoice),
+      switchMap((data) =>
+        this.paymentsService.createGroupInvoice(data).pipe(
+          tap((invoices) =>
+            this.snackBar.open(
+              `Group invoice created successfully with ${invoices.length} student(s)`,
+              'OK',
+              {
+                duration: 3000,
+                verticalPosition: 'top',
+                horizontalPosition: 'center',
+              }
+            )
+          ),
+          map((invoices) =>
+            invoiceActions.createGroupInvoiceSuccess({ invoices })
+          ),
+          catchError((error: HttpErrorResponse) => {
+            let errorMessage = 'Failed to create group invoice.';
+            if (error.error?.message) {
+              errorMessage = error.error.message;
+            } else if (error.message) {
+              errorMessage = error.message;
+            }
+
+            this.snackBar.open(`Error: ${errorMessage}`, 'Close', {
+              duration: 5000,
+              verticalPosition: 'top',
+              horizontalPosition: 'center',
+              panelClass: ['error-snackbar'],
+            });
+
+            return of(
+              invoiceActions.createGroupInvoiceFail({
+                ...error,
+              })
+            );
+          })
+        )
+      )
+    )
+  );
+
+  fetchGroupInvoice$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(invoiceActions.fetchGroupInvoice),
+      switchMap((data) =>
+        this.paymentsService.getGroupInvoice(data.groupInvoiceNumber).pipe(
+          map((invoices) =>
+            invoiceActions.fetchGroupInvoiceSuccess({ invoices })
+          ),
+          catchError((error: HttpErrorResponse) => {
+            return of(
+              invoiceActions.fetchGroupInvoiceFail({
+                ...error,
+              })
+            );
+          })
+        )
+      )
+    )
+  );
+
   fetchStudentOutstandingBalance$ = createEffect(() =>
     this.actions$.pipe(
       ofType(receiptActions.fetchStudentOutstandingBalance),

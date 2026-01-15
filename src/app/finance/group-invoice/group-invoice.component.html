@@ -1,0 +1,208 @@
+<div class="group-invoice-container" 
+     [class.theme-light]="currentTheme === 'light'" 
+     [class.theme-dark]="currentTheme === 'dark'">
+  
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-content">
+      <h1 class="page-title">
+        <mat-icon class="title-icon">group</mat-icon>
+        Group Invoice Creation
+      </h1>
+      <p class="page-subtitle">Create invoices for multiple students with the same fees</p>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <mat-card class="main-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>receipt_long</mat-icon>
+        Step {{ currentStep }} of {{ totalSteps }}: {{ getStepTitle(currentStep) }}
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Step 1: Term Selection -->
+      <div *ngIf="currentStep === 1" class="step-content">
+        <h3>Select Academic Term</h3>
+        <p class="step-description">Choose the term for which you want to create group invoices</p>
+        
+        <mat-form-field appearance="outline" class="term-field">
+          <mat-label>Academic Term</mat-label>
+          <mat-select
+            [(ngModel)]="selectedTerm"
+            (selectionChange)="onTermSelected($event.value)">
+            <mat-option *ngFor="let term of terms$ | async" [value]="term">
+              Term {{ term.num }} - {{ term.year }}
+            </mat-option>
+          </mat-select>
+          <mat-hint>Select the academic term for billing</mat-hint>
+        </mat-form-field>
+
+        <div class="step-actions">
+          <button 
+            mat-raised-button 
+            color="primary" 
+            (click)="goToStep2()"
+            [disabled]="!canProceedToStep2()">
+            Next: Select Students
+            <mat-icon>arrow_forward</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: Student Selection -->
+      <div *ngIf="currentStep === 2" class="step-content">
+        <h3>Select Students</h3>
+        <p class="step-description">Select multiple students to include in this group invoice</p>
+        
+        <div *ngIf="selectedTerm" class="student-selection-section">
+          <div class="selection-info">
+            <span class="selected-count">{{ selectedStudents.length }} student(s) selected</span>
+          </div>
+          
+          <div class="students-list" *ngIf="(studentsToBill$ | async) as studentsToBill">
+            <div *ngIf="studentsToBill.length > 0; else noStudentsTemplate" class="students-chip-container">
+              <div class="students-chip-list">
+                <mat-chip 
+                  *ngFor="let enrol of studentsToBill" 
+                  (click)="toggleStudentSelection(enrol)"
+                  [class.selected]="isStudentSelected(enrol)"
+                  [class.mat-chip-selected]="isStudentSelected(enrol)">
+                  <div class="student-chip-content">
+                    <span class="student-name">{{ enrol.student.surname }} {{ enrol.student.name }}</span>
+                    <span class="student-class">({{ enrol.name }})</span>
+                    <mat-icon *ngIf="isStudentSelected(enrol)" class="check-icon">check_circle</mat-icon>
+                  </div>
+                </mat-chip>
+              </div>
+            </div>
+            <ng-template #noStudentsTemplate>
+              <div class="no-students-message">
+                <mat-icon>info</mat-icon>
+                <p>No students available to bill for Term {{ selectedTerm.num }} - {{ selectedTerm.year }}.</p>
+                <p class="hint">All students may already be billed for this term.</p>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+
+        <div *ngIf="!selectedTerm" class="term-required-message">
+          <mat-icon>warning</mat-icon>
+          <p>Please select a term in Step 1 first.</p>
+        </div>
+
+        <div class="step-actions">
+          <button mat-stroked-button (click)="goBack()">
+            <mat-icon>arrow_back</mat-icon>
+            Back
+          </button>
+          <button 
+            mat-raised-button 
+            color="primary" 
+            (click)="goToStep3()"
+            [disabled]="!canProceedToStep3()">
+            Next: Select Fees
+            <mat-icon>arrow_forward</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 3: Fee Selection -->
+      <div *ngIf="currentStep === 3" class="step-content">
+        <h3>Select Fees</h3>
+        <p class="step-description">Choose fees to apply to all selected students. For uniforms, specify quantities.</p>
+        
+        <app-fee-selection
+          [fees]="fees$ | async"
+          [selectedFees]="selectedFees"
+          [numberOfStudents]="selectedStudents.length"
+          (feesSelected)="onFeesSelected($event)">
+        </app-fee-selection>
+
+        <div class="step-actions">
+          <button mat-stroked-button (click)="goBack()">
+            <mat-icon>arrow_back</mat-icon>
+            Back
+          </button>
+          <button 
+            mat-raised-button 
+            color="primary" 
+            (click)="goToStep4()"
+            [disabled]="!canProceedToStep4()">
+            Next: Preview
+            <mat-icon>arrow_forward</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 4: Preview & Confirm -->
+      <div *ngIf="currentStep === 4" class="step-content">
+        <h3>Preview & Confirm</h3>
+        <p class="step-description">Review the group invoice before saving</p>
+        
+        <!-- Donor Note Input -->
+        <mat-form-field appearance="outline" class="donor-note-field">
+          <mat-label>Donor/Scholarship Note (Optional)</mat-label>
+          <textarea 
+            matInput 
+            [(ngModel)]="donorNote" 
+            placeholder="Enter donor or scholarship information"
+            rows="3">
+          </textarea>
+        </mat-form-field>
+
+        <app-group-invoice-preview
+          *ngIf="getPreviewData() as previewData"
+          [previewData]="previewData">
+        </app-group-invoice-preview>
+
+        <div class="step-actions">
+          <button mat-stroked-button (click)="goBack()">
+            <mat-icon>arrow_back</mat-icon>
+            Back
+          </button>
+          <button 
+            mat-raised-button 
+            color="primary" 
+            (click)="confirmAndSave()"
+            [disabled]="isCreating || !getPreviewData()">
+            <mat-spinner *ngIf="isCreating" diameter="20"></mat-spinner>
+            <mat-icon *ngIf="!isCreating">save</mat-icon>
+            {{ isCreating ? 'Creating...' : 'Confirm & Save' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 5: View & Download -->
+      <div *ngIf="currentStep === 5" class="step-content">
+        <h3>Group Invoice Created Successfully</h3>
+        <p class="step-description">View and download the created group invoice</p>
+        
+        <div *ngIf="isLoadingGroupInvoice" class="loading-container">
+          <mat-spinner></mat-spinner>
+          <p>Loading group invoice details...</p>
+        </div>
+
+        <div *ngIf="!isLoadingGroupInvoice && createdGroupInvoices.length > 0">
+          <app-group-invoice-item
+            [groupInvoices]="createdGroupInvoices"
+            [groupInvoiceNumber]="createdGroupInvoiceNumber || ''"
+            [donorNote]="donorNote || null">
+          </app-group-invoice-item>
+        </div>
+
+        <div class="step-actions">
+          <button 
+            mat-raised-button 
+            color="primary" 
+            (click)="startNewInvoice()">
+            <mat-icon>add</mat-icon>
+            Create New Group Invoice
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

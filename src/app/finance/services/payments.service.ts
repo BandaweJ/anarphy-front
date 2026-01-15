@@ -1,6 +1,6 @@
 import { HttpClient, HttpResponse, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { map, Observable, timeout, catchError, throwError } from 'rxjs';
+import { map, Observable, timeout, catchError, throwError, tap } from 'rxjs';
 import { InvoiceModel } from '../models/invoice.model';
 import { InvoiceResponseModel } from '../models/invoice-response.model';
 import { environment } from 'src/environments/environment';
@@ -199,6 +199,65 @@ export class PaymentsService {
     return this.httpClient.get<CreditActivityReportModel>(
       `${this.baseURL}credit-activity-report`,
       { params },
+    );
+  }
+
+  createGroupInvoice(groupInvoiceData: {
+    students: Array<{
+      studentNumber: string;
+      termNum: number;
+      year: number;
+      bills: any[];
+    }>;
+    donorNote?: string;
+    invoiceDate?: string | Date;
+    invoiceDueDate?: string | Date;
+  }): Observable<InvoiceModel[]> {
+    return this.httpClient.post<InvoiceModel[]>(
+      `${this.baseURL}group-invoice`,
+      groupInvoiceData
+    );
+  }
+
+  getGroupInvoice(groupInvoiceNumber: string): Observable<InvoiceModel[]> {
+    return this.httpClient.get<InvoiceModel[]>(
+      `${this.baseURL}group-invoice/${groupInvoiceNumber}`
+    );
+  }
+
+  downloadGroupInvoice(groupInvoiceNumber: string): Observable<HttpResponse<Blob>> {
+    return this.httpClient.get(
+      `${this.baseURL}group-invoice-pdf/${groupInvoiceNumber}`,
+      {
+        responseType: 'blob',
+        observe: 'response',
+      }
+    ).pipe(
+      tap((response: HttpResponse<Blob>) => {
+        const blob = response.body;
+        if (!blob) {
+          throw new Error('No PDF data received');
+        }
+
+        const contentDisposition = response.headers.get('Content-Disposition');
+        let filename = `group_invoice_${groupInvoiceNumber}.pdf`;
+        
+        if (contentDisposition) {
+          const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
+          if (filenameMatch) {
+            filename = filenameMatch[1];
+          }
+        }
+
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      })
     );
   }
 

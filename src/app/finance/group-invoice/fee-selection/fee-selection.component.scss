@@ -1,0 +1,224 @@
+// Theme Variables
+$primary-blue: #2196f3;
+$primary-blue-dark: #1976d2;
+$text-primary-light: #2c3e50;
+$text-secondary-light: #7f8c8d;
+$surface-light: #ffffff;
+$surface-alt-light: #f5f7fa;
+$border-color-light: rgba(0, 0, 0, 0.12);
+
+$text-primary-dark: #ffffff;
+$text-secondary-dark: #b0bec5;
+$surface-dark: #1e1e1e;
+$surface-alt-dark: #2d2d2d;
+$border-color-dark: rgba(255, 255, 255, 0.12);
+
+.fee-selection-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.fee-category-card {
+  margin-bottom: 16px;
+
+  .mat-card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color, rgba(0, 0, 0, 0.12));
+
+    .mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary, $text-primary-light);
+
+      mat-icon {
+        color: $primary-blue;
+      }
+    }
+
+    .mat-card-subtitle {
+      color: var(--text-secondary, $text-secondary-light);
+      font-size: 0.875rem;
+      margin-top: 4px;
+    }
+  }
+
+  .mat-card-content {
+    padding: 20px;
+  }
+}
+
+.fee-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .fee-item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: var(--surface-alt, rgba(0, 0, 0, 0.02));
+    }
+
+    mat-checkbox {
+      width: 100%;
+
+      .fee-details {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        margin-left: 8px;
+
+        .fee-name {
+          font-weight: 500;
+          color: var(--text-primary, $text-primary-light);
+        }
+
+        .fee-amount {
+          font-weight: 600;
+          color: $primary-blue;
+          font-size: 1rem;
+        }
+      }
+    }
+  }
+}
+
+.uniform-fees-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  .uniform-fee-item {
+    display: grid;
+    grid-template-columns: 1fr 150px;
+    gap: 16px;
+    align-items: start;
+    padding: 16px;
+    border: 1px solid var(--border-color, rgba(0, 0, 0, 0.12));
+    border-radius: 8px;
+    background-color: var(--surface, $surface-light);
+
+    .uniform-fee-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      .uniform-fee-name {
+        font-weight: 600;
+        font-size: 1rem;
+        color: var(--text-primary, $text-primary-light);
+      }
+
+      .uniform-fee-unit-price {
+        font-size: 0.875rem;
+        color: var(--text-secondary, $text-secondary-light);
+      }
+    }
+
+    .quantity-field {
+      width: 100%;
+    }
+
+    .uniform-fee-total {
+      grid-column: 1 / -1;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border-color, rgba(0, 0, 0, 0.12));
+      font-weight: 600;
+      color: $primary-blue;
+      font-size: 1rem;
+    }
+  }
+}
+
+.summary-card {
+  margin-top: 8px;
+  background-color: var(--surface-alt, rgba(33, 150, 243, 0.05));
+  border: 2px solid $primary-blue;
+
+  .mat-card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color, rgba(0, 0, 0, 0.12));
+
+    .mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary, $text-primary-light);
+
+      mat-icon {
+        color: $primary-blue;
+      }
+    }
+  }
+
+  .mat-card-content {
+    padding: 20px;
+  }
+
+  .total-amount {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+
+    .total-label {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: var(--text-primary, $text-primary-light);
+    }
+
+    .total-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: $primary-blue;
+    }
+  }
+
+  .selected-fees-count {
+    font-size: 0.875rem;
+    color: var(--text-secondary, $text-secondary-light);
+    text-align: right;
+  }
+}
+
+.theme-dark {
+  .fee-category-card {
+    background-color: $surface-dark;
+
+    .mat-card-header {
+      border-bottom-color: rgba(255, 255, 255, 0.12);
+    }
+  }
+
+  .fee-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+
+  .uniform-fee-item {
+    background-color: $surface-dark;
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+
+  .summary-card {
+    background-color: rgba(100, 181, 246, 0.1);
+    border-color: #64b5f6;
+  }
+}
+
+@media (max-width: 768px) {
+  .uniform-fee-item {
+    grid-template-columns: 1fr;
+  }
+}

@@ -141,7 +141,10 @@
                </mat-card-header>
 
                <mat-card-content>
-                 <app-billing [enrolment]="invoice.enrol"></app-billing>
+                 <app-billing 
+                   [enrolment]="invoice.enrol"
+                   [term]="selectedTerm ? { num: selectedTerm.num, year: selectedTerm.year } : null">
+                 </app-billing>
                </mat-card-content>
              </mat-card>
 

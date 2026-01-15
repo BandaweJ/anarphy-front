@@ -153,3 +153,73 @@ mat-list-item {
   }
 }
 
+// Group Invoice Styles
+mat-accordion {
+  width: 100%;
+}
+
+mat-expansion-panel {
+  margin-bottom: 8px;
+  border-radius: 8px !important;
+
+  &.group-invoice {
+    border-left: 4px solid $primary-blue;
+  }
+}
+
+.invoice-header-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+
+  mat-icon {
+    font-size: 1.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .invoice-number {
+    font-weight: 600;
+  }
+
+  .group-chip {
+    font-size: 0.75rem;
+    height: 24px;
+  }
+}
+
+.donor-note {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  background-color: rgba(33, 150, 243, 0.08);
+  border-radius: 4px;
+  font-size: 0.875rem;
+
+  mat-icon {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+  }
+}
+
+.group-invoice-actions {
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  justify-content: flex-end;
+  border-bottom: 1px solid var(--border-color, $border-light);
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  mat-spinner {
+    display: inline-block;
+  }
+}

@@ -191,27 +191,37 @@ export class AppComponent implements OnInit, OnDestroy {
       }
     });
     
-    // Wait for router to finish initial navigation before checking auth status
-    // This ensures we can correctly identify public routes like /apply
-    let authChecked = false;
+    // Check auth status immediately on app initialization, before router processes routes
+    // This ensures auth state is restored before any route guards or redirects happen
+    this.store.dispatch(checkAuthStatus());
+    
+    // Also listen to router events to handle navigation after auth check
     this.router.events
       .pipe(
         filter(event => event instanceof NavigationEnd),
         takeUntil(this.destroy$)
       )
       .subscribe(() => {
-        // Only check auth status on the first navigation end (initial load)
-        if (!authChecked) {
-          authChecked = true;
-          this.store.dispatch(checkAuthStatus());
+        // Re-check auth status on navigation to handle edge cases
+        // but don't redirect if already on a valid route
+        const currentUrl = this.router.url.split('?')[0].toLowerCase();
+        const publicRoutes = ['/signin', '/signup', '/apply', '/track-application'];
+        const isPublicRoute = publicRoutes.some(route => {
+          const normalizedRoute = route.toLowerCase();
+          return currentUrl === normalizedRoute || currentUrl.startsWith(normalizedRoute + '/');
+        });
+        
+        // Only re-check if we're on a public route (might need to redirect if logged in)
+        if (isPublicRoute) {
+          const authStatus = this.store.select(selectIsLoggedIn).pipe(takeUntil(this.destroy$));
+          authStatus.subscribe(isLoggedIn => {
+            if (isLoggedIn && (currentUrl === '/signin' || currentUrl === '/signup')) {
+              // User is logged in but on signin page, redirect to dashboard
+              this.store.dispatch(checkAuthStatus());
+            }
+          });
         }
       });
-    
-    // Also check immediately if router has already navigated (e.g., on subsequent navigations)
-    if (this.router.navigated && !authChecked) {
-      authChecked = true;
-      this.store.dispatch(checkAuthStatus());
-    }
 
     this.checkScreenSize(); // Initial screen size check
 

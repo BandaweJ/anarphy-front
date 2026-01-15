@@ -1,0 +1,112 @@
+<mat-card class="group-invoice-card">
+  <mat-card-header>
+    <mat-card-title>
+      <mat-icon>receipt_long</mat-icon>
+      Group Invoice: {{ groupInvoiceNumber }}
+    </mat-card-title>
+    <mat-card-subtitle *ngIf="donorNote">
+      <mat-icon>info</mat-icon>
+      {{ donorNote }}
+    </mat-card-subtitle>
+    <div class="header-actions">
+      <button 
+        mat-raised-button 
+        color="primary" 
+        (click)="downloadGroupInvoice()"
+        [disabled]="isDownloading">
+        <mat-spinner *ngIf="isDownloading" diameter="20"></mat-spinner>
+        <mat-icon *ngIf="!isDownloading">download</mat-icon>
+        {{ isDownloading ? 'Downloading...' : 'Download PDF' }}
+      </button>
+    </div>
+  </mat-card-header>
+
+  <mat-card-content>
+    <div class="group-invoice-summary">
+      <div class="summary-item">
+        <span class="label">Total Students:</span>
+        <span class="value">{{ groupInvoices.length }}</span>
+      </div>
+      <div class="summary-item">
+        <span class="label">Total Bill:</span>
+        <span class="value">{{ getTotalBill() | currency:'USD':'symbol':'1.2-2' }}</span>
+      </div>
+      <div class="summary-item">
+        <span class="label">Total Paid:</span>
+        <span class="value">{{ getTotalAmountPaid() | currency:'USD':'symbol':'1.2-2' }}</span>
+      </div>
+      <div class="summary-item">
+        <span class="label">Total Balance:</span>
+        <span class="value">{{ getTotalBalance() | currency:'USD':'symbol':'1.2-2' }}</span>
+      </div>
+    </div>
+
+    <table mat-table [dataSource]="groupInvoices" class="group-invoice-table">
+      <!-- Student Column -->
+      <ng-container matColumnDef="student">
+        <th mat-header-cell *matHeaderCellDef>Student</th>
+        <td mat-cell *matCellDef="let invoice">
+          {{ invoice.student?.surname }} {{ invoice.student?.name }}
+          <br />
+          <small>{{ invoice.student?.studentNumber }}</small>
+        </td>
+      </ng-container>
+
+      <!-- Enrollment Column -->
+      <ng-container matColumnDef="enrollment">
+        <th mat-header-cell *matHeaderCellDef>Enrollment</th>
+        <td mat-cell *matCellDef="let invoice">
+          <span *ngIf="invoice.enrol">
+            Term {{ invoice.enrol.num }}, {{ invoice.enrol.year }}
+            <br />
+            <small>{{ invoice.enrol.class?.name }}</small>
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Invoice Number Column -->
+      <ng-container matColumnDef="invoiceNumber">
+        <th mat-header-cell *matHeaderCellDef>Invoice #</th>
+        <td mat-cell *matCellDef="let invoice">{{ invoice.invoiceNumber }}</td>
+      </ng-container>
+
+      <!-- Total Bill Column -->
+      <ng-container matColumnDef="totalBill">
+        <th mat-header-cell *matHeaderCellDef>Total Bill</th>
+        <td mat-cell *matCellDef="let invoice">
+          {{ invoice.totalBill | currency:'USD':'symbol':'1.2-2' }}
+        </td>
+      </ng-container>
+
+      <!-- Amount Paid Column -->
+      <ng-container matColumnDef="amountPaid">
+        <th mat-header-cell *matHeaderCellDef>Amount Paid</th>
+        <td mat-cell *matCellDef="let invoice">
+          {{ invoice.amountPaidOnInvoice | currency:'USD':'symbol':'1.2-2' }}
+        </td>
+      </ng-container>
+
+      <!-- Balance Column -->
+      <ng-container matColumnDef="balance">
+        <th mat-header-cell *matHeaderCellDef>Balance</th>
+        <td mat-cell *matCellDef="let invoice">
+          {{ invoice.balance | currency:'USD':'symbol':'1.2-2' }}
+        </td>
+      </ng-container>
+
+      <!-- Status Column -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let invoice">
+          <mat-chip [color]="getStatusColor(invoice.status) || undefined">
+            {{ invoice.status }}
+          </mat-chip>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+  </mat-card-content>
+</mat-card>
+

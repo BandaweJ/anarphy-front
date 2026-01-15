@@ -265,6 +265,12 @@
               <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Billing</span>
             </button>
 
+            <!-- Group Invoice -->
+            <button mat-button routerLink="/group-invoice" routerLinkActive="active" *ngIf="canAccessBilling$ | async">
+              <mat-icon>group</mat-icon>
+              <span *ngIf="!isSidenavCollapsed || isScreenSmall" class="menu-text">Group Invoice</span>
+            </button>
+
             <!-- Invoices List -->
             <button mat-button routerLink="/invoice" routerLinkActive="active"
               *ngIf="canAccessBilling$ | async">

@@ -4,22 +4,100 @@
     <span>Invoices</span>
   </div>
   
-  <mat-list role="list" *ngIf="invoices$ | async as invoices; else emptyTemplate">
-    <mat-list-item 
-      (click)="selectInvoice(invoice)" 
-      role="listitem" 
-      *ngFor="let invoice of invoices"
-      [class.selected]="isSelected(invoice)"
-      [class.theme-light]="currentTheme === 'light'"
-      [class.theme-dark]="currentTheme === 'dark'">
-      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-        <span>{{ invoice.invoiceNumber }}</span>
-        <span style="color: var(--text-secondary); font-size: 0.875rem;">
-          {{ invoice.student.surname }} {{ invoice.student.name }}
-        </span>
-      </div>
-    </mat-list-item>
-  </mat-list>
+  <div *ngIf="groupedInvoices$ | async as groupedInvoices; else emptyTemplate">
+    <mat-accordion multi="true" *ngIf="groupedInvoices.length > 0">
+      <mat-expansion-panel 
+        *ngFor="let group of groupedInvoices"
+        [expanded]="false"
+        [class.group-invoice]="isGroupInvoice(group)">
+        
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <div class="invoice-header-content">
+              <mat-icon *ngIf="isGroupInvoice(group)">group</mat-icon>
+              <mat-icon *ngIf="!isGroupInvoice(group)">receipt</mat-icon>
+              <span class="invoice-number">
+                {{ isGroupInvoice(group) ? group.groupInvoiceNumber : group.invoices[0].invoiceNumber }}
+              </span>
+              <mat-chip *ngIf="isGroupInvoice(group)" class="group-chip">
+                {{ group.invoices.length }} students
+              </mat-chip>
+            </div>
+          </mat-panel-title>
+          <mat-panel-description>
+            <span *ngIf="isGroupInvoice(group)">
+              Total: {{ group.totalBill | currency:'USD':'symbol':'1.2-2' }} | 
+              Paid: {{ group.totalPaid | currency:'USD':'symbol':'1.2-2' }} | 
+              Balance: {{ group.totalBalance | currency:'USD':'symbol':'1.2-2' }}
+            </span>
+            <span *ngIf="!isGroupInvoice(group)">
+              {{ group.invoices[0].student.surname }} {{ group.invoices[0].student.name }}
+            </span>
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <!-- Download button for group invoices -->
+        <div *ngIf="isGroupInvoice(group)" class="group-invoice-actions">
+          <button 
+            mat-raised-button 
+            color="primary" 
+            (click)="downloadGroupInvoice(group.groupInvoiceNumber, $event)"
+            [disabled]="isDownloading(group.groupInvoiceNumber)">
+            <mat-spinner *ngIf="isDownloading(group.groupInvoiceNumber)" diameter="20"></mat-spinner>
+            <mat-icon *ngIf="!isDownloading(group.groupInvoiceNumber)">download</mat-icon>
+            {{ isDownloading(group.groupInvoiceNumber) ? 'Downloading...' : 'Download Group Invoice PDF' }}
+          </button>
+        </div>
+
+        <div *ngIf="isGroupInvoice(group) && group.donorNote" class="donor-note">
+          <mat-icon>info</mat-icon>
+          <span><strong>Donor/Scholarship:</strong> {{ group.donorNote }}</span>
+        </div>
+
+        <mat-list role="list">
+          <mat-list-item 
+            (click)="selectInvoiceFromGroup(invoice)" 
+            role="listitem" 
+            *ngFor="let invoice of group.invoices"
+            [class.selected]="isSelected(invoice)"
+            [class.theme-light]="currentTheme === 'light'"
+            [class.theme-dark]="currentTheme === 'dark'">
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+              <div>
+                <span class="invoice-number">{{ invoice.invoiceNumber }}</span>
+                <span style="color: var(--text-secondary); font-size: 0.875rem; display: block; margin-top: 4px;">
+                  {{ invoice.student.surname }} {{ invoice.student.name }}
+                </span>
+              </div>
+              <div style="text-align: right; font-size: 0.875rem;">
+                <div>Bill: {{ invoice.totalBill | currency:'USD':'symbol':'1.2-2' }}</div>
+                <div>Paid: {{ invoice.amountPaidOnInvoice | currency:'USD':'symbol':'1.2-2' }}</div>
+                <div>Balance: {{ invoice.balance | currency:'USD':'symbol':'1.2-2' }}</div>
+              </div>
+            </div>
+          </mat-list-item>
+        </mat-list>
+      </mat-expansion-panel>
+    </mat-accordion>
+
+    <!-- Fallback to simple list if no grouped invoices -->
+    <mat-list role="list" *ngIf="groupedInvoices.length === 0">
+      <mat-list-item 
+        (click)="selectInvoice(invoice)" 
+        role="listitem" 
+        *ngFor="let invoice of (invoices$ | async) || []"
+        [class.selected]="isSelected(invoice)"
+        [class.theme-light]="currentTheme === 'light'"
+        [class.theme-dark]="currentTheme === 'dark'">
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+          <span>{{ invoice.invoiceNumber }}</span>
+          <span style="color: var(--text-secondary); font-size: 0.875rem;">
+            {{ invoice.student.surname }} {{ invoice.student.name }}
+          </span>
+        </div>
+      </mat-list-item>
+    </mat-list>
+  </div>
   
   <ng-template #emptyTemplate>
     <div class="empty-list">

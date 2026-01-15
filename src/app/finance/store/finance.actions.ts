@@ -76,6 +76,25 @@ export const invoiceActions = createActionGroup({
     'Void Invoice': props<{ invoiceId: number }>(), // Request to void an invoice
     'Void Invoice Success': props<{ invoice: InvoiceModel }>(), // Voiding successful, provide updated invoice
     'Void Invoice Failure': props<{ error: HttpErrorResponse }>(), // Voiding failed
+
+    // --- GROUP INVOICE ACTIONS ---
+    createGroupInvoice: props<{
+      students: Array<{
+        studentNumber: string;
+        termNum: number;
+        year: number;
+        bills: BillModel[];
+      }>;
+      donorNote?: string;
+      invoiceDate?: string | Date;
+      invoiceDueDate?: string | Date;
+    }>(),
+    createGroupInvoiceSuccess: props<{ invoices: InvoiceModel[] }>(),
+    createGroupInvoiceFail: props<{ error: HttpErrorResponse }>(),
+
+    fetchGroupInvoice: props<{ groupInvoiceNumber: string }>(),
+    fetchGroupInvoiceSuccess: props<{ invoices: InvoiceModel[] }>(),
+    fetchGroupInvoiceFail: props<{ error: HttpErrorResponse }>(),
   },
 });
 

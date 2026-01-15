@@ -82,6 +82,14 @@
         <span class="meta-label">Invoice #</span>
         <span class="meta-value">{{ invoice?.invoiceNumber || 'N/A' }}</span>
       </div>
+      <div class="meta-item" *ngIf="invoice?.groupInvoiceNumber">
+        <span class="meta-label">Group Invoice #</span>
+        <span class="meta-value">{{ invoice?.groupInvoiceNumber }}</span>
+      </div>
+      <div class="meta-item" *ngIf="invoice?.donorNote">
+        <span class="meta-label">Donor/Scholarship</span>
+        <span class="meta-value">{{ invoice?.donorNote }}</span>
+      </div>
       <div class="meta-item">
         <span class="meta-label">Date</span>
         <span class="meta-value">{{ formatDate(invoice?.invoiceDate) }}</span>

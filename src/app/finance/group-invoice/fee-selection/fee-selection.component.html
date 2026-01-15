@@ -1,0 +1,183 @@
+<div class="fee-selection-container">
+  <form [formGroup]="feeForm">
+    <!-- New Student Fees -->
+    <mat-card class="fee-category-card" *ngIf="newStudentFees.length > 0">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>person_add</mat-icon>
+          New Student Fees
+        </mat-card-title>
+        <mat-card-subtitle>One-time fees for new students</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="fee-list">
+          <div class="fee-item" *ngFor="let fee of newStudentFees">
+            <mat-checkbox 
+              [formControlName]="'fee_' + fee.id"
+              color="primary">
+              <div class="fee-details">
+                <span class="fee-name">{{ getFeeDisplayName(fee.name) }}</span>
+                <span class="fee-amount">{{ fee.amount | currency:'USD':'symbol':'1.2-2' }}</span>
+              </div>
+            </mat-checkbox>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Tuition Fees -->
+    <mat-card class="fee-category-card" *ngIf="tuitionFees.length > 0">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>school</mat-icon>
+          Tuition Fees
+        </mat-card-title>
+        <mat-card-subtitle>Termly tuition fees</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="fee-list">
+          <div class="fee-item" *ngFor="let fee of tuitionFees">
+            <mat-checkbox 
+              [formControlName]="'fee_' + fee.id"
+              color="primary">
+              <div class="fee-details">
+                <span class="fee-name">{{ getFeeDisplayName(fee.name) }}</span>
+                <span class="fee-amount">{{ fee.amount | currency:'USD':'symbol':'1.2-2' }}</span>
+              </div>
+            </mat-checkbox>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Science Fees -->
+    <mat-card class="fee-category-card" *ngIf="scienceFees.length > 0">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>science</mat-icon>
+          Science Fees
+        </mat-card-title>
+        <mat-card-subtitle>Science subject fees</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="fee-list">
+          <div class="fee-item" *ngFor="let fee of scienceFees">
+            <mat-checkbox 
+              [formControlName]="'fee_' + fee.id"
+              color="primary">
+              <div class="fee-details">
+                <span class="fee-name">{{ getFeeDisplayName(fee.name) }}</span>
+                <span class="fee-amount">{{ fee.amount | currency:'USD':'symbol':'1.2-2' }}</span>
+              </div>
+            </mat-checkbox>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Development Fee -->
+    <mat-card class="fee-category-card" *ngIf="developmentFee">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>construction</mat-icon>
+          Development Fee
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="fee-list">
+          <div class="fee-item">
+            <mat-checkbox 
+              [formControlName]="'fee_' + developmentFee.id"
+              color="primary">
+              <div class="fee-details">
+                <span class="fee-name">{{ getFeeDisplayName(developmentFee.name) }}</span>
+                <span class="fee-amount">{{ developmentFee.amount | currency:'USD':'symbol':'1.2-2' }}</span>
+              </div>
+            </mat-checkbox>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Optional Services -->
+    <mat-card class="fee-category-card" *ngIf="optionalServiceFees.length > 0">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>restaurant</mat-icon>
+          Optional Services
+        </mat-card-title>
+        <mat-card-subtitle>Food and transport services</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="fee-list">
+          <div class="fee-item" *ngFor="let fee of optionalServiceFees">
+            <mat-checkbox 
+              [formControlName]="'fee_' + fee.id"
+              color="primary">
+              <div class="fee-details">
+                <span class="fee-name">{{ getFeeDisplayName(fee.name) }}</span>
+                <span class="fee-amount">{{ fee.amount | currency:'USD':'symbol':'1.2-2' }}</span>
+              </div>
+            </mat-checkbox>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Uniform Fees -->
+    <mat-card class="fee-category-card" *ngIf="uniformFees.length > 0">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>checkroom</mat-icon>
+          Uniform Fees
+        </mat-card-title>
+        <mat-card-subtitle>Specify quantities for each uniform type</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="uniform-fees-list">
+          <div class="uniform-fee-item" *ngFor="let fee of uniformFees">
+            <div class="uniform-fee-info">
+              <span class="uniform-fee-name">{{ getFeeDisplayName(fee.name) }}</span>
+              <span class="uniform-fee-unit-price">{{ fee.amount | currency:'USD':'symbol':'1.2-2' }} each</span>
+            </div>
+            <mat-form-field appearance="outline" class="quantity-field">
+              <mat-label>Quantity</mat-label>
+              <input 
+                matInput 
+                type="number" 
+                [formControlName]="'fee_' + fee.id + '_qty'"
+                min="0"
+                placeholder="0">
+              <mat-hint>Number of students needing this uniform</mat-hint>
+            </mat-form-field>
+            <div class="uniform-fee-total" *ngIf="getUniformQuantity(fee.id) > 0">
+              Total: {{ (fee.amount * getUniformQuantity(fee.id)) | currency:'USD':'symbol':'1.2-2' }}
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </form>
+
+  <!-- Summary -->
+  <mat-card class="summary-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>calculate</mat-icon>
+        Total Amount
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="total-amount">
+        <span class="total-label">Grand Total:</span>
+        <span class="total-value">{{ getTotalAmount() | currency:'USD':'symbol':'1.2-2' }}</span>
+      </div>
+      <div class="selected-fees-count">
+        {{ (selectedFees || []).length }} fee type(s) selected
+      </div>
+      <div class="students-count" *ngIf="numberOfStudents > 0">
+        {{ numberOfStudents }} student(s) selected
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

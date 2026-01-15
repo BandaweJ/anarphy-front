@@ -184,9 +184,9 @@ export class AuthEffects {
               return currentUrl === normalizedRoute || currentUrl.startsWith(normalizedRoute + '/');
             });
             
-            // Only redirect to dashboard if not on a public route
-            if (!isPublicRoute) {
-              // Check if user is bootstrap user and redirect accordingly
+            // If user is logged in and on signin/signup page, redirect to dashboard
+            if (isPublicRoute && (currentUrl === '/signin' || currentUrl === '/signup')) {
+              // User is logged in but on signin page, redirect to appropriate dashboard
               if (authStatus.user.isBootstrap) {
                 this.router.navigateByUrl('/teachers');
               } else if (authStatus.user.role === ROLES.parent) {
@@ -195,6 +195,17 @@ export class AuthEffects {
                 this.router.navigateByUrl('/dashboard');
               }
             }
+            // If user is on root path and logged in, redirect to dashboard
+            else if (currentUrl === '/' || currentUrl === '') {
+              if (authStatus.user.isBootstrap) {
+                this.router.navigateByUrl('/teachers');
+              } else if (authStatus.user.role === ROLES.parent) {
+                this.router.navigateByUrl('/parent-dashboard');
+              } else {
+                this.router.navigateByUrl('/dashboard');
+              }
+            }
+            // Otherwise, stay on current route (user is already on a valid route)
             
             return signinActions.signinSuccess({
               // Use grouped action for dispatch
@@ -216,15 +227,10 @@ export class AuthEffects {
               return currentUrl === normalizedRoute || currentUrl.startsWith(normalizedRoute + '/');
             });
             
-            // Debug logging (can be removed later)
-            console.log('Auth check - Current URL:', currentUrl, 'Is public route:', isPublicRoute);
-            
             // Only redirect if not on a public route and not on root
+            // If on root, let the default route handle the redirect
             if (!isPublicRoute && currentUrl !== '/' && currentUrl !== '') {
-              console.log('Redirecting to /signin from:', currentUrl);
               this.router.navigateByUrl('/signin');
-            } else {
-              console.log('Not redirecting - public route or root');
             }
             
             return logout(); // Still an individual action

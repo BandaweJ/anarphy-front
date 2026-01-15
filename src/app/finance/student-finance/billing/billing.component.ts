@@ -9,28 +9,34 @@ import {
   ChangeDetectorRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import {
   billStudentActions,
   feesActions,
   isNewComerActions,
+  invoiceActions,
 } from '../../store/finance.actions';
 import { FeesModel } from '../../models/fees.model';
 import {
   selectedStudentInvoice,
   selectFees,
   selectIsNewComer,
+  selectStudentsToBill,
 } from '../../store/finance.selector';
+import { billingActions } from '../../store/finance.actions';
 import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
 import { BillModel } from '../../models/bill.model';
+import { TermsModel } from 'src/app/enrolment/models/terms.model';
+import { selectTerms } from 'src/app/enrolment/store/enrolment.selectors';
+import { fetchTerms } from 'src/app/enrolment/store/enrolment.actions';
 import { SharedService } from 'src/app/shared.service';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 // ConfirmDeleteDialogComponent will be lazy loaded
 import { Residence } from 'src/app/enrolment/models/residence.enum';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Subscription, combineLatest, Subject } from 'rxjs';
-import { startWith, distinctUntilChanged, map, takeUntil } from 'rxjs/operators';
+import { startWith, distinctUntilChanged, map, takeUntil, take } from 'rxjs/operators';
 import { ThemeService, Theme } from '../../../services/theme.service';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -39,6 +45,10 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatTabsModule } from '@angular/material/tabs';
 
 @Component({
   selector: 'app-billing',
@@ -46,6 +56,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,
     MatCardModule,
     MatIconModule,
     MatRadioModule,
@@ -53,6 +64,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
     MatDividerModule,
     MatButtonModule,
     MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatChipsModule,
+    MatTabsModule,
     MatSnackBarModule,
     MatDialogModule,
   ],
@@ -65,6 +80,7 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
   isNewComer$ = this.store.select(selectIsNewComer);
   isScienceStudent: boolean = false;
   @Input() enrolment: EnrolsModel | undefined = undefined;
+  @Input() term: { num: number; year: number } | null = null; // For group invoice mode
   selectedBills: BillModel[] = []; // Bills already associated with the invoice from backend
   toBill: BillModel[] = []; // Temporary staging area for bills to be processed on save
   currentInvoice: any = null; // Store current invoice for accessing student information
@@ -74,6 +90,7 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
 
   academicSettingsForm!: FormGroup;
   accommodationOptions = Object.values(Residence); // Use Object.values for enum strings
+
 
   // --- Subscriptions to manage memory leaks ---
   private subscriptions: Subscription[] = [];
@@ -96,6 +113,7 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
     private cdr: ChangeDetectorRef
   ) {
     this.store.dispatch(feesActions.fetchFees());
+    this.store.dispatch(fetchTerms());
   }
 
   // --- Getters for Form Controls for cleaner access ---
@@ -944,6 +962,7 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
    * @param fee The FeesModel to add.
    */
   addFeeToToBill(fee: FeesModel | undefined): void {
+    if (!fee) return;
     if (!fee?.id) {
       return;
     }
@@ -957,7 +976,8 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
       return;
     }
     
-    // Use currentInvoice.student for editing existing invoices, or enrolment.student for new invoices
+    
+    // For single invoice mode, use currentInvoice.student for editing existing invoices, or enrolment.student for new invoices
     const student = this.currentInvoice?.student || this.enrolment?.student;
     const enrol = this.currentInvoice?.enrol || this.enrolment;
     
@@ -977,6 +997,7 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
         enrol: enrol,
       };
       this.toBill.push(newBill);
+      this.cdr.markForCheck(); // Trigger change detection for OnPush strategy
     }
   }
 
@@ -994,6 +1015,7 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
     );
     if (billToRemoveIndex !== -1) {
       this.toBill.splice(billToRemoveIndex, 1);
+      this.cdr.markForCheck(); // Trigger change detection for OnPush strategy
     }
   }
 
@@ -1014,6 +1036,7 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
       this.academicSettingsForm.markAllAsTouched(); // Show validation errors
     }
   }
+
 
   onCancel(): void {
     this.snackBar.open('Changes cancelled.', 'Close', {

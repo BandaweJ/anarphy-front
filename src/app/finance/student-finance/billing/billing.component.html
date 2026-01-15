@@ -1,6 +1,13 @@
 <div class="settings-page-container" [class.theme-light]="currentTheme === 'light'" [class.theme-dark]="currentTheme === 'dark'">
 
   <mat-card class="settings-card mat-elevation-z4">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>payment</mat-icon>
+        Billing Management
+      </mat-card-title>
+      <mat-card-subtitle>Configure student billing and fees</mat-card-subtitle>
+    </mat-card-header>
     <mat-card-content>
       <div class="enrollment-preferences-section">
         <div class="header-section">
@@ -105,8 +112,10 @@
 
     <mat-card-actions align="end" class="card-actions">
       <button mat-button (click)="onCancel()" color="warn">Cancel</button>
-      <button mat-raised-button color="primary" (click)="onSaveChanges()" [disabled]="academicSettingsForm.invalid">Save
-        Changes</button>
+        <button mat-raised-button color="primary" (click)="onSaveChanges()" 
+          [disabled]="academicSettingsForm.invalid">
+          Save Changes
+        </button>
     </mat-card-actions>
   </mat-card>
 </div>

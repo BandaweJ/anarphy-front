@@ -246,6 +246,12 @@ const routes: Routes = [
     title: 'Individual Student Finance',
   },
   {
+    path: 'group-invoice',
+    loadComponent: () => import('./finance/group-invoice/group-invoice.component').then(m => m.GroupInvoiceComponent),
+    canActivate: [AuthGuardService],
+    title: 'Group Invoice',
+  },
+  {
     path: 'payments',
     loadComponent: () => import('./finance/payments/payments.component').then(m => m.PaymentsComponent),
     canActivate: [AuthGuardService],
@@ -367,6 +373,8 @@ const routes: Routes = [
   },
   {
     path: '', // Default route for the root path
+    // Don't redirect immediately - let auth check handle it
+    // This prevents showing signin page when user is logged in
     redirectTo: 'signin',
     pathMatch: 'full',
   },

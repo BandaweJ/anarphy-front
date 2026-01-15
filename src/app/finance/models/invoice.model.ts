@@ -33,4 +33,11 @@ export interface InvoiceModel {
 
   // Legacy flag for historical invoices that may have data inconsistencies
   isLegacy?: boolean;
+
+  // Group invoice fields
+  groupInvoiceNumber?: string | null;
+  donorNote?: string | null;
+  
+  // For group invoice responses, include all invoices in the group
+  groupInvoices?: InvoiceModel[];
 }

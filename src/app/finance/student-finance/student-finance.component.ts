@@ -6,7 +6,9 @@ import { Observable, Subject } from 'rxjs';
 import { take, takeUntil, filter } from 'rxjs/operators';
 import { TermsModel } from 'src/app/enrolment/models/terms.model';
 import { selectTerms } from 'src/app/enrolment/store/enrolment.selectors';
+import { fetchTerms } from 'src/app/enrolment/store/enrolment.actions';
 import { StudentsModel } from 'src/app/registration/models/students.model';
+import { fetchStudents } from 'src/app/registration/store/registration.actions';
 import { invoiceActions } from '../store/finance.actions';
 import { InvoiceModel } from '../models/invoice.model';
 import {
@@ -76,6 +78,10 @@ export class StudentFinanceComponent implements OnInit, OnDestroy {
     this.loadingInvoice$ = this.store.select(selectLoadingInvoice);
     this.error$ = this.store.select(selectFechInvoiceError);
     this.invoiceWarning$ = this.store.select(selectInvoiceWarning);
+    
+    // Fetch terms and students on component initialization
+    this.store.dispatch(fetchTerms());
+    this.store.dispatch(fetchStudents());
   }
 
   ngOnInit(): void {
