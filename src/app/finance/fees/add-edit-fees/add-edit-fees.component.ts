@@ -134,7 +134,8 @@ export class AddEditFeesComponent implements OnInit, OnDestroy {
       [FeesNames.juniorGirlsUniform]: 'Junior Girls Uniform',
       [FeesNames.juniorBoysUniform]: 'Junior Boys Uniform',
       [FeesNames.seniorGirlsUniform]: 'Senior Girls Uniform',
-      [FeesNames.seniorBoysUniform]: 'Senior Boys Uniform'
+      [FeesNames.seniorBoysUniform]: 'Senior Boys Uniform',
+      [FeesNames.hostelsFee]: 'Hostels Fee',
     };
     return displayNames[feeName] || feeName;
   }
@@ -153,6 +154,7 @@ export class AddEditFeesComponent implements OnInit, OnDestroy {
       [FeesNames.developmentFee]: 'O Level Fees',
       [FeesNames.foodFee]: 'Optional Services',
       [FeesNames.transportFee]: 'Optional Services',
+      [FeesNames.hostelsFee]: 'Optional Services',
       [FeesNames.juniorGirlsUniform]: 'Uniform Fees',
       [FeesNames.juniorBoysUniform]: 'Uniform Fees',
       [FeesNames.seniorGirlsUniform]: 'Uniform Fees',
@@ -175,6 +177,7 @@ export class AddEditFeesComponent implements OnInit, OnDestroy {
       [FeesNames.developmentFee]: 'Development fee for O Level students',
       [FeesNames.foodFee]: 'Optional fee for day scholars who eat at school',
       [FeesNames.transportFee]: 'Optional fee for day scholars who use school transport',
+      [FeesNames.hostelsFee]: 'Optional hostels fee for students',
       [FeesNames.juniorGirlsUniform]: 'Uniform fee for O Level female students',
       [FeesNames.juniorBoysUniform]: 'Uniform fee for O Level male students',
       [FeesNames.seniorGirlsUniform]: 'Uniform fee for A Level female students',
@@ -197,6 +200,7 @@ export class AddEditFeesComponent implements OnInit, OnDestroy {
       [FeesNames.developmentFee]: 'o-level',
       [FeesNames.foodFee]: 'optional',
       [FeesNames.transportFee]: 'optional',
+      [FeesNames.hostelsFee]: 'optional',
       [FeesNames.juniorGirlsUniform]: 'uniform',
       [FeesNames.juniorBoysUniform]: 'uniform',
       [FeesNames.seniorGirlsUniform]: 'uniform',

@@ -51,6 +51,7 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
   statusForm!: FormGroup;
   isLoading = false;
   isUpdating = false;
+  isDownloading = false;
   ApplicationStatus = ApplicationStatus;
 
   constructor(
@@ -162,6 +163,30 @@ export class ApplicationDetailComponent implements OnInit, OnDestroy {
 
   goBack(): void {
     this.router.navigate(['/applications']);
+  }
+
+  downloadApplicationPdf(): void {
+    if (!this.application || this.isDownloading) {
+      return;
+    }
+
+    this.isDownloading = true;
+    this.applicationsService.downloadApplicationPdf(this.application.id).subscribe({
+      next: () => {
+        this.isDownloading = false;
+        this.snackBar.open('Application PDF downloaded successfully', 'Close', {
+          duration: 3000,
+        });
+      },
+      error: (error) => {
+        this.isDownloading = false;
+        this.snackBar.open(
+          error.error?.message || 'Failed to download application PDF',
+          'Close',
+          { duration: 5000 },
+        );
+      },
+    });
   }
 }
 

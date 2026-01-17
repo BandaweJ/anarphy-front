@@ -273,6 +273,7 @@ export class GroupInvoicePreviewComponent implements OnInit, OnChanges {
       [FeesNames.juniorBoysUniform]: 'Junior Boys Uniform',
       [FeesNames.seniorGirlsUniform]: 'Senior Girls Uniform',
       [FeesNames.seniorBoysUniform]: 'Senior Boys Uniform',
+      [FeesNames.hostelsFee]: 'Hostels Fee',
     };
     return displayNames[feeName as FeesNames] || feeName;
   }

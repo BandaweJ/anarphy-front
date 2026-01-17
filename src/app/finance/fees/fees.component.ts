@@ -134,6 +134,7 @@ export class FeesComponent implements OnInit, OnDestroy {
         // Optional Services
         case FeesNames.foodFee:
         case FeesNames.transportFee:
+        case FeesNames.hostelsFee:
           this.optionalServiceFees.push(fee);
           break;
 
@@ -165,7 +166,8 @@ export class FeesComponent implements OnInit, OnDestroy {
       [FeesNames.juniorGirlsUniform]: 'Junior Girls Uniform',
       [FeesNames.juniorBoysUniform]: 'Junior Boys Uniform',
       [FeesNames.seniorGirlsUniform]: 'Senior Girls Uniform',
-      [FeesNames.seniorBoysUniform]: 'Senior Boys Uniform'
+      [FeesNames.seniorBoysUniform]: 'Senior Boys Uniform',
+      [FeesNames.hostelsFee]: 'Hostels Fee',
     };
     return displayNames[feeName] || feeName;
   }

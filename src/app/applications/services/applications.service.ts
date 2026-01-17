@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import {
@@ -7,6 +7,7 @@ import {
   UpdateApplicationStatusDto,
 } from '../models/application.model';
 import { environment } from 'src/environments/environment';
+import { map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -68,6 +69,45 @@ export class ApplicationsService {
   trackApplication(applicationId: string): Observable<ApplicationModel> {
     return this.httpClient.get<ApplicationModel>(
       this.baseUrl + 'track/' + applicationId,
+    );
+  }
+
+  /**
+   * Download application as PDF (admin only)
+   */
+  downloadApplicationPdf(id: string): Observable<HttpResponse<Blob>> {
+    return this.httpClient.get(
+      this.baseUrl + id + '/pdf',
+      {
+        responseType: 'blob',
+        observe: 'response',
+      }
+    ).pipe(
+      map((response: HttpResponse<Blob>) => {
+        const contentDisposition = response.headers.get('content-disposition');
+        let filename = `application_${id}.pdf`;
+        
+        if (contentDisposition) {
+          const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
+          if (filenameMatch) {
+            filename = filenameMatch[1];
+          }
+        }
+
+        const blob = response.body;
+        if (blob) {
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = filename;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+        }
+
+        return response;
+      })
     );
   }
 }

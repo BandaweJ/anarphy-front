@@ -172,6 +172,12 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
     }
     return this.academicSettingsForm.get('transportOption') as FormControl;
   }
+  get hostelsOption(): FormControl {
+    if (!this.academicSettingsForm) {
+      this.initializeForm();
+    }
+    return this.academicSettingsForm.get('hostelsOption') as FormControl;
+  }
   get juniorGirlsUniform(): FormControl {
     if (!this.academicSettingsForm) {
       this.initializeForm();
@@ -223,6 +229,7 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
       aLevelAccommodationType: [null, Validators.required],
       foodOption: [false],
       transportOption: [false],
+      hostelsOption: [false],
       juniorGirlsUniform: [false],
       juniorBoysUniform: [false],
       seniorGirlsUniform: [false],
@@ -380,6 +387,17 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
           this.addFeeToToBill(transportFee);
         } else {
           this.removeFeeFromToBill(transportFee);
+        }
+      })
+    );
+
+    this.subscriptions.push(
+      this.hostelsOption.valueChanges.subscribe((value) => {
+        const hostelsFee = this.findFee('hostelsFee');
+        if (value) {
+          this.addFeeToToBill(hostelsFee);
+        } else {
+          this.removeFeeFromToBill(hostelsFee);
         }
       })
     );
@@ -726,6 +744,14 @@ export class BillingComponent implements OnInit, OnChanges, OnDestroy {
     if (transportBill) {
       formUpdates['transportOption'] = true;
       addBillToInitial(transportBill, transportFee);
+    }
+
+    // Hostels Fee (optional checkbox)
+    const hostelsBill = findBillByFeeName(bills, 'hostelsFee');
+    const hostelsFee = findFee('hostelsFee');
+    if (hostelsBill) {
+      formUpdates['hostelsOption'] = true;
+      addBillToInitial(hostelsBill, hostelsFee);
     }
 
     // Uniform bills

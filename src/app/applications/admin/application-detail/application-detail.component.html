@@ -8,6 +8,17 @@
     <mat-card-header>
       <mat-card-title>Application Details</mat-card-title>
       <mat-card-subtitle>Reference: {{ application.applicationId }}</mat-card-subtitle>
+      <div class="header-actions">
+        <button 
+          mat-raised-button 
+          color="primary" 
+          (click)="downloadApplicationPdf()"
+          [disabled]="isDownloading">
+          <mat-spinner *ngIf="isDownloading" diameter="20"></mat-spinner>
+          <mat-icon *ngIf="!isDownloading">download</mat-icon>
+          {{ isDownloading ? 'Downloading...' : 'Download PDF' }}
+        </button>
+      </div>
     </mat-card-header>
 
     <mat-card-content>
