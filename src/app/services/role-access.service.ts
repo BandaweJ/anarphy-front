@@ -238,14 +238,14 @@ export class RoleAccessService {
   canVoidReceipt$(): Observable<boolean> {
     return this.hasPermission$(
       PERMISSIONS.FINANCE.VOID_RECEIPT,
-      [ROLES.auditor, ROLES.director, ROLES.reception]
+      [ROLES.auditor, ROLES.director, ROLES.reception, ROLES.admin]
     );
   }
 
   canVoidInvoice$(): Observable<boolean> {
     return this.hasPermission$(
       PERMISSIONS.FINANCE.VOID_INVOICE,
-      [ROLES.auditor, ROLES.director, ROLES.reception]
+      [ROLES.auditor, ROLES.director, ROLES.reception, ROLES.admin]
     );
   }
 
