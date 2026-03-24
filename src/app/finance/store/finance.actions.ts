@@ -31,7 +31,7 @@ export const feesActions = createActionGroup({
 export const billingActions = createActionGroup({
   source: 'Student Finance Component',
   events: {
-    fetchStudentsToBill: props<{ num: number; year: number; termId?: number }>(),
+    fetchStudentsToBill: props<{ termId: number; num?: number; year?: number }>(),
     fetchStudentsToBillSuccess: props<{ studentsToBill: EnrolsModel[] }>(),
     fetchStudentsToBillFail: props<{ error: HttpErrorResponse }>(),
   },
@@ -40,7 +40,7 @@ export const billingActions = createActionGroup({
 export const invoiceActions = createActionGroup({
   source: 'Student Finance Component',
   events: {
-    fetchInvoice: props<{ studentNumber: string; num: number; year: number; termId?: number }>(),
+    fetchInvoice: props<{ studentNumber: string; termId: number; num?: number; year?: number }>(),
     fetchInvoiceSuccess: props<{ invoice: InvoiceModel; warning?: { message: string; voidedInvoiceNumber?: string; voidedAt?: Date; voidedBy?: string } }>(),
     fetchInvoiceFail: props<{ error: HttpErrorResponse }>(),
 
@@ -53,11 +53,11 @@ export const invoiceActions = createActionGroup({
     saveInvoiceSuccess: props<{ invoice: InvoiceModel }>(),
     saveInvoiceFail: props<{ error: HttpErrorResponse }>(),
 
-    fetchInvoiceStats: props<{ num: number; year: number; termId?: number }>(),
+    fetchInvoiceStats: props<{ termId: number; num?: number; year?: number }>(),
     fetchInvoiceStatsSuccess: props<{ invoiceStats: InvoiceStatsModel[] }>(),
     fetchInvoiceStatsFail: props<{ error: HttpErrorResponse }>(),
 
-    fetchTermInvoices: props<{ num: number; year: number; termId?: number }>(), //invoices for a term
+    fetchTermInvoices: props<{ termId: number; num?: number; year?: number }>(), //invoices for a term
     fetchTermInvoicesSuccess: props<{ invoices: InvoiceModel[] }>(),
     fetchTermInvoicesFail: props<{ error: HttpErrorResponse }>(),
 
@@ -81,9 +81,9 @@ export const invoiceActions = createActionGroup({
     createGroupInvoice: props<{
       students: Array<{
         studentNumber: string;
-        termNum: number;
-        year: number;
-        termId?: number;
+        termId: number;
+        termNum?: number;
+        year?: number;
         bills: BillModel[];
       }>;
       donorNote?: string;

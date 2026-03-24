@@ -92,15 +92,18 @@ export class InvoiceComponent implements OnInit, OnDestroy {
   }
 
   onTermChange(term: TermsModel) {
+    if (term.id === undefined) {
+      return;
+    }
     this.term = term;
     // this.store.dispatch(
     //   invoiceActions.fetchInvoiceStats({ num: term.num, year: term.year })
     // );
     this.store.dispatch(
       invoiceActions.fetchTermInvoices({
+        termId: term.id,
         num: term.num,
         year: term.year,
-        termId: term.id,
       })
     );
   }

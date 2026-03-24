@@ -105,35 +105,36 @@ export class StudentFinanceComponent implements OnInit, OnDestroy {
     this.selectedTerm = term;
   }
 
-         generateInvoice(): void {
-           if (
-             this.selectedStudentNumber &&
-             this.selectedTerm?.num !== undefined &&
-             this.selectedTerm?.year !== undefined
-           ) {
-             this.store.dispatch(
-               invoiceActions.fetchInvoice({
-                 studentNumber: this.selectedStudentNumber,
-                 num: this.selectedTerm.num,
-                 year: this.selectedTerm.year,
-                 termId: this.selectedTerm.id,
-               })
-             );
-           }
-         }
+  generateInvoice(): void {
+    if (
+      this.selectedStudentNumber &&
+      this.selectedTerm?.id !== undefined &&
+      this.selectedTerm?.num !== undefined &&
+      this.selectedTerm?.year !== undefined
+    ) {
+      this.store.dispatch(
+        invoiceActions.fetchInvoice({
+          studentNumber: this.selectedStudentNumber,
+          termId: this.selectedTerm.id,
+          num: this.selectedTerm.num,
+          year: this.selectedTerm.year,
+        })
+      );
+    }
+  }
 
-         saveInvoice(): void {
-           // Get the current invoice from the store and save it
-           this.invoice$.pipe(take(1)).subscribe(currentInvoice => {
-             if (currentInvoice && currentInvoice.invoiceNumber) {
-               this.store.dispatch(
-                 invoiceActions.saveInvoice({ invoice: currentInvoice })
-               );
-             } else {
-               console.warn('No invoice available to save. Please generate an invoice first.');
-             }
-           });
-         }
+  saveInvoice(): void {
+    // Get the current invoice from the store and save it
+    this.invoice$.pipe(take(1)).subscribe((currentInvoice) => {
+      if (currentInvoice && currentInvoice.invoiceNumber) {
+        this.store.dispatch(
+          invoiceActions.saveInvoice({ invoice: currentInvoice })
+        );
+      } else {
+        console.warn('No invoice available to save. Please generate an invoice first.');
+      }
+    });
+  }
 
   clearSelection(): void {
     this.selectedStudent = null;

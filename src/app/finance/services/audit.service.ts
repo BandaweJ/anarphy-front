@@ -62,15 +62,11 @@ export class AuditService {
 
   /**
    * Get all invoices for a term including voided ones (for audit)
-   * @param num - Term number
-   * @param year - Term year
+   * @param termId - Term id
    */
-  getTermInvoicesForAudit(
-    num: number,
-    year: number,
-  ): Observable<InvoiceModel[]> {
+  getTermInvoicesForAudit(termId: number): Observable<InvoiceModel[]> {
     return this.httpClient.get<InvoiceModel[]>(
-      `${this.baseURL}invoice/audit/term/${num}/${year}`,
+      `${this.baseURL}invoice/audit/term-id/${termId}`,
     );
   }
 
@@ -91,21 +87,19 @@ export class AuditService {
   }
 
   /**
-   * Get an invoice by student, term, and year, optionally including voided
+   * Get an invoice by student and term id, optionally including voided
    * @param studentNumber - The student number
-   * @param num - Term number
-   * @param year - Term year
+   * @param termId - Term id
    * @param includeVoided - Whether to include voided invoices
    */
   getInvoice(
     studentNumber: string,
-    num: number,
-    year: number,
+    termId: number,
     includeVoided: boolean = false,
   ): Observable<InvoiceModel> {
     const params = includeVoided ? { includeVoided: 'true' } : {};
     return this.httpClient.get<InvoiceModel>(
-      `${this.baseURL}invoice/${studentNumber}/${num}/${year}`,
+      `${this.baseURL}invoice/${studentNumber}/term/${termId}`,
       { params },
     );
   }

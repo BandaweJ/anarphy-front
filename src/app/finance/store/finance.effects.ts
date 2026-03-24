@@ -128,7 +128,7 @@ export class FinanceEffects {
       ofType(billingActions.fetchStudentsToBill),
       switchMap((data) =>
         this.financeService
-          .getStudentsNotYetBilledForTerm(data.num, data.year, data.termId)
+          .getStudentsNotYetBilledForTerm(data.termId, data.num, data.year)
           .pipe(
             map((studentsToBill) => {
               return billingActions.fetchStudentsToBillSuccess({
@@ -148,7 +148,7 @@ export class FinanceEffects {
       ofType(invoiceActions.fetchInvoice),
       switchMap((data) =>
         this.paymentsService
-          .getInvoice(data.studentNumber, data.num, data.year, data.termId)
+          .getInvoice(data.studentNumber, data.termId, data.num, data.year)
           .pipe(
             map((response) => {
               return invoiceActions.fetchInvoiceSuccess({
@@ -168,7 +168,7 @@ export class FinanceEffects {
     this.actions$.pipe(
       ofType(invoiceActions.fetchTermInvoices),
       switchMap((data) =>
-        this.paymentsService.getTermInvoices(data.num, data.year, data.termId).pipe(
+        this.paymentsService.getTermInvoices(data.termId, data.num, data.year).pipe(
           map((invoices) => {
             return invoiceActions.fetchTermInvoicesSuccess({
               invoices,
@@ -240,7 +240,7 @@ export class FinanceEffects {
     this.actions$.pipe(
       ofType(invoiceActions.fetchInvoiceStats),
       switchMap((data) =>
-        this.paymentsService.getInvoiceStats(data.num, data.year, data.termId).pipe(
+        this.paymentsService.getInvoiceStats(data.termId, data.num, data.year).pipe(
           map((invoiceStats) => {
             return invoiceActions.fetchInvoiceStatsSuccess({
               invoiceStats,

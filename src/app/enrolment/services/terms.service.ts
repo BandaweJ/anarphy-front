@@ -25,6 +25,9 @@ export class TermsService {
   }
 
   deleteTerm(term: TermsModel): Observable<number> {
+    if (term.id) {
+      return this.httpClient.delete<number>(`${this.baseURL}/id/${term.id}`);
+    }
     return this.httpClient.delete<number>(`${this.baseURL}/${term.num}/${term.year}`);
   }
 

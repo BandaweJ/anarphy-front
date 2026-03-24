@@ -118,11 +118,11 @@ export class GroupInvoiceComponent implements OnInit, OnDestroy {
   // Step 1: Term Selection
   onTermSelected(term: TermsModel | null): void {
     this.selectedTerm = term;
-    if (term) {
+    if (term?.id !== undefined) {
       this.store.dispatch(billingActions.fetchStudentsToBill({ 
+        termId: term.id,
         num: term.num, 
         year: term.year,
-        termId: term.id,
       }));
       // Clear selected students when term changes
       this.selectedStudents = [];
@@ -333,7 +333,7 @@ export class GroupInvoiceComponent implements OnInit, OnDestroy {
 
         return {
           studentNumber: enrol.student?.studentNumber || '',
-          termId: enrol.termId,
+          termId: this.selectedTerm?.id ?? enrol.termId ?? 0,
           termNum: enrol.num,
           year: enrol.year,
           bills,
@@ -346,6 +346,14 @@ export class GroupInvoiceComponent implements OnInit, OnDestroy {
     const invalidStudents = groupInvoiceData.students.filter(s => !s.studentNumber);
     if (invalidStudents.length > 0) {
       this.snackBar.open('Some selected students are missing student numbers.', 'Close', {
+        duration: 3000,
+      });
+      return;
+    }
+
+    const invalidTerms = groupInvoiceData.students.filter(s => !s.termId);
+    if (invalidTerms.length > 0) {
+      this.snackBar.open('Some selected students are missing term id.', 'Close', {
         duration: 3000,
       });
       return;

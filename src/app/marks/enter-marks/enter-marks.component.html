@@ -67,6 +67,12 @@
     </div>
   </form>
 
+  <div class="term-mark-hint">
+    <p>
+      Term Mark is captured here for report display only and does not affect class or subject ranking.
+    </p>
+  </div>
+
 
   <div class="mat-elevation-z2 table-container">
     <div class="top-panel">
@@ -101,8 +107,8 @@
         </ng-container>
 
         <ng-container matColumnDef="markComment">
-          <th mat-header-cell *matHeaderCellDef [attr.colspan]="2">
-            Mark / Comment
+          <th mat-header-cell *matHeaderCellDef [attr.colspan]="3">
+            Mark / Term Mark / Comment
           </th>
           <td mat-cell *matCellDef="let row; let i = index">
             <div [formGroup]="getMarkFormGroup(i)" class="mark-comment-group">
@@ -119,7 +125,7 @@
               </mat-form-field>
 
               <mat-form-field appearance="outline" class="comment-input">
-                <mat-label>Term Mark</mat-label>
+                <mat-label>Term Mark (Display Only)</mat-label>
                 <input matInput type="number" formControlName="termMark" (blur)="saveMark(row, i)" min="0" max="100" />
                 <mat-error
                   *ngIf="(getTermMarkControl(i).hasError('min') || getTermMarkControl(i).hasError('max')) && getTermMarkControl(i).touched">
