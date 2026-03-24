@@ -1,18 +1,15 @@
 /* src/app/enrolment-chart/enrolment-chart.component.css */
 .chart-container {
   width: 100%;
-  min-height: 300px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.chart {
+  height: 360px;
   display: flex;
   justify-content: stretch;
   align-items: stretch;
+}
+
+.chart {
   width: 100% !important; /* Force canvas to take 100% width of its container */
-  height: auto !important; /* Maintain aspect ratio */
+  height: 100% !important;
 }
 
 .no-data-message {

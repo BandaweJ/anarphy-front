@@ -191,11 +191,6 @@ export class TermsComponent implements OnInit, AfterViewInit, OnDestroy {
     );
     if (confirmDelete) {
       this.store.dispatch(deleteTermAction({ term }));
-      this.snackBar.open('Term deleted successfully', 'Close', {
-        duration: 3000,
-        verticalPosition: 'top',
-        horizontalPosition: 'right'
-      });
     }
   }
 

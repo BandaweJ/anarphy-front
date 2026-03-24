@@ -166,6 +166,24 @@ export const enrolmentReducer = createReducer(
     isLoading: false,
     errorMessage: error.message,
   })),
+  on(enrolmentActions.deleteTermAction, (state, { term }) => ({
+    ...state,
+    isLoading: true,
+    errorMessage: '',
+  })),
+  on(enrolmentActions.deleteTermSuccess, (state, { term }) => ({
+    ...state,
+    isLoading: false,
+    errorMessage: '',
+    terms: state.terms.filter(
+      (t) => !(t.num === term.num && t.year === term.year),
+    ),
+  })),
+  on(enrolmentActions.deleteTermFail, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    errorMessage: error?.error?.message || error.message,
+  })),
   on(enrolmentActions.editTermAction, (state, { term }) => ({
     ...state,
     isLoading: true,

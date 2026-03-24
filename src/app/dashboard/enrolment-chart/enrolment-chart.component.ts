@@ -53,6 +53,7 @@ export class EnrolmentChartComponent implements OnInit {
 
   public barChartOptions: ChartConfiguration<'bar'>['options'] = {
     responsive: true,
+    maintainAspectRatio: false,
 
     plugins: {
       title: {

@@ -208,6 +208,35 @@ export class EnrolmentEffects {
     )
   );
 
+  deleteTerm$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(fromEnrolmentActions.deleteTermAction),
+      switchMap(({ term }) =>
+        this.termsService.deleteTerm(term).pipe(
+          tap(() =>
+            this.snackBar.open('Term deleted successfully', 'OK', {
+              duration: 4000,
+              verticalPosition: 'top',
+              horizontalPosition: 'center',
+            })
+          ),
+          map(() => fromEnrolmentActions.deleteTermSuccess({ term })),
+          catchError((error: HttpErrorResponse) => {
+            const message =
+              error?.error?.message ||
+              'Failed to delete term. Please ensure no students are enrolled in this term.';
+            this.snackBar.open(message, 'OK', {
+              duration: 5000,
+              verticalPosition: 'top',
+              horizontalPosition: 'center',
+            });
+            return of(fromEnrolmentActions.deleteTermFail({ error }));
+          })
+        )
+      )
+    )
+  );
+
   editTerm$ = createEffect(() =>
     this.actions$.pipe(
       ofType(fromEnrolmentActions.editTermAction),

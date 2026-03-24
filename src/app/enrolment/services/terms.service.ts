@@ -24,6 +24,10 @@ export class TermsService {
     return this.httpClient.patch<TermsModel>(this.baseURL, term);
   }
 
+  deleteTerm(term: TermsModel): Observable<number> {
+    return this.httpClient.delete<number>(`${this.baseURL}/${term.num}/${term.year}`);
+  }
+
   getCurrentTerm(): Observable<TermsModel> {
     return this.httpClient.get<TermsModel>(`${this.baseURL}/current`);
   }
