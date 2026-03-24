@@ -229,8 +229,14 @@ mat-progress-bar ::ng-deep .mdc-linear-progress__track {
 
 .top-panel {
   display: flex;
+  gap: 12px;
+  align-items: center;
   padding: 0 0 20px 0;
   margin-bottom: 16px;
+}
+
+.bulk-ai-btn {
+  white-space: nowrap;
 }
 
 .top-panel mat-form-field {
@@ -285,6 +291,16 @@ table {
 
 .comment-input {
   flex: 1 1 auto;
+}
+
+.ai-generate-btn {
+  height: 56px;
+  min-width: 88px;
+}
+
+.ai-suggestions-input {
+  flex: 1 1 220px;
+  min-width: 180px;
 }
 
 .mat-column-action {
@@ -422,6 +438,11 @@ table {
     max-width: 100%;
   }
 
+  .top-panel {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
   .mat-column-studentNumber,
   .mat-column-surname,
   .mat-column-name,
@@ -437,6 +458,7 @@ table {
 
   .mark-comment-group {
     gap: 8px;
+    flex-wrap: wrap;
   }
 }
 

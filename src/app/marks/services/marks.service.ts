@@ -7,6 +7,26 @@ import { environment } from 'src/environments/environment';
 import { ExamType } from '../models/examtype.enum';
 import { MarksProgressModel } from '../models/marks-progress.model';
 
+export type AiCommentTone = 'encouraging' | 'balanced' | 'firm';
+
+export interface AiCommentsRequest {
+  mark: number;
+  maxMark?: number;
+  subject?: string;
+  studentName?: string;
+  className?: string;
+  examType?: string;
+}
+
+export interface AiCommentsResponse {
+  comments: string[];
+  success: boolean;
+  error?: string;
+  source?: 'openai' | 'fallback';
+  /** Set by the server from mark percentage (no manual tone picker). */
+  appliedTone?: AiCommentTone;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -77,6 +97,15 @@ export class MarksService {
     // console.log(mark);
     return this.httpClient.delete<MarksModel>(
       this.baseUrl + 'marks/' + mark.id
+    );
+  }
+
+  generateCommentOptions(
+    request: AiCommentsRequest
+  ): Observable<AiCommentsResponse> {
+    return this.httpClient.post<AiCommentsResponse>(
+      `${environment.apiUrl}/ai/generate-comments`,
+      request
     );
   }
 

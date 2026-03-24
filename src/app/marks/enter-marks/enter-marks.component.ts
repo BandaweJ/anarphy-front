@@ -8,6 +8,7 @@ import {
 import { FormControl, FormGroup, Validators, FormArray } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable, Subject, combineLatest } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import {
   map,
   startWith,
@@ -41,6 +42,7 @@ import { Title } from '@angular/platform-browser';
 import { ExamType } from '../models/examtype.enum';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
+import { MarksService } from '../services/marks.service';
 // ConfirmDialogComponent will be lazy loaded
 
 interface MarkFormGroup {
@@ -70,6 +72,9 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
   value = 0;
   maxValue = 0;
   savingMarks = new Set<number>(); // Track which marks are being saved
+  generatingAiComments = new Set<number>();
+  aiCommentOptions = new Map<number, string[]>();
+  bulkGeneratingAi = false;
 
   examtype: ExamType[] = [ExamType.midterm, ExamType.endofterm];
 
@@ -134,7 +139,8 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
     private store: Store,
     public title: Title,
     private snackBar: MatSnackBar,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private marksService: MarksService
   ) {
     this.store.dispatch(fetchClasses());
     this.store.dispatch(fetchTerms());
@@ -265,8 +271,20 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
     const commentControl = this.getCommentControl(index);
     return commentControl.valueChanges.pipe(
       startWith(commentControl.value || ''), // Initialize with current value
-      map((value) => this._filterComments(value || ''))
+      map((value) => {
+        const options = this.getCommentOptionsForRow(index);
+        const filterValue = (value || '').toLowerCase();
+        return options.filter((option) =>
+          option.toLowerCase().includes(filterValue)
+        );
+      })
     );
+  }
+
+  getCommentOptionsForRow(index: number): string[] {
+    const aiOptions = this.aiCommentOptions.get(index) || [];
+    const merged = [...aiOptions, ...this.commentOptions];
+    return Array.from(new Set(merged));
   }
 
   applyFilter(event: Event) {
@@ -349,6 +367,164 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.getMarkFormGroup(index).get('termMark') as FormControl<
       number | null
     >;
+  }
+
+  getAiCommentOptions(index: number): string[] {
+    return this.aiCommentOptions.get(index) || [];
+  }
+
+  /**
+   * Mirrors server `resolveToneFromPercentage` (mark / 100 as %).
+   * Used only for UI hints; the API still applies tone from the mark.
+   */
+  getAutoToneLabelForIndex(index: number): string {
+    const m = this.getMarkControl(index).value;
+    if (m === null || m === undefined) {
+      return 'Enter a mark to preview tone.';
+    }
+    if (m < 0 || m > 100) {
+      return 'Invalid mark for tone preview.';
+    }
+    if (m < 50) {
+      return 'Encouraging tone (mark < 50%).';
+    }
+    if (m < 75) {
+      return 'Balanced tone (50–74%).';
+    }
+    return 'Firm tone (75%+).';
+  }
+
+  isGeneratingAi(index: number): boolean {
+    return this.generatingAiComments.has(index);
+  }
+
+  applyAiComment(index: number, comment: string): void {
+    this.getCommentControl(index).setValue(comment);
+  }
+
+  generateAiComments(markModel: MarksModel, index: number): void {
+    const formGroup = this.getMarkFormGroup(index);
+    const mark = formGroup.controls.mark.value;
+    if (mark === null || mark === undefined || mark < 0 || mark > 100) {
+      this.snackBar.open(
+        'Enter a valid mark first (0-100) to generate AI comments.',
+        'Close',
+        { duration: 2500 }
+      );
+      return;
+    }
+
+    const subject = this.subjectControl?.value as SubjectsModel | null;
+    const className = this.classControl?.value as string | null;
+    const examType = this.examTypeControl?.value as ExamType | null;
+
+    this.generatingAiComments.add(index);
+    this.marksService
+      .generateCommentOptions({
+        mark,
+        maxMark: 100,
+        subject: subject?.name,
+        studentName: `${markModel.student?.name || ''} ${
+          markModel.student?.surname || ''
+        }`.trim(),
+        className: className || undefined,
+        examType: examType || undefined,
+      })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res) => {
+          this.aiCommentOptions.set(index, res.comments || []);
+          if (!res.comments?.length) {
+            this.snackBar.open('No AI comments returned for this row.', 'Close', {
+              duration: 2000,
+            });
+            return;
+          }
+          const toneHint = res.appliedTone
+            ? ` (${res.appliedTone} tone)`
+            : '';
+          if (res.source === 'fallback') {
+            this.snackBar.open(
+              `Fallback comments loaded${toneHint}. Select one from AI Suggestions.`,
+              'Close',
+              { duration: 2500 }
+            );
+          } else {
+            this.snackBar.open(
+              `AI comments generated${toneHint}. Select one from AI Suggestions.`,
+              'Close',
+              { duration: 2500 }
+            );
+          }
+        },
+        error: () => {
+          this.generatingAiComments.delete(index);
+          this.snackBar.open(
+            'Failed to generate AI comments for this row.',
+            'Close',
+            { duration: 3000 }
+          );
+        },
+        complete: () => {
+          this.generatingAiComments.delete(index);
+        },
+      });
+  }
+
+  async generateAiCommentsForAllRows(): Promise<void> {
+    if (!this.dataSource.data.length) {
+      this.snackBar.open('No rows loaded yet. Fetch class marks first.', 'Close', {
+        duration: 2500,
+      });
+      return;
+    }
+
+    this.bulkGeneratingAi = true;
+    let generatedCount = 0;
+    let skippedCount = 0;
+
+    for (let index = 0; index < this.dataSource.data.length; index++) {
+      const row = this.dataSource.data[index];
+      const formGroup = this.getMarkFormGroup(index);
+      const mark = formGroup.controls.mark.value;
+      if (mark === null || mark === undefined || mark < 0 || mark > 100) {
+        skippedCount++;
+        continue;
+      }
+
+      const subject = this.subjectControl?.value as SubjectsModel | null;
+      const className = this.classControl?.value as string | null;
+      const examType = this.examTypeControl?.value as ExamType | null;
+      this.generatingAiComments.add(index);
+
+      try {
+        const res = await firstValueFrom(
+          this.marksService.generateCommentOptions({
+            mark,
+            maxMark: 100,
+            subject: subject?.name,
+            studentName: `${row.student?.name || ''} ${
+              row.student?.surname || ''
+            }`.trim(),
+            className: className || undefined,
+            examType: examType || undefined,
+          })
+        );
+        this.aiCommentOptions.set(index, res.comments || []);
+        generatedCount++;
+      } catch {
+        skippedCount++;
+      } finally {
+        this.generatingAiComments.delete(index);
+      }
+    }
+
+    this.bulkGeneratingAi = false;
+    this.snackBar.open(
+      `AI suggestions ready for ${generatedCount} row(s). Skipped ${skippedCount} row(s). Tone is set per row from each mark.`,
+      'Close',
+      { duration: 4000 }
+    );
   }
 
   saveMark(markModel: MarksModel, index: number) {
