@@ -421,9 +421,6 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
         mark,
         maxMark: 100,
         subject: subject?.name,
-        studentName: `${markModel.student?.name || ''} ${
-          markModel.student?.surname || ''
-        }`.trim(),
         className: className || undefined,
         examType: examType || undefined,
       })
@@ -510,9 +507,6 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
             mark,
             maxMark: 100,
             subject: subject?.name,
-            studentName: `${row.student?.name || ''} ${
-              row.student?.surname || ''
-            }`.trim(),
             className: className || undefined,
             examType: examType || undefined,
           })

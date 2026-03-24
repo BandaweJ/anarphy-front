@@ -13,6 +13,7 @@ export interface AiCommentsRequest {
   mark: number;
   maxMark?: number;
   subject?: string;
+  /** Optional; if sent, stripped from model output as a safety net. Prefer omitting. */
   studentName?: string;
   className?: string;
   examType?: string;

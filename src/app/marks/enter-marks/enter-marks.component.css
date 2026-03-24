@@ -289,8 +289,22 @@ table {
   flex: 0 0 100px;
 }
 
+/* Narrow: label is "Term" only; meaning is in the hint above the table. */
+.term-mark-field {
+  flex: 0 0 5rem;
+  width: 5rem;
+  max-width: 5rem;
+  min-width: 4.5rem;
+}
+
+.term-mark-field ::ng-deep .mat-mdc-form-field-infix {
+  min-width: 0;
+  width: 100%;
+}
+
 .comment-input {
   flex: 1 1 auto;
+  min-width: 0;
 }
 
 /* Overlay is attached to body; panelClass targets the dropdown panel. */

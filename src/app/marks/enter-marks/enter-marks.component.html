@@ -119,7 +119,7 @@
 
         <ng-container matColumnDef="markComment">
           <th mat-header-cell *matHeaderCellDef [attr.colspan]="3">
-            Mark / Term Mark / Comment
+            Mark / Term / Comment
           </th>
           <td mat-cell *matCellDef="let row; let i = index">
             <div [formGroup]="getMarkFormGroup(i)" class="mark-comment-group">
@@ -135,12 +135,12 @@
                 </mat-error>
               </mat-form-field>
 
-              <mat-form-field appearance="outline" class="comment-input">
-                <mat-label>Term Mark (Display Only)</mat-label>
+              <mat-form-field appearance="outline" class="term-mark-field">
+                <mat-label>Term</mat-label>
                 <input matInput type="number" formControlName="termMark" (blur)="saveMark(row, i)" min="0" max="100" />
                 <mat-error
                   *ngIf="(getTermMarkControl(i).hasError('min') || getTermMarkControl(i).hasError('max')) && getTermMarkControl(i).touched">
-                  Term Mark must be between 0 and 100.
+                  Use 0–100.
                 </mat-error>
               </mat-form-field>
 
