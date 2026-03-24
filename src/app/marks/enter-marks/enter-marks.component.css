@@ -293,14 +293,24 @@ table {
   flex: 1 1 auto;
 }
 
+/* Overlay is attached to body; panelClass targets the dropdown panel. */
+::ng-deep .comment-ai-autocomplete-panel.mat-mdc-autocomplete-panel {
+  min-width: 480px !important;
+  max-width: min(560px, 92vw);
+}
+
+::ng-deep .comment-ai-autocomplete-panel .mat-mdc-option {
+  white-space: normal;
+  line-height: 1.35;
+  min-height: 3rem;
+  align-items: flex-start;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
 .ai-generate-btn {
   height: 56px;
   min-width: 88px;
-}
-
-.ai-suggestions-input {
-  flex: 1 1 220px;
-  min-width: 180px;
 }
 
 .mat-column-action {

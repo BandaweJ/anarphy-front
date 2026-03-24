@@ -1,13 +1,17 @@
 import {
   AfterViewInit,
+  ChangeDetectorRef,
   Component,
   OnInit,
+  QueryList,
   ViewChild,
+  ViewChildren,
   OnDestroy,
 } from '@angular/core';
+import { MatAutocompleteTrigger } from '@angular/material/autocomplete';
 import { FormControl, FormGroup, Validators, FormArray } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { Observable, Subject, combineLatest } from 'rxjs';
+import { Observable, Subject, combineLatest, merge } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 import {
   map,
@@ -74,64 +78,18 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
   savingMarks = new Set<number>(); // Track which marks are being saved
   generatingAiComments = new Set<number>();
   aiCommentOptions = new Map<number, string[]>();
+  /** When last fetch ran for a row, keyed by mark (so changing mark refetches). */
+  private lastAiFetchKeyByRow = new Map<number, string>();
+  private commentAiRefresh$ = new Subject<void>();
   bulkGeneratingAi = false;
 
   examtype: ExamType[] = [ExamType.midterm, ExamType.endofterm];
 
-  commentOptions: string[] = [
-    'Excellent effort',
-    'Good work, keep it up',
-    'Needs to improve concentration',
-    'Struggling with concepts',
-    'Showing great potential',
-    'Requires more practice',
-    'Completed all assignments',
-    'Participates well in class',
-    'Absent for key lessons',
-    'Handwriting needs improvement',
-    'Neat and organized work',
-    'Struggling with time management',
-    'Very good',
-    'Good',
-    'Average',
-    'Below average',
-    'Needs improvement',
-    'Unsatisfactory',
-    'Fail',
-    'Absent',
-    'Present',
-    'Late',
-    'A fair attempt, keep it up',
-    'Needs to improve',
-    'Pleasing effort',
-    'Superb!.',
-    'A good start',
-    'An impressive start',
-    'Excellent work. Keep up the momentum.',
-    'Good work. Keep up the momentum.',
-    'You are iconic girl! Keep this standard.',
-    'Excellent mark, keep on focused',
-    'Satisfactory performance.',
-    'Keep soaring.',
-    'Satisfactory work.',
-    'Elating results! Keep.working.',
-    'Excellent work. Continue working hard.',
-    'Quite pleasing. Keep on working',
-    'An impressive start',
-    'Excellent mark, keep it up',
-    'Quite pleasing.',
-    'A fair start',
-    'A fair attempt, you have the room to improve',
-    'Pull up',
-    'Can do better than this.',
-    'Has the potential to do better than this.',
-    'A marginal pass, work hard to improve the grade.',
-    'Revise work covered',
-    'Aim higher please',
-  ];
-
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
+  /** One trigger per comment row — used to open the autocomplete dropdown after AI loads. */
+  @ViewChildren(MatAutocompleteTrigger)
+  commentAutocompleteTriggers!: QueryList<MatAutocompleteTrigger>;
 
   private destroy$ = new Subject<void>();
 
@@ -140,7 +98,8 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
     public title: Title,
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
-    private marksService: MarksService
+    private marksService: MarksService,
+    private cdr: ChangeDetectorRef
   ) {
     this.store.dispatch(fetchClasses());
     this.store.dispatch(fetchTerms());
@@ -193,6 +152,8 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private updateMarksFormArray(marks: MarksModel[]): void {
     this.marksFormArray.clear();
+    this.aiCommentOptions.clear();
+    this.lastAiFetchKeyByRow.clear();
 
     marks.forEach((mark) => {
       const markControl = new FormControl<number | null>(mark.mark || null, [
@@ -255,36 +216,38 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
     this.value = completedCount;
   }
 
-  // This method will be called from the template
-  private _filterComments(value: string): string[] {
-    const filterValue = value.toLowerCase();
-    return this.commentOptions.filter((option) =>
-      option.toLowerCase().includes(filterValue)
-    );
-  }
-
   /**
-   * Returns an Observable of filtered comment options for a specific row.
-   * This method is called from the template for each autocomplete.
+   * Autocomplete options: AI suggestions only (no hardcoded list).
+   * Merge with commentAiRefresh$ so the list updates when a fetch completes.
    */
   getFilteredCommentOptions(index: number): Observable<string[]> {
     const commentControl = this.getCommentControl(index);
-    return commentControl.valueChanges.pipe(
-      startWith(commentControl.value || ''), // Initialize with current value
-      map((value) => {
+    return merge(
+      commentControl.valueChanges,
+      this.commentAiRefresh$
+    ).pipe(
+      startWith(commentControl.value),
+      map(() => {
         const options = this.getCommentOptionsForRow(index);
-        const filterValue = (value || '').toLowerCase();
+        const raw = commentControl.value ?? '';
+        const filterValue = String(raw).toLowerCase().trim();
+        if (!filterValue) {
+          return options;
+        }
         return options.filter((option) =>
           option.toLowerCase().includes(filterValue)
         );
-      })
+      }),
+      takeUntil(this.destroy$)
     );
   }
 
   getCommentOptionsForRow(index: number): string[] {
-    const aiOptions = this.aiCommentOptions.get(index) || [];
-    const merged = [...aiOptions, ...this.commentOptions];
-    return Array.from(new Set(merged));
+    return this.aiCommentOptions.get(index) || [];
+  }
+
+  trackByCommentOption(_index: number, option: string): string {
+    return option;
   }
 
   applyFilter(event: Event) {
@@ -369,10 +332,6 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
     >;
   }
 
-  getAiCommentOptions(index: number): string[] {
-    return this.aiCommentOptions.get(index) || [];
-  }
-
   /**
    * Mirrors server `resolveToneFromPercentage` (mark / 100 as %).
    * Used only for UI hints; the API still applies tone from the mark.
@@ -398,19 +357,57 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.generatingAiComments.has(index);
   }
 
-  applyAiComment(index: number, comment: string): void {
-    this.getCommentControl(index).setValue(comment);
+  /** Focus on the comment field loads AI suggestions (quietly unless invalid mark). */
+  onCommentFocus(row: MarksModel, index: number): void {
+    this.requestAiComments(row, index, { silent: true });
   }
 
+  /** Opens the Material autocomplete overlay so AI options appear as a dropdown. */
+  private openCommentAutocompletePanel(rowIndex: number): void {
+    this.cdr.detectChanges();
+    queueMicrotask(() => {
+      const triggers = this.commentAutocompleteTriggers?.toArray();
+      const trigger = triggers?.[rowIndex];
+      if (trigger) {
+        trigger.openPanel();
+      }
+    });
+  }
+
+  /** Manual refresh: always refetches from the API. */
   generateAiComments(markModel: MarksModel, index: number): void {
+    this.requestAiComments(markModel, index, { silent: false, force: true });
+  }
+
+  private requestAiComments(
+    markModel: MarksModel,
+    index: number,
+    options: { silent?: boolean; force?: boolean } = {}
+  ): void {
+    const { silent = false, force = false } = options;
     const formGroup = this.getMarkFormGroup(index);
     const mark = formGroup.controls.mark.value;
     if (mark === null || mark === undefined || mark < 0 || mark > 100) {
-      this.snackBar.open(
-        'Enter a valid mark first (0-100) to generate AI comments.',
-        'Close',
-        { duration: 2500 }
-      );
+      if (!silent) {
+        this.snackBar.open(
+          'Enter a valid mark first (0-100) to generate AI comments.',
+          'Close',
+          { duration: 2500 }
+        );
+      }
+      return;
+    }
+
+    if (this.generatingAiComments.has(index)) {
+      return;
+    }
+
+    const fetchKey = String(mark);
+    if (
+      !force &&
+      (this.aiCommentOptions.get(index)?.length ?? 0) >= 1 &&
+      this.lastAiFetchKeyByRow.get(index) === fetchKey
+    ) {
       return;
     }
 
@@ -434,10 +431,18 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
       .subscribe({
         next: (res) => {
           this.aiCommentOptions.set(index, res.comments || []);
+          this.lastAiFetchKeyByRow.set(index, fetchKey);
+          this.commentAiRefresh$.next();
           if (!res.comments?.length) {
-            this.snackBar.open('No AI comments returned for this row.', 'Close', {
-              duration: 2000,
-            });
+            if (!silent) {
+              this.snackBar.open('No AI comments returned for this row.', 'Close', {
+                duration: 2000,
+              });
+            }
+            return;
+          }
+          this.openCommentAutocompletePanel(index);
+          if (silent) {
             return;
           }
           const toneHint = res.appliedTone
@@ -445,13 +450,13 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
             : '';
           if (res.source === 'fallback') {
             this.snackBar.open(
-              `Fallback comments loaded${toneHint}. Select one from AI Suggestions.`,
+              `Fallback comments loaded${toneHint}. Pick one from the list or type.`,
               'Close',
               { duration: 2500 }
             );
           } else {
             this.snackBar.open(
-              `AI comments generated${toneHint}. Select one from AI Suggestions.`,
+              `AI comments ready${toneHint}. Pick one from the list or type.`,
               'Close',
               { duration: 2500 }
             );
@@ -459,11 +464,13 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
         },
         error: () => {
           this.generatingAiComments.delete(index);
-          this.snackBar.open(
-            'Failed to generate AI comments for this row.',
-            'Close',
-            { duration: 3000 }
-          );
+          if (!silent) {
+            this.snackBar.open(
+              'Failed to generate AI comments for this row.',
+              'Close',
+              { duration: 3000 }
+            );
+          }
         },
         complete: () => {
           this.generatingAiComments.delete(index);
@@ -511,6 +518,7 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
           })
         );
         this.aiCommentOptions.set(index, res.comments || []);
+        this.lastAiFetchKeyByRow.set(index, String(mark));
         generatedCount++;
       } catch {
         skippedCount++;
@@ -519,6 +527,7 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }
 
+    this.commentAiRefresh$.next();
     this.bulkGeneratingAi = false;
     this.snackBar.open(
       `AI suggestions ready for ${generatedCount} row(s). Skipped ${skippedCount} row(s). Tone is set per row from each mark.`,
@@ -620,6 +629,7 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.commentAiRefresh$.complete();
     this.destroy$.next();
     this.destroy$.complete();
   }

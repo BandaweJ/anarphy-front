@@ -146,12 +146,34 @@
 
               <mat-form-field appearance="outline" class="comment-input">
                 <mat-label>Comment</mat-label>
-                <input matInput formControlName="comment" [matAutocomplete]="auto" (blur)="saveMark(row, i)" />
-                <mat-autocomplete #auto="matAutocomplete" (optionSelected)="saveMark(row, i)"> <mat-option
-                    *ngFor="let option of getFilteredCommentOptions(i) | async" [value]="option">
+                <input
+                  matInput
+                  formControlName="comment"
+                  [matAutocomplete]="commentAuto"
+                  #commentTrigger="matAutocompleteTrigger"
+                  (focus)="onCommentFocus(row, i)"
+                  (blur)="saveMark(row, i)"
+                />
+                <mat-autocomplete
+                  #commentAuto="matAutocomplete"
+                  panelClass="comment-ai-autocomplete-panel"
+                  [panelWidth]="480"
+                  [autoActiveFirstOption]="false"
+                  (optionSelected)="saveMark(row, i)"
+                >
+                  <mat-option *ngIf="isGeneratingAi(i)" disabled>
+                    Loading AI suggestions…
+                  </mat-option>
+                  <mat-option
+                    *ngFor="let option of getFilteredCommentOptions(i) | async; trackBy: trackByCommentOption"
+                    [value]="option"
+                  >
                     {{ option }}
                   </mat-option>
                 </mat-autocomplete>
+                <mat-hint>
+                  AI suggestions appear in the dropdown below — focus loads them (needs a mark). Refresh to regenerate.
+                </mat-hint>
                 <mat-error *ngIf="getCommentControl(i).hasError('required') && getCommentControl(i).touched">
                   Comment is required.
                 </mat-error>
@@ -166,20 +188,8 @@
                 [disabled]="isGeneratingAi(i)"
                 [matTooltip]="getAutoToneLabelForIndex(i)"
               >
-                {{ isGeneratingAi(i) ? 'Generating...' : 'AI x5' }}
+                {{ isGeneratingAi(i) ? 'Generating...' : 'Refresh AI' }}
               </button>
-
-              <mat-form-field appearance="outline" class="ai-suggestions-input">
-                <mat-label>AI Suggestions</mat-label>
-                <mat-select
-                  [disabled]="!getAiCommentOptions(i).length"
-                  (selectionChange)="applyAiComment(i, $event.value); saveMark(row, i)"
-                >
-                  <mat-option *ngFor="let aiComment of getAiCommentOptions(i)" [value]="aiComment">
-                    {{ aiComment }}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
             </div>
           </td>
         </ng-container>
