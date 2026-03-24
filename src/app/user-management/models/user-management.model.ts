@@ -40,9 +40,20 @@ export interface CreateUserModel {
   password: string;
   role: string;
   name: string;
+  surname: string;
+  gender: string;
+  title?: string;
   email?: string;
   phone?: string;
-  profileId: string;
+  profileId?: string;
+  idnumber?: string;
+  dob?: string;
+  dateOfJoining?: string;
+  dateOfLeaving?: string;
+  address?: string;
+  prevSchool?: string;
+  residence?: 'Day' | 'Boarder';
+  qualifications?: string[];
 }
 
 export interface UpdateUserModel {

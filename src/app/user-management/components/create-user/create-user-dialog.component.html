@@ -32,19 +32,48 @@
               </mat-option>
             </mat-select>
             <mat-error *ngIf="getFieldError('role')">{{ getFieldError('role') }}</mat-error>
+            <mat-hint *ngIf="createUserForm.get('role')?.value">
+              Required fields update automatically based on the selected role.
+            </mat-hint>
           </mat-form-field>
         </div>
 
         <div class="form-row">
           <mat-form-field appearance="outline" class="form-field">
-            <mat-label>Full Name *</mat-label>
-            <input matInput formControlName="name" placeholder="Enter full name">
+            <mat-label>Name *</mat-label>
+            <input matInput formControlName="name" placeholder="Enter name">
             <mat-icon matSuffix>badge</mat-icon>
             <mat-error *ngIf="getFieldError('name')">{{ getFieldError('name') }}</mat-error>
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="form-field">
-            <mat-label>Profile ID *</mat-label>
+            <mat-label>Surname *</mat-label>
+            <input matInput formControlName="surname" placeholder="Enter surname">
+            <mat-icon matSuffix>badge</mat-icon>
+            <mat-error *ngIf="getFieldError('surname')">{{ getFieldError('surname') }}</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Gender *</mat-label>
+            <mat-select formControlName="gender">
+              <mat-option value="Male">Male</mat-option>
+              <mat-option value="Female">Female</mat-option>
+            </mat-select>
+            <mat-error *ngIf="getFieldError('gender')">{{ getFieldError('gender') }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Title <span *ngIf="isRequiredForRole('title')">*</span></mat-label>
+            <input matInput formControlName="title" placeholder="e.g. Mr, Mrs, Dr">
+            <mat-error *ngIf="getFieldError('title')">{{ getFieldError('title') }}</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row" *ngIf="isStaffRole(createUserForm.get('role')?.value)">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Profile ID <span *ngIf="isRequiredForRole('profileId')">*</span></mat-label>
             <input matInput formControlName="profileId" placeholder="Enter profile ID">
             <mat-icon matSuffix>fingerprint</mat-icon>
             <mat-error *ngIf="getFieldError('profileId')">{{ getFieldError('profileId') }}</mat-error>
@@ -58,17 +87,76 @@
         
         <div class="form-row">
           <mat-form-field appearance="outline" class="form-field">
-            <mat-label>Email</mat-label>
+            <mat-label>Email <span *ngIf="isRequiredForRole('email')">*</span></mat-label>
             <input matInput formControlName="email" placeholder="Enter email address" type="email">
             <mat-icon matSuffix>email</mat-icon>
             <mat-error *ngIf="getFieldError('email')">{{ getFieldError('email') }}</mat-error>
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="form-field">
-            <mat-label>Phone</mat-label>
+            <mat-label>Phone <span *ngIf="isRequiredForRole('phone')">*</span></mat-label>
             <input matInput formControlName="phone" placeholder="Enter phone number">
             <mat-icon matSuffix>phone</mat-icon>
             <mat-error *ngIf="getFieldError('phone')">{{ getFieldError('phone') }}</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>ID Number</mat-label>
+            <input matInput formControlName="idnumber" placeholder="Enter ID number">
+            <mat-icon matSuffix>badge</mat-icon>
+            <mat-error *ngIf="getFieldError('idnumber')">{{ getFieldError('idnumber') }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Date of Birth</mat-label>
+            <input matInput formControlName="dob" type="date">
+            <mat-icon matSuffix>calendar_today</mat-icon>
+            <mat-error *ngIf="getFieldError('dob')">{{ getFieldError('dob') }}</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Date of Joining <span *ngIf="isRequiredForRole('dateOfJoining')">*</span></mat-label>
+            <input matInput formControlName="dateOfJoining" type="date">
+            <mat-icon matSuffix>event</mat-icon>
+            <mat-error *ngIf="getFieldError('dateOfJoining')">{{ getFieldError('dateOfJoining') }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field" *ngIf="isStaffRole(createUserForm.get('role')?.value)">
+            <mat-label>Date of Leaving</mat-label>
+            <input matInput formControlName="dateOfLeaving" type="date">
+            <mat-icon matSuffix>event_busy</mat-icon>
+            <mat-error *ngIf="getFieldError('dateOfLeaving')">{{ getFieldError('dateOfLeaving') }}</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Address <span *ngIf="isRequiredForRole('address')">*</span></mat-label>
+            <input matInput formControlName="address" placeholder="Enter address">
+            <mat-icon matSuffix>home</mat-icon>
+            <mat-error *ngIf="getFieldError('address')">{{ getFieldError('address') }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field" *ngIf="isStudentRole(createUserForm.get('role')?.value)">
+            <mat-label>Residence <span *ngIf="isRequiredForRole('residence')">*</span></mat-label>
+            <mat-select formControlName="residence">
+              <mat-option value="Day">Day</mat-option>
+              <mat-option value="Boarder">Boarder</mat-option>
+            </mat-select>
+            <mat-error *ngIf="getFieldError('residence')">{{ getFieldError('residence') }}</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row" *ngIf="isStudentRole(createUserForm.get('role')?.value)">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Previous School</mat-label>
+            <input matInput formControlName="prevSchool" placeholder="Enter previous school">
+            <mat-icon matSuffix>school</mat-icon>
+            <mat-error *ngIf="getFieldError('prevSchool')">{{ getFieldError('prevSchool') }}</mat-error>
           </mat-form-field>
         </div>
       </div>

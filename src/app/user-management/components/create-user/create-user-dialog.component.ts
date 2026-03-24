@@ -52,13 +52,29 @@ export class CreateUserDialogComponent implements OnInit, OnDestroy {
       confirmPassword: ['', [Validators.required]],
       role: ['', [Validators.required]],
       name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
+      surname: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
+      gender: ['', [Validators.required]],
+      title: [''],
       email: ['', [Validators.email]],
       phone: ['', [Validators.pattern(/^[\+]?[1-9][\d]{0,15}$/)]],
-      profileId: ['', [Validators.required]]
+      profileId: [''],
+      idnumber: [''],
+      dob: [''],
+      dateOfJoining: [''],
+      dateOfLeaving: [''],
+      address: [''],
+      prevSchool: [''],
+      residence: ['Day'],
     }, { validators: this.passwordMatchValidator });
   }
 
   ngOnInit(): void {
+    this.createUserForm.get('role')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((role) => this.updateRoleBasedValidators(role));
+
+    this.updateRoleBasedValidators(this.createUserForm.get('role')?.value);
+
     this.store.select(selectLoading)
       .pipe(takeUntil(this.destroy$))
       .subscribe(loading => {
@@ -66,6 +82,46 @@ export class CreateUserDialogComponent implements OnInit, OnDestroy {
           // Dialog will close after successful creation
         }
       });
+  }
+
+  private updateRoleBasedValidators(role: string): void {
+    const profileId = this.createUserForm.get('profileId');
+    const title = this.createUserForm.get('title');
+    const email = this.createUserForm.get('email');
+    const phone = this.createUserForm.get('phone');
+    const address = this.createUserForm.get('address');
+    const dateOfJoining = this.createUserForm.get('dateOfJoining');
+    const residence = this.createUserForm.get('residence');
+
+    profileId?.clearValidators();
+    title?.clearValidators();
+    email?.clearValidators();
+    phone?.clearValidators();
+    address?.clearValidators();
+    dateOfJoining?.clearValidators();
+    residence?.clearValidators();
+
+    email?.setValidators([Validators.email]);
+    phone?.setValidators([Validators.pattern(/^[\+]?[1-9][\d]{0,15}$/)]);
+
+    if (this.isParentRole(role)) {
+      email?.setValidators([Validators.required, Validators.email]);
+      title?.setValidators([Validators.required]);
+      phone?.setValidators([Validators.required, Validators.pattern(/^[\+]?[1-9][\d]{0,15}$/)]);
+      address?.setValidators([Validators.required]);
+    } else if (this.isStudentRole(role)) {
+      residence?.setValidators([Validators.required]);
+    } else if (role) {
+      profileId?.setValidators([Validators.required]);
+      title?.setValidators([Validators.required]);
+      email?.setValidators([Validators.required, Validators.email]);
+      phone?.setValidators([Validators.required, Validators.pattern(/^[\+]?[1-9][\d]{0,15}$/)]);
+      dateOfJoining?.setValidators([Validators.required]);
+    }
+
+    [profileId, title, email, phone, address, dateOfJoining, residence].forEach((control) => {
+      control?.updateValueAndValidity({ emitEvent: false });
+    });
   }
 
   ngOnDestroy(): void {
@@ -93,9 +149,19 @@ export class CreateUserDialogComponent implements OnInit, OnDestroy {
         password: formValue.password,
         role: formValue.role,
         name: formValue.name,
+        surname: formValue.surname,
+        gender: formValue.gender,
+        title: formValue.title || undefined,
         email: formValue.email || undefined,
         phone: formValue.phone || undefined,
-        profileId: formValue.profileId
+        profileId: formValue.profileId || undefined,
+        idnumber: formValue.idnumber || undefined,
+        dob: formValue.dob || undefined,
+        dateOfJoining: formValue.dateOfJoining || undefined,
+        dateOfLeaving: formValue.dateOfLeaving || undefined,
+        address: formValue.address || undefined,
+        prevSchool: formValue.prevSchool || undefined,
+        residence: formValue.residence || undefined,
       };
 
       this.store.dispatch(userManagementActions.createUser({ user: createUserData }));
@@ -117,6 +183,56 @@ export class CreateUserDialogComponent implements OnInit, OnDestroy {
       const control = this.createUserForm.get(key);
       control?.markAsTouched();
     });
+  }
+
+  isParentRole(role: string): boolean {
+    return role === ROLES.parent;
+  }
+
+  isStudentRole(role: string): boolean {
+    return role === ROLES.student;
+  }
+
+  isStaffRole(role: string): boolean {
+    return !this.isParentRole(role) && !this.isStudentRole(role);
+  }
+
+  isRequiredForRole(fieldName: string): boolean {
+    const role = this.createUserForm.get('role')?.value;
+
+    if (!role) {
+      return false;
+    }
+
+    if (fieldName === 'email') {
+      return this.isParentRole(role) || this.isStaffRole(role);
+    }
+
+    if (fieldName === 'phone') {
+      return this.isParentRole(role) || this.isStaffRole(role);
+    }
+
+    if (fieldName === 'address') {
+      return this.isParentRole(role);
+    }
+
+    if (fieldName === 'dateOfJoining') {
+      return this.isStaffRole(role);
+    }
+
+    if (fieldName === 'title') {
+      return this.isParentRole(role) || this.isStaffRole(role);
+    }
+
+    if (fieldName === 'profileId') {
+      return this.isStaffRole(role);
+    }
+
+    if (fieldName === 'residence') {
+      return this.isStudentRole(role);
+    }
+
+    return false;
   }
 
   getFieldError(fieldName: string): string {
@@ -151,9 +267,19 @@ export class CreateUserDialogComponent implements OnInit, OnDestroy {
       confirmPassword: 'Confirm Password',
       role: 'Role',
       name: 'Name',
+      surname: 'Surname',
+      gender: 'Gender',
+      title: 'Title',
       email: 'Email',
       phone: 'Phone',
-      profileId: 'Profile ID'
+      profileId: 'Profile ID',
+      idnumber: 'ID Number',
+      dob: 'Date of Birth',
+      dateOfJoining: 'Date of Joining',
+      dateOfLeaving: 'Date of Leaving',
+      address: 'Address',
+      prevSchool: 'Previous School',
+      residence: 'Residence',
     };
     return displayNames[fieldName] || fieldName;
   }

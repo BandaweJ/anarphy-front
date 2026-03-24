@@ -1,9 +1,10 @@
 /* eslint-disable prettier/prettier */
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { map, Observable, switchMap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { UserManagementModel, UserDetailsModel, UserListPaginatedModel, CreateUserModel, UpdateUserModel, ChangePasswordModel, UserActivityPaginatedModel } from '../models/user-management.model';
+import { ROLES } from '../../registration/models/roles.enum';
 
 @Injectable({
   providedIn: 'root'
@@ -13,8 +14,75 @@ export class UserManagementService {
 
   constructor(private httpClient: HttpClient) {}
 
-  createUser(user: CreateUserModel): Observable<UserDetailsModel> {
-    return this.httpClient.post<UserDetailsModel>(`${this.baseUrl}`, user);
+  createUser(user: CreateUserModel): Observable<any> {
+    const signup = (id: string, role: string) =>
+      this.httpClient.post<{ response: boolean }>(`${environment.apiUrl}/auth/signup`, {
+        username: user.username,
+        password: user.password,
+        role,
+        id,
+      });
+
+    if (user.role === ROLES.student) {
+      const studentPayload = {
+        name: user.name,
+        surname: user.surname,
+        gender: user.gender,
+        dob: user.dob || undefined,
+        idnumber: user.idnumber || undefined,
+        dateOfJoining: user.dateOfJoining || undefined,
+        cell: user.phone || undefined,
+        email: user.email || undefined,
+        address: user.address || undefined,
+        prevSchool: user.prevSchool || undefined,
+        residence: user.residence || 'Day',
+      };
+
+      return this.httpClient.post<any>(`${environment.apiUrl}/students`, studentPayload).pipe(
+        switchMap((student) => signup(student.studentNumber, user.role)),
+        map(() => ({ ...user, id: user.profileId || null, role: user.role }))
+      );
+    }
+
+    if (user.role === ROLES.parent) {
+      const parentPayload = {
+        email: user.email,
+        name: user.name || undefined,
+        surname: user.surname,
+        sex: user.gender,
+        title: user.title,
+        idnumber: user.idnumber || undefined,
+        cell: user.phone,
+        address: user.address,
+      };
+
+      return this.httpClient.post<any>(`${environment.apiUrl}/parents`, parentPayload).pipe(
+        switchMap((parent) => signup(parent.email, user.role)),
+        map(() => ({ ...user, id: user.email, role: user.role }))
+      );
+    }
+
+    const teacherPayload = {
+      id: user.profileId,
+      name: user.name,
+      surname: user.surname,
+      dob: user.dob || undefined,
+      gender: user.gender,
+      title: user.title,
+      dateOfJoining: user.dateOfJoining || undefined,
+      qualifications: user.qualifications || [],
+      active: true,
+      cell: user.phone,
+      email: user.email,
+      address: user.address || undefined,
+      dateOfLeaving: user.dateOfLeaving || undefined,
+      role: user.role,
+    };
+
+    return this.httpClient.post<any>(`${environment.apiUrl}/teachers`, teacherPayload).pipe(
+      switchMap((teacherResponse) => signup(teacherResponse.teacher?.id || user.profileId, user.role)),
+      map(() => ({ ...user, id: user.profileId, role: user.role }))
+    );
   }
 
   getAllUsers(
