@@ -23,11 +23,6 @@ import { viewReportsActions } from '../store/reports.actions';
 import { EnrolsModel } from 'src/app/enrolment/models/enrols.model';
 import { take, map } from 'rxjs/operators'; // Import take operator for saveReports
 import { RoleAccessService } from 'src/app/services/role-access.service';
-import { MarksService } from 'src/app/marks/services/marks.service';
-import { MarksModel } from 'src/app/marks/models/marks.model';
-import { SubjectsModel } from 'src/app/marks/models/subjects.model';
-import { selectSubjects } from 'src/app/marks/store/marks.selectors';
-import { fetchSubjects } from 'src/app/marks/store/marks.actions';
 import { ReportsService, ReportReleaseModel } from '../services/reports.service';
 
 @Component({
@@ -37,10 +32,8 @@ import { ReportsService, ReportReleaseModel } from '../services/reports.service'
 })
 export class ReportsComponent implements OnInit, OnDestroy {
   reportsForm!: FormGroup;
-  termMarkForm!: FormGroup;
   terms$!: Observable<TermsModel[]>;
   classes$!: Observable<ClassesModel[]>;
-  subjects$!: Observable<SubjectsModel[]>;
 
   reports$: Observable<ReportsModel[]> = this.store.select(selectReports);
 
@@ -63,8 +56,6 @@ export class ReportsComponent implements OnInit, OnDestroy {
   averageMark = 0;
   passRate = 0;
   selectedRelease: ReportReleaseModel | null = null;
-  termMarksRows: MarksModel[] = [];
-  savingTermMarkIds = new Set<number>();
 
   private subscriptions: Subscription[] = [];
 
@@ -73,12 +64,10 @@ export class ReportsComponent implements OnInit, OnDestroy {
   constructor(
     private store: Store,
     private roleAccess: RoleAccessService,
-    private marksService: MarksService,
     private reportsService: ReportsService,
   ) {
     this.store.dispatch(fetchTerms());
     this.store.dispatch(fetchClasses());
-    this.store.dispatch(fetchSubjects());
 
     this.subscriptions.push(
       this.store.select(selectCurrentEnrolment).subscribe((enrolment) => {
@@ -91,19 +80,11 @@ export class ReportsComponent implements OnInit, OnDestroy {
     this.store.dispatch(reportsActions.viewReportsActions.resetReports());
     this.classes$ = this.store.select(selectClasses);
     this.terms$ = this.store.select(selectTerms);
-    this.subjects$ = this.store.select(selectSubjects);
 
     this.reportsForm = new FormGroup({
       term: new FormControl('', [Validators.required]),
       clas: new FormControl('', [Validators.required]),
       examType: new FormControl('', Validators.required),
-    });
-
-    this.termMarkForm = new FormGroup({
-      term: new FormControl('', [Validators.required]),
-      clas: new FormControl('', [Validators.required]),
-      subject: new FormControl('', [Validators.required]),
-      examType: new FormControl('', [Validators.required]),
     });
 
     this.subscriptions.push(
@@ -191,48 +172,6 @@ export class ReportsComponent implements OnInit, OnDestroy {
       .subscribe((row) => {
         this.selectedRelease = row;
       });
-  }
-
-  loadTermMarkRows(): void {
-    if (this.termMarkForm.invalid) {
-      this.termMarkForm.markAllAsTouched();
-      return;
-    }
-    const { term, clas, subject, examType } = this.termMarkForm.value;
-    this.marksService
-      .getMarksInClassBySubject(clas, term.num, term.year, subject.code, examType)
-      .pipe(take(1))
-      .subscribe((rows) => {
-        this.termMarksRows = rows || [];
-      });
-  }
-
-  updateTermMark(row: MarksModel, value: string): void {
-    const parsed = value === '' ? null : Number(value);
-    if (parsed !== null && (Number.isNaN(parsed) || parsed < 0 || parsed > 100)) {
-      return;
-    }
-    row.termMark = parsed;
-  }
-
-  saveTermMark(row: MarksModel): void {
-    if (!row.id) return;
-    this.savingTermMarkIds.add(row.id);
-    this.marksService
-      .saveMark(row)
-      .pipe(take(1))
-      .subscribe({
-        next: () => {
-          this.savingTermMarkIds.delete(row.id!);
-        },
-        error: () => {
-          this.savingTermMarkIds.delete(row.id!);
-        },
-      });
-  }
-
-  isSavingTermMark(row: MarksModel): boolean {
-    return !!row.id && this.savingTermMarkIds.has(row.id);
   }
 
   generate() {
