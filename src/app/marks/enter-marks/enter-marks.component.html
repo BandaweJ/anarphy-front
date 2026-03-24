@@ -172,7 +172,7 @@
                   </mat-option>
                 </mat-autocomplete>
                 <mat-hint>
-                  AI suggestions appear in the dropdown below — focus loads them (needs a mark). Refresh to regenerate.
+                  AI suggestions open in the dropdown — focus loads them (needs a mark). Use the refresh icon to regenerate.
                 </mat-hint>
                 <mat-error *ngIf="getCommentControl(i).hasError('required') && getCommentControl(i).touched">
                   Comment is required.
@@ -180,15 +180,16 @@
               </mat-form-field>
 
               <button
-                mat-stroked-button
+                mat-icon-button
                 color="primary"
                 type="button"
-                class="ai-generate-btn"
+                class="ai-refresh-btn"
                 (click)="generateAiComments(row, i)"
                 [disabled]="isGeneratingAi(i)"
-                [matTooltip]="getAutoToneLabelForIndex(i)"
+                [matTooltip]="getAiRefreshTooltip(i)"
+                aria-label="Refresh AI suggestions"
               >
-                {{ isGeneratingAi(i) ? 'Generating...' : 'Refresh AI' }}
+                <mat-icon [class.ai-refresh-spinning]="isGeneratingAi(i)">refresh</mat-icon>
               </button>
             </div>
           </td>

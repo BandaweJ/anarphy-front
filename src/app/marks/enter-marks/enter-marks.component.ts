@@ -353,6 +353,10 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
     return 'Firm tone (75%+).';
   }
 
+  getAiRefreshTooltip(index: number): string {
+    return `Refresh AI suggestions. ${this.getAutoToneLabelForIndex(index)}`;
+  }
+
   isGeneratingAi(index: number): boolean {
     return this.generatingAiComments.has(index);
   }
