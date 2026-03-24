@@ -96,7 +96,110 @@
             <span>View</span>
           </button>
         </div>
+
+        <div class="release-status-bar" *ngIf="reportsForm.valid">
+          <div class="release-pill" [class.released]="selectedRelease?.released" [class.draft]="!selectedRelease?.released">
+            {{ selectedRelease?.released ? 'Released to Parents/Students' : 'Draft (Not Released)' }}
+          </div>
+          <button mat-stroked-button color="primary" type="button" (click)="setReleaseStatus(true)">
+            Release
+          </button>
+          <button mat-stroked-button color="warn" type="button" (click)="setReleaseStatus(false)">
+            Unrelease
+          </button>
+        </div>
       </form>
+    </div>
+
+    <div class="form-section">
+      <div class="form-header">
+        <mat-icon class="form-icon">edit_note</mat-icon>
+        <h3>Term Mark Capture</h3>
+      </div>
+
+      <form [formGroup]="termMarkForm" (ngSubmit)="loadTermMarkRows()" class="reports-form">
+        <div class="form-fields">
+          <div class="form-field">
+            <mat-form-field appearance="outline">
+              <mat-label>Choose Term</mat-label>
+              <mat-select formControlName="term">
+                <mat-option *ngFor="let term of terms$ | async" [value]="term">
+                  {{ term.num + ' ' + term.year }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="form-field">
+            <mat-form-field appearance="outline">
+              <mat-label>Choose Class</mat-label>
+              <mat-select formControlName="clas">
+                <mat-option *ngFor="let clas of classes$ | async" [value]="clas.name">
+                  {{ clas.name }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="form-field">
+            <mat-form-field appearance="outline">
+              <mat-label>Choose Subject</mat-label>
+              <mat-select formControlName="subject">
+                <mat-option *ngFor="let subject of subjects$ | async" [value]="subject">
+                  {{ subject.code + ' ' + subject.name }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="form-field">
+            <mat-form-field appearance="outline">
+              <mat-label>Exam Type</mat-label>
+              <mat-select formControlName="examType">
+                <mat-option *ngFor="let type of examtype" [value]="type">
+                  {{ type }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <button mat-flat-button type="submit" class="view-button" [disabled]="termMarkForm.invalid">
+            <mat-icon>list</mat-icon>
+            <span>Load Class Marks</span>
+          </button>
+        </div>
+      </form>
+
+      <div class="term-mark-table-wrap" *ngIf="termMarksRows.length">
+        <table class="term-mark-table">
+          <thead>
+            <tr>
+              <th>Student No</th>
+              <th>Name</th>
+              <th>Mark</th>
+              <th>Term Mark</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of termMarksRows">
+              <td>{{ row.student.studentNumber }}</td>
+              <td>{{ row.student.surname }} {{ row.student.name }}</td>
+              <td>{{ row.mark }}</td>
+              <td>
+                <input type="number" min="0" max="100" [value]="row.termMark ?? ''" (input)="updateTermMark(row, $any($event.target).value)" />
+              </td>
+              <td>
+                <button mat-mini-fab color="primary" type="button" (click)="saveTermMark(row)" [disabled]="isSavingTermMark(row)">
+                  <mat-icon>save</mat-icon>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <!-- Reports Display Area -->

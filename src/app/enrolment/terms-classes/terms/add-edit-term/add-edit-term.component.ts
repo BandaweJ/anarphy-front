@@ -60,6 +60,7 @@ export class AddEditTermComponent implements OnInit, OnDestroy {
         Validators.min(2000),
         Validators.max(2100)
       ]),
+      type: new FormControl('regular', [Validators.required]),
       startDate: new FormControl('', [Validators.required]),
       endDate: new FormControl('', [Validators.required]),
     }, { validators: this.dateRangeValidator });
@@ -68,6 +69,7 @@ export class AddEditTermComponent implements OnInit, OnDestroy {
       this.addTermForm.patchValue({
         num: this.data.num,
         year: this.data.year,
+        type: this.data.type ?? 'regular',
         startDate: new Date(this.data.startDate),
         endDate: new Date(this.data.endDate)
       });
@@ -135,6 +137,7 @@ export class AddEditTermComponent implements OnInit, OnDestroy {
     const term: TermsModel = {
       num: Number(formValue.num),
       year: Number(formValue.year),
+      type: formValue.type,
       startDate: formValue.startDate,
       endDate: formValue.endDate
     };

@@ -4,10 +4,12 @@ import { ExamType } from './examtype.enum';
 
 export interface MarksModel {
   id?: number;
+  termId?: number;
   num: number;
   name: string;
   year: number;
   mark: number | null;
+  termMark?: number | null;
   comment: string;
   subject: SubjectsModel;
   student: StudentsModel;

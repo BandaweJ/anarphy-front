@@ -121,7 +121,8 @@ export class GroupInvoiceComponent implements OnInit, OnDestroy {
     if (term) {
       this.store.dispatch(billingActions.fetchStudentsToBill({ 
         num: term.num, 
-        year: term.year 
+        year: term.year,
+        termId: term.id,
       }));
       // Clear selected students when term changes
       this.selectedStudents = [];
@@ -332,6 +333,7 @@ export class GroupInvoiceComponent implements OnInit, OnDestroy {
 
         return {
           studentNumber: enrol.student?.studentNumber || '',
+          termId: enrol.termId,
           termNum: enrol.num,
           year: enrol.year,
           bills,

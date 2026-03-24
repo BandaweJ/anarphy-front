@@ -61,6 +61,19 @@
                   <mat-error>{{ getFormErrorMessage('year') }}</mat-error>
                 </mat-form-field>
               </div>
+
+              <div class="field-group">
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Term Type</mat-label>
+                  <mat-select formControlName="type" placeholder="Select term type">
+                    <mat-option value="regular">Regular</mat-option>
+                    <mat-option value="vacation">Vacation</mat-option>
+                  </mat-select>
+                  <mat-icon matSuffix>category</mat-icon>
+                  <mat-hint>Regular term or vacation school term</mat-hint>
+                  <mat-error>{{ getFormErrorMessage('type') }}</mat-error>
+                </mat-form-field>
+              </div>
             </div>
           </div>
 

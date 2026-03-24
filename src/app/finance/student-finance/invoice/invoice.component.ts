@@ -97,7 +97,11 @@ export class InvoiceComponent implements OnInit, OnDestroy {
     //   invoiceActions.fetchInvoiceStats({ num: term.num, year: term.year })
     // );
     this.store.dispatch(
-      invoiceActions.fetchTermInvoices({ num: term.num, year: term.year })
+      invoiceActions.fetchTermInvoices({
+        num: term.num,
+        year: term.year,
+        termId: term.id,
+      })
     );
   }
 

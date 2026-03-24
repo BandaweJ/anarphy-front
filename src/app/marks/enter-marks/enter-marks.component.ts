@@ -45,6 +45,7 @@ import { MatDialog } from '@angular/material/dialog';
 
 interface MarkFormGroup {
   mark: FormControl<number | null>;
+  termMark: FormControl<number | null>;
   comment: FormControl<string | null>;
 }
 
@@ -197,9 +198,14 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
         mark.comment || null,
         Validators.required
       );
+      const termMarkControl = new FormControl<number | null>(mark.termMark ?? null, [
+        Validators.min(0),
+        Validators.max(100),
+      ]);
 
       const markFormGroup = new FormGroup<MarkFormGroup>({
         mark: markControl,
+        termMark: termMarkControl,
         comment: commentControl,
       });
 
@@ -211,6 +217,10 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
           distinctUntilChanged()
         ),
         commentControl.valueChanges.pipe(
+          debounceTime(300),
+          distinctUntilChanged()
+        ),
+        termMarkControl.valueChanges.pipe(
           debounceTime(300),
           distinctUntilChanged()
         ),
@@ -312,9 +322,10 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
     const year = term.year;
     const subjectCode = subject.code;
     const examType = this.examTypeControl?.value;
+    const termId = term.id;
 
     this.store.dispatch(
-      fetchSubjectMarksInClass({ name, num, year, subjectCode, examType })
+      fetchSubjectMarksInClass({ name, num, year, subjectCode, examType, termId })
     );
   }
 
@@ -334,6 +345,12 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
     >;
   }
 
+  getTermMarkControl(index: number): FormControl<number | null> {
+    return this.getMarkFormGroup(index).get('termMark') as FormControl<
+      number | null
+    >;
+  }
+
   saveMark(markModel: MarksModel, index: number) {
     const formGroup = this.getMarkFormGroup(index);
 
@@ -344,8 +361,10 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
       const updatedMark: MarksModel = {
         ...markModel,
         mark: formGroup.value.mark!,
+        termMark: formGroup.value.termMark ?? null,
         comment: formGroup.value.comment!,
         examType: this.examTypeControl?.value,
+        termId: this.termControl?.value.id,
         year: this.termControl?.value.year,
         num: this.termControl?.value.num,
       };

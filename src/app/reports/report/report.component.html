@@ -6,7 +6,7 @@
   </button>
 
   <div class="letter-head-container">
-    <img src="../../../assets/banner.jpeg" alt="School letter head" class="letter-head" />
+    <img src="../../../assets/report-letterhead.png" alt="School letter head" class="letter-head" />
   </div>
   <hr class="hr" />
   <mat-card-title>
@@ -42,6 +42,7 @@
             <th class="small-column">Ser</th>
             <th>Subject</th>
             <th>Mark</th>
+            <th>Term Mark</th>
             <th>Average</th>
             <th>Position</th>
             <th>Grade</th>
@@ -53,6 +54,7 @@
             <td class="small-column">{{ i + 1 }}</td>
             <td>{{ subjRow.subjectCode + " " + subjRow.subjectName }}</td>
             <td class="blue-text">{{ subjRow.mark }}</td>
+            <td>{{ subjRow.termMark ?? '-' }}</td>
             <td>{{ subjRow.averageMark.toFixed(1) }}</td>
             <td>{{ subjRow.position }}</td>
             <td>{{ subjRow.grade }}</td>

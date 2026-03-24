@@ -116,6 +116,7 @@ export class StudentFinanceComponent implements OnInit, OnDestroy {
                  studentNumber: this.selectedStudentNumber,
                  num: this.selectedTerm.num,
                  year: this.selectedTerm.year,
+                 termId: this.selectedTerm.id,
                })
              );
            }

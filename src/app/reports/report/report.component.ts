@@ -189,6 +189,7 @@ export class ReportComponent implements OnInit {
           name,
           num,
           year,
+          termId: (this.report as any).termId,
           // Re-evaluate if you need `examType` if you already have it from `report.report.examType`
           // If the action expects `ExamType`, ensure 'examType' from 'report.report' is that type.
           examType: examType, // Explicit cast if necessary

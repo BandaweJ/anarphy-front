@@ -7,6 +7,17 @@ import { HeadCommentModel, FormTeacherCommentModel } from '../models/comment.mod
 import { environment } from 'src/environments/environment';
 import { ExamType } from 'src/app/marks/models/examtype.enum';
 
+export interface ReportReleaseModel {
+  id?: number;
+  name: string;
+  num: number;
+  year: number;
+  examType: string;
+  released: boolean;
+  releasedAt?: string;
+  releasedBy?: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -19,9 +30,14 @@ export class ReportsService {
     name: string,
     num: number,
     year: number,
-    examType: ExamType
+    examType: ExamType,
+    termId?: number
   ): Observable<ReportsModel[]> {
-    // console.log(`${this.baseUrl}generate/${name}/${num}/${year}/`);
+    if (termId) {
+      return this.httpClient.get<ReportsModel[]>(
+        `${this.baseUrl}generate/term/${termId}/${name}/${examType}`
+      );
+    }
     return this.httpClient.get<ReportsModel[]>(
       `${this.baseUrl}generate/${name}/${num}/${year}/${examType}`
     );
@@ -32,9 +48,15 @@ export class ReportsService {
     num: number,
     year: number,
     examType: ExamType,
-    reports: ReportsModel[]
+    reports: ReportsModel[],
+    termId?: number
   ): Observable<ReportsModel[]> {
-    // console.log(name, num, year, examType, reports.length);
+    if (termId) {
+      return this.httpClient.post<ReportsModel[]>(
+        `${this.baseUrl}save/term/${termId}/${name}/${examType}`,
+        reports
+      );
+    }
     return this.httpClient.post<ReportsModel[]>(
       `${this.baseUrl}save/${name}/${num}/${year}/${examType}`,
       reports
@@ -53,8 +75,14 @@ export class ReportsService {
     name: string,
     num: number,
     year: number,
-    examType: ExamType
+    examType: ExamType,
+    termId?: number
   ): Observable<ReportsModel[]> {
+    if (termId) {
+      return this.httpClient.get<ReportsModel[]>(
+        `${this.baseUrl}view/term/${termId}/${name}/${examType}`
+      );
+    }
     return this.httpClient.get<ReportsModel[]>(
       `${this.baseUrl}view/${name}/${num}/${year}/${examType}`
     );
@@ -118,10 +146,14 @@ export class ReportsService {
     num: number,
     year: number,
     examType: string,
-    studentNumber: string
+    studentNumber: string,
+    termId?: number
   ) {
+    const url = termId
+      ? `${this.baseUrl}pdf/term/${termId}/${name}/${examType}/${studentNumber}`
+      : `${this.baseUrl}pdf/${name}/${num}/${year}/${examType}/${studentNumber}`;
     const result = this.httpClient.get(
-      `${this.baseUrl}pdf/${name}/${num}/${year}/${examType}/${studentNumber}`,
+      url,
       {
         observe: 'response',
         responseType: 'blob',
@@ -171,5 +203,31 @@ export class ReportsService {
     return this.httpClient.get<ReportsModel[]>(
       `${this.baseUrl}view/${studentNumber}`
     );
+  }
+
+  getReportReleaseStatus(
+    name?: string,
+    num?: number,
+    year?: number,
+    examType?: string
+  ): Observable<ReportReleaseModel[]> {
+    const params = new URLSearchParams();
+    if (name) params.set('name', name);
+    if (num !== undefined) params.set('num', String(num));
+    if (year !== undefined) params.set('year', String(year));
+    if (examType) params.set('examType', examType);
+    const queryString = params.toString();
+    const url = `${this.baseUrl}release${queryString ? `?${queryString}` : ''}`;
+    return this.httpClient.get<ReportReleaseModel[]>(url);
+  }
+
+  setReportReleaseStatus(payload: {
+    name: string;
+    num: number;
+    year: number;
+    examType: string;
+    released: boolean;
+  }): Observable<ReportReleaseModel> {
+    return this.httpClient.post<ReportReleaseModel>(`${this.baseUrl}release`, payload);
   }
 }

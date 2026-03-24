@@ -56,6 +56,7 @@ export const fetchSubjectMarksInClass = createAction(
     name: string;
     num: number;
     year: number;
+    termId?: number;
     subjectCode: string;
     examType: ExamType;
   }>()

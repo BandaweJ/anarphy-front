@@ -23,6 +23,13 @@ import { EnrolmentModule } from 'src/app/enrolment/enrolment.module';
 import { MarksModule } from 'src/app/marks/marks.module';
 import { GradingSystemService, GradingSystem, GradeThresholds } from '../services/grading-system.service';
 import { HttpClient } from '@angular/common/http';
+import { ReportsService, ReportReleaseModel } from 'src/app/reports/services/reports.service';
+import { Store } from '@ngrx/store';
+import { selectTerms, selectClasses } from 'src/app/enrolment/store/enrolment.selectors';
+import { fetchTerms, fetchClasses } from 'src/app/enrolment/store/enrolment.actions';
+import { TermsModel } from 'src/app/enrolment/models/terms.model';
+import { ClassesModel } from 'src/app/enrolment/models/classes.model';
+import { ExamType } from 'src/app/marks/models/examtype.enum';
 
 @Component({
   selector: 'app-academic-settings',
@@ -56,6 +63,11 @@ export class AcademicSettingsComponent implements OnInit, OnDestroy {
   currentTheme: Theme = 'light';
   selectedTab = 0;
   isLoading = false;
+  releaseForm: FormGroup;
+  releases: ReportReleaseModel[] = [];
+  terms$!: Observable<TermsModel[]>;
+  classes$!: Observable<ClassesModel[]>;
+  examTypes: ExamType[] = [ExamType.midterm, ExamType.endofterm];
   
   // Grading systems data
   gradingSystems: GradingSystem[] = [];
@@ -89,7 +101,9 @@ export class AcademicSettingsComponent implements OnInit, OnDestroy {
     private themeService: ThemeService,
     private title: Title,
     private cdr: ChangeDetectorRef,
-    private gradingSystemService: GradingSystemService
+    private gradingSystemService: GradingSystemService,
+    private reportsService: ReportsService,
+    private store: Store
   ) {
     this.academicSettingsForm = this.fb.group({
       academicYearStart: ['', Validators.required],
@@ -107,6 +121,13 @@ export class AcademicSettingsComponent implements OnInit, OnDestroy {
       showGradesToStudents: [true],
       showGradesToParents: [true],
       allowGradeOverrides: [false],
+    });
+
+    this.releaseForm = this.fb.group({
+      term: ['', Validators.required],
+      clas: ['', Validators.required],
+      examType: ['', Validators.required],
+      released: [true],
     });
 
     // Initialize grade threshold forms
@@ -149,6 +170,11 @@ export class AcademicSettingsComponent implements OnInit, OnDestroy {
 
     this.loadSettings();
     this.loadGradingSystems();
+    this.store.dispatch(fetchTerms());
+    this.store.dispatch(fetchClasses());
+    this.terms$ = this.store.select(selectTerms);
+    this.classes$ = this.store.select(selectClasses);
+    this.refreshReleaseStatuses();
   }
 
   loadGradingSystems(): void {
@@ -415,6 +441,52 @@ export class AcademicSettingsComponent implements OnInit, OnDestroy {
       { grade: 'E', threshold: thresholds.e, description: 'Marginal Pass' },
       { grade: grading.failGrade, threshold: 0, description: 'Fail' },
     ];
+  }
+
+  refreshReleaseStatuses(): void {
+    this.reportsService.getReportReleaseStatus()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((rows) => {
+        this.releases = rows || [];
+        this.cdr.markForCheck();
+      });
+  }
+
+  saveReleaseStatus(): void {
+    if (this.releaseForm.invalid) {
+      this.releaseForm.markAllAsTouched();
+      this.snackBar.open('Please choose term, class and exam type first', 'Close', {
+        duration: 3000,
+      });
+      return;
+    }
+
+    const term: TermsModel = this.releaseForm.value.term;
+    const payload = {
+      name: this.releaseForm.value.clas,
+      num: term.num,
+      year: term.year,
+      examType: this.releaseForm.value.examType,
+      released: this.releaseForm.value.released,
+    };
+
+    this.reportsService.setReportReleaseStatus(payload)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.snackBar.open(
+            payload.released ? 'Reports released successfully' : 'Reports unreleased successfully',
+            'Close',
+            { duration: 3000 }
+          );
+          this.refreshReleaseStatuses();
+        },
+        error: () => {
+          this.snackBar.open('Failed to update report release status', 'Close', {
+            duration: 3000,
+          });
+        },
+      });
   }
 }
 

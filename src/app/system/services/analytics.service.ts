@@ -70,6 +70,7 @@ export class AnalyticsService {
     endDate?: string,
     termNum?: number,
     termYear?: number,
+    termId?: number,
   ): Observable<AnalyticsSummary> {
     let params = new HttpParams();
     if (startDate) {
@@ -84,12 +85,16 @@ export class AnalyticsService {
     if (termYear) {
       params = params.set('termYear', termYear.toString());
     }
+    if (termId) {
+      params = params.set('termId', termId.toString());
+    }
     return this.http.get<AnalyticsSummary>(this.apiUrl, { params });
   }
 
   getEnrollmentAnalytics(
     termNum?: number,
     termYear?: number,
+    termId?: number,
   ): Observable<EnrollmentAnalytics> {
     let params = new HttpParams();
     if (termNum) {
@@ -97,6 +102,9 @@ export class AnalyticsService {
     }
     if (termYear) {
       params = params.set('termYear', termYear.toString());
+    }
+    if (termId) {
+      params = params.set('termId', termId.toString());
     }
     return this.http.get<EnrollmentAnalytics>(`${this.apiUrl}/enrollment`, { params });
   }
@@ -106,6 +114,7 @@ export class AnalyticsService {
     endDate?: string,
     termNum?: number,
     termYear?: number,
+    termId?: number,
   ): Observable<FinancialAnalytics> {
     let params = new HttpParams();
     if (startDate) {
@@ -120,6 +129,9 @@ export class AnalyticsService {
     if (termYear) {
       params = params.set('termYear', termYear.toString());
     }
+    if (termId) {
+      params = params.set('termId', termId.toString());
+    }
     return this.http.get<FinancialAnalytics>(`${this.apiUrl}/financial`, {
       params,
     });
@@ -128,6 +140,7 @@ export class AnalyticsService {
   getAcademicAnalytics(
     termNum?: number,
     termYear?: number,
+    termId?: number,
   ): Observable<AcademicAnalytics> {
     let params = new HttpParams();
     if (termNum) {
@@ -135,6 +148,9 @@ export class AnalyticsService {
     }
     if (termYear) {
       params = params.set('termYear', termYear.toString());
+    }
+    if (termId) {
+      params = params.set('termId', termId.toString());
     }
     return this.http.get<AcademicAnalytics>(`${this.apiUrl}/academic`, { params });
   }

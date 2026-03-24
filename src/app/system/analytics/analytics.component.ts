@@ -95,6 +95,7 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
     this.filterForm = this.fb.group({
       startDate: [''],
       endDate: [''],
+      termId: [''],
       termNum: [''],
       termYear: [''],
     });
@@ -124,6 +125,7 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
               next: (currentTerm) => {
                 this.currentTerm = currentTerm;
                 this.filterForm.patchValue({
+                  termId: currentTerm.id,
                   termNum: currentTerm.num,
                   termYear: currentTerm.year,
                 });
@@ -143,6 +145,7 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
               next: (currentTerm) => {
                 this.currentTerm = currentTerm;
                 this.filterForm.patchValue({
+                  termId: currentTerm.id,
                   termNum: currentTerm.num,
                   termYear: currentTerm.year,
                 });
@@ -174,9 +177,10 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
       : undefined;
     const termNum = formValue.termNum ? parseInt(formValue.termNum, 10) : undefined;
     const termYear = formValue.termYear ? parseInt(formValue.termYear, 10) : undefined;
+    const termId = formValue.termId ? parseInt(formValue.termId, 10) : undefined;
 
     this.analyticsService
-      .getAnalyticsSummary(startDate, endDate, termNum, termYear)
+      .getAnalyticsSummary(startDate, endDate, termNum, termYear, termId)
       .pipe(
         takeUntil(this.destroy$),
         catchError((error) => {
@@ -441,6 +445,7 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
     // Reset to current term if available
     if (this.currentTerm) {
       this.filterForm.patchValue({
+        termId: this.currentTerm.id,
         termNum: this.currentTerm.num,
         termYear: this.currentTerm.year,
         startDate: '',
@@ -469,10 +474,15 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
   onTermChange(): void {
     // When term is selected, update year if needed
     const selectedTermNum = this.filterForm.get('termNum')?.value;
+    const selectedYear = this.filterForm.get('termYear')?.value;
     if (selectedTermNum) {
-      const selectedTerm = this.availableTerms.find(t => t.num === parseInt(selectedTermNum, 10));
+      const selectedTerm = this.availableTerms.find(
+        t =>
+          t.num === parseInt(selectedTermNum, 10) &&
+          (!selectedYear || t.year === parseInt(selectedYear, 10)),
+      );
       if (selectedTerm) {
-        this.filterForm.patchValue({ termYear: selectedTerm.year }, { emitEvent: false });
+        this.filterForm.patchValue({ termYear: selectedTerm.year, termId: selectedTerm.id }, { emitEvent: false });
       }
     }
     this.onFilterChange();
@@ -488,7 +498,9 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
         t => t.num === parseInt(selectedTermNum, 10) && t.year === parseInt(selectedYear, 10)
       );
       if (!selectedTerm) {
-        this.filterForm.patchValue({ termNum: '' }, { emitEvent: false });
+        this.filterForm.patchValue({ termNum: '', termId: '' }, { emitEvent: false });
+      } else {
+        this.filterForm.patchValue({ termId: selectedTerm.id }, { emitEvent: false });
       }
     }
     this.onFilterChange();

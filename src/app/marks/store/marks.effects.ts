@@ -92,7 +92,8 @@ export class MarksEffects {
             data.num,
             data.year,
             data.subjectCode,
-            data.examType
+            data.examType,
+            data.termId
           )
           .pipe(
             map((marks) =>

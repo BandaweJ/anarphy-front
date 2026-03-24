@@ -119,6 +119,15 @@
               </mat-form-field>
 
               <mat-form-field appearance="outline" class="comment-input">
+                <mat-label>Term Mark</mat-label>
+                <input matInput type="number" formControlName="termMark" (blur)="saveMark(row, i)" min="0" max="100" />
+                <mat-error
+                  *ngIf="(getTermMarkControl(i).hasError('min') || getTermMarkControl(i).hasError('max')) && getTermMarkControl(i).touched">
+                  Term Mark must be between 0 and 100.
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="comment-input">
                 <mat-label>Comment</mat-label>
                 <input matInput formControlName="comment" [matAutocomplete]="auto" (blur)="saveMark(row, i)" />
                 <mat-autocomplete #auto="matAutocomplete" (optionSelected)="saveMark(row, i)"> <mat-option

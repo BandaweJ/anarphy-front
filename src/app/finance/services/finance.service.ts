@@ -48,8 +48,14 @@ export class FinanceService {
 
   getStudentsNotYetBilledForTerm(
     num: number,
-    year: number
+    year: number,
+    termId?: number
   ): Observable<EnrolsModel[]> {
+    if (termId) {
+      return this.httpClient.get<EnrolsModel[]>(
+        `${this.baseURL}billing/tobill/term/${termId}`
+      );
+    }
     return this.httpClient.get<EnrolsModel[]>(
       `${this.baseURL}billing/tobill/${num}/${year}`
     );

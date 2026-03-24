@@ -79,6 +79,15 @@
         </ng-container>
 
         <!-- Term Number Column -->
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            <mat-icon>tag</mat-icon>
+            <span>Term ID</span>
+          </th>
+          <td mat-cell *matCellDef="let row">{{ row.id }}</td>
+        </ng-container>
+
+        <!-- Term Number Column -->
         <ng-container matColumnDef="num">
           <th mat-header-cell *matHeaderCellDef mat-sort-header class="num-header">
             <mat-icon>looks_one</mat-icon>
@@ -100,6 +109,16 @@
           </th>
           <td mat-cell *matCellDef="let row" class="year-cell">
             <div class="year-badge">{{ row.year }}</div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="type">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            <mat-icon>category</mat-icon>
+            <span>Type</span>
+          </th>
+          <td mat-cell *matCellDef="let row">
+            {{ (row.type || 'regular') | titlecase }}
           </td>
         </ng-container>
 

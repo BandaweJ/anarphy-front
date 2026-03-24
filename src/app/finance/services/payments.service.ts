@@ -22,12 +22,14 @@ export class PaymentsService {
   getInvoice(
     studentNumber: string,
     num: number,
-    year: number
+    year: number,
+    termId?: number
   ): Observable<InvoiceResponseModel> {
+    const url = termId
+      ? `${this.baseURL}invoice/${studentNumber}/term/${termId}`
+      : `${this.baseURL}invoice/${studentNumber}/${num}/${year}`;
     return this.httpClient
-      .get<InvoiceResponseModel>(
-        `${this.baseURL}invoice/${studentNumber}/${num}/${year}`
-      )
+      .get<InvoiceResponseModel>(url)
       .pipe(
         timeout(30000), // 30 second timeout
         map((response) => {
@@ -40,13 +42,23 @@ export class PaymentsService {
       );
   }
 
-  getInvoiceStats(num: number, year: number): Observable<InvoiceStatsModel[]> {
+  getInvoiceStats(num: number, year: number, termId?: number): Observable<InvoiceStatsModel[]> {
+    if (termId) {
+      return this.httpClient.get<InvoiceStatsModel[]>(
+        `${this.baseURL}invoice/stats/term/${termId}`
+      );
+    }
     return this.httpClient.get<InvoiceStatsModel[]>(
       `${this.baseURL}invoice/stats/${num}/${year}`
     );
   }
 
-  getTermInvoices(num: number, year: number): Observable<InvoiceModel[]> {
+  getTermInvoices(num: number, year: number, termId?: number): Observable<InvoiceModel[]> {
+    if (termId) {
+      return this.httpClient.get<InvoiceModel[]>(
+        `${this.baseURL}invoice/term/${termId}`
+      );
+    }
     return this.httpClient.get<InvoiceModel[]>(
       `${this.baseURL}invoice/${num}/${year}`
     );
@@ -205,6 +217,7 @@ export class PaymentsService {
   createGroupInvoice(groupInvoiceData: {
     students: Array<{
       studentNumber: string;
+      termId?: number;
       termNum: number;
       year: number;
       bills: any[];

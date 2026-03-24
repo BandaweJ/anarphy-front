@@ -33,7 +33,13 @@ export class StudentsToBillComponent implements OnInit {
     if (this.currentTerm) {
       const num = this.currentTerm.num;
       const year = this.currentTerm.year;
-      this.store.dispatch(billingActions.fetchStudentsToBill({ num, year }));
+      this.store.dispatch(
+        billingActions.fetchStudentsToBill({
+          num,
+          year,
+          termId: this.currentTerm.id,
+        }),
+      );
     }
   }
 }

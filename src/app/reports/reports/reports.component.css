@@ -313,6 +313,51 @@
   transform: none;
 }
 
+.release-status-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.release-pill {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.release-pill.released {
+  background: #e8f5e9;
+  color: #1b5e20;
+}
+
+.release-pill.draft {
+  background: #fff8e1;
+  color: #8d6e00;
+}
+
+.term-mark-table-wrap {
+  margin-top: 12px;
+  overflow-x: auto;
+}
+
+.term-mark-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.term-mark-table th,
+.term-mark-table td {
+  border: 1px solid #e0e0e0;
+  padding: 8px;
+  text-align: left;
+}
+
+.term-mark-table input[type='number'] {
+  width: 120px;
+}
+
 /* Analytics Section */
 .analytics-section {
   margin-bottom: 3rem;

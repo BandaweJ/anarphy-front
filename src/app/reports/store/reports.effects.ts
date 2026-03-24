@@ -19,7 +19,7 @@ export class ReportsEffects {
       ofType(reportsActions.generateReports),
       switchMap((data) =>
         this.reportsService
-          .generateReports(data.name, data.num, data.year, data.examType)
+          .generateReports(data.name, data.num, data.year, data.examType, data.termId)
           .pipe(
             tap((data) =>
               this.snackBar.open(
@@ -53,7 +53,8 @@ export class ReportsEffects {
             data.num,
             data.year,
             data.examType,
-            data.reports
+            data.reports,
+            data.termId
           )
           .pipe(
             map((reports) =>
@@ -72,7 +73,7 @@ export class ReportsEffects {
       ofType(reportsActions.viewReportsActions.viewReports),
       switchMap((data) =>
         this.reportsService
-          .viewReports(data.name, data.num, data.year, data.examType)
+          .viewReports(data.name, data.num, data.year, data.examType, data.termId)
           .pipe(
             map((reports) =>
               reportsActions.viewReportsActions.viewReportsSuccess({ reports })
@@ -117,7 +118,8 @@ export class ReportsEffects {
             data.num,
             data.year,
             data.examType,
-            data.studentNumber
+            data.studentNumber,
+            data.termId
           )
           // .unsubscribe()
           .pipe(

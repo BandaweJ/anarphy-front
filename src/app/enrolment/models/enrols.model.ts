@@ -5,6 +5,7 @@ import { FeesModel } from 'src/app/finance/models/fees.model';
 export interface EnrolsModel {
   id?: number;
   name: string;
+  termId?: number;
   num: number;
   year: number;
   residence: Residence;

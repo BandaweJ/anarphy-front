@@ -59,8 +59,10 @@ export class TermsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   displayedColumns: string[] = [
     'index',
+    'id',
     'num',
     'year',
+    'type',
     'startDate',
     'endDate',
     'duration',
@@ -219,7 +221,7 @@ export class TermsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   trackByTermId(index: number, term: TermsModel): string {
-    return `${term.num}-${term.year}`;
+    return `${term.id ?? `${term.num}-${term.year}`}`;
   }
 
   getTermStatus(term: TermsModel): string {

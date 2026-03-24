@@ -3,6 +3,7 @@ import { ReportModel } from './report.model';
 
 export interface ReportsModel {
   id?: number;
+  termId?: number;
   num: number;
   year: number;
   name: string;
