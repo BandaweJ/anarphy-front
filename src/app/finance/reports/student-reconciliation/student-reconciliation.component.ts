@@ -42,6 +42,7 @@ export class StudentReconciliationComponent implements OnInit, OnDestroy {
   selectedStudent: StudentsModel | null = null;
   isReconciling = false;
   reconciliationResult: ReconciliationResultModel | null = null;
+  runFromScratch = false;
   private destroy$ = new Subject<void>();
   baseURL = `${environment.apiUrl}/payment/`;
 
@@ -78,7 +79,7 @@ export class StudentReconciliationComponent implements OnInit, OnDestroy {
     this.http
       .post<ReconciliationResultModel>(
         `${this.baseURL}reconcile/${studentNumber}`,
-        {},
+        { fromScratch: this.runFromScratch === true },
       )
       .subscribe({
         next: (response) => {
