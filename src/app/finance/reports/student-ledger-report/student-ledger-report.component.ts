@@ -186,6 +186,7 @@ export class StudentLedgerReportComponent implements OnInit, OnDestroy {
         );
       }),
       map((v) => Number(v || 0)),
+      startWith(0),
     );
 
     // Apply filters to ledger

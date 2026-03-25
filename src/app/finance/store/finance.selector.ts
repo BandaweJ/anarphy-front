@@ -616,24 +616,56 @@ export const getStudentLedger = (studentNumber: string) =>
 export const getStudentCreditBalance = (studentNumber: string) =>
   createSelector(
     selectAllNonVoidedReceipts,
-    (allReceipts: ReceiptModel[] | null): number => {
+    selectAllInvoices,
+    (allReceipts: ReceiptModel[] | null, allInvoices: InvoiceModel[] | null): number => {
       if (!studentNumber) return 0;
       const receipts = (allReceipts || []).filter(
         (r) => r.student?.studentNumber === studentNumber,
       );
 
-      // Prefer the canonical studentCredit.amount if present on any receiptCredit.
-      // Multiple receipt credits can reference the same studentCredit record; take max.
-      let maxBalance = 0;
-      for (const r of receipts) {
-        const rc = (r as any).receiptCredits;
-        if (!rc || !Array.isArray(rc)) continue;
-        for (const entry of rc) {
-          const bal = Number(entry?.studentCredit?.amount ?? 0);
-          if (bal > maxBalance) maxBalance = bal;
-        }
+      // Credit balance shown in the ledger/report should align with what the user sees in the table:
+      // credits created from receipt overpayments MINUS credits applied to invoices.
+      const totalCreditsCreated = receipts.reduce((sum, r: any) => {
+        const rc = r?.receiptCredits;
+        if (!rc || !Array.isArray(rc)) return sum;
+        return (
+          sum +
+          rc.reduce((s: number, entry: any) => s + Number(entry?.creditAmount ?? 0), 0)
+        );
+      }, 0);
+
+      // Credits applied: sum credit allocations for this student's invoices.
+      // Exclude redundant credit allocations that relate to a receipt which already has direct allocations
+      // to the same invoice (prevents double-counting in hybrid/legacy data).
+      const studentInvoices = (allInvoices || []).filter(
+        (inv) => !inv.isVoided && inv.student?.studentNumber === studentNumber,
+      );
+
+      const tolerance = 0.01;
+      let totalCreditsApplied = 0;
+      for (const inv of studentInvoices) {
+        const receiptIdsWithDirectAllocations = new Set<number>();
+        (inv.allocations || []).forEach((a: any) => {
+          const rid = Number(a?.receiptId ?? a?.receipt?.id);
+          if (rid) receiptIdsWithDirectAllocations.add(rid);
+        });
+
+        const totalBill = Number(inv.totalBill || 0);
+        const receiptAllocated = (inv.allocations || []).reduce(
+          (s, a: any) => s + Number(a?.amountApplied ?? 0),
+          0,
+        );
+
+        (inv.creditAllocations || []).forEach((ca: any) => {
+          const relatedReceiptId = Number(ca?.relatedReceiptId ?? 0);
+          // If receipts already fully cover the invoice, don't treat these credit allocations as consuming credit.
+          if (receiptAllocated >= totalBill - tolerance) return;
+          if (relatedReceiptId && receiptIdsWithDirectAllocations.has(relatedReceiptId)) return;
+          totalCreditsApplied += Number(ca?.amountApplied ?? 0);
+        });
       }
-      return maxBalance;
+
+      return Math.max(0, totalCreditsCreated - totalCreditsApplied);
     },
   );
 
