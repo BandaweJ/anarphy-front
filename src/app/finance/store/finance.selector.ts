@@ -508,6 +508,28 @@ export const getStudentLedger = (studentNumber: string) =>
             amountPaid: receipt.amountPaid,
           });
         }
+
+        // 2.25. Process Receipt Credits (overpayments that became student credit)
+        if (
+          (receipt as any).receiptCredits &&
+          Array.isArray((receipt as any).receiptCredits) &&
+          (receipt as any).receiptCredits.length > 0
+        ) {
+          (receipt as any).receiptCredits.forEach((rc: any) => {
+            const creditAmount = Number(rc?.creditAmount ?? 0);
+            if (!(creditAmount > 0.01)) return;
+            ledgerEntries.push({
+              id: `CREDIT-${receipt.id}-${rc.id ?? 'x'}`,
+              type: 'Credit',
+              date: new Date(rc?.createdAt || receipt.paymentDate),
+              description: `Credit created from Receipt #${receipt.receiptNumber}`,
+              amount: creditAmount,
+              direction: 'in',
+              relatedDocNumber: receipt.receiptNumber,
+              status: 'Processed',
+            });
+          });
+        }
       });
 
       // 2.5. Process Credit Allocations (overpayments applied to invoices)
@@ -589,6 +611,30 @@ export const getStudentLedger = (studentNumber: string) =>
 
       return ledgerWithRunningBalance;
     }
+  );
+
+export const getStudentCreditBalance = (studentNumber: string) =>
+  createSelector(
+    selectAllNonVoidedReceipts,
+    (allReceipts: ReceiptModel[] | null): number => {
+      if (!studentNumber) return 0;
+      const receipts = (allReceipts || []).filter(
+        (r) => r.student?.studentNumber === studentNumber,
+      );
+
+      // Prefer the canonical studentCredit.amount if present on any receiptCredit.
+      // Multiple receipt credits can reference the same studentCredit record; take max.
+      let maxBalance = 0;
+      for (const r of receipts) {
+        const rc = (r as any).receiptCredits;
+        if (!rc || !Array.isArray(rc)) continue;
+        for (const entry of rc) {
+          const bal = Number(entry?.studentCredit?.amount ?? 0);
+          if (bal > maxBalance) maxBalance = bal;
+        }
+      }
+      return maxBalance;
+    },
   );
 
 // --- Fees Collection Report Specific Models (no changes here) ---

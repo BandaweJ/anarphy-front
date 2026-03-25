@@ -8,6 +8,7 @@ import { StudentsModel } from 'src/app/registration/models/students.model';
 import {
   getStudentLedger,
   LedgerEntry,
+  getStudentCreditBalance,
   selectIsLoadingFinancials,
   selectErrorMsg,
 } from '../../store/finance.selector';
@@ -80,6 +81,7 @@ export class StudentLedgerReportComponent implements OnInit, OnDestroy {
   rawLedger$!: Observable<LedgerEntry[]>;
   filteredLedger$!: Observable<LedgerEntry[]>;
   ledgerSummary$!: Observable<LedgerSummary>;
+  creditBalance$!: Observable<number>;
   isLoading$: Observable<boolean>;
   error$: Observable<string | null>;
   allStudents$: Observable<StudentsModel[]>;
@@ -173,6 +175,17 @@ export class StudentLedgerReportComponent implements OnInit, OnDestroy {
         );
       }),
       map(ledger => ledger || [])
+    );
+
+    // Credit balance (separate from amount owed)
+    this.creditBalance$ = this.selectedStudent$.pipe(
+      switchMap((student) => {
+        if (!student) return of(0);
+        return this.store.select(getStudentCreditBalance(student.studentNumber)).pipe(
+          catchError(() => of(0)),
+        );
+      }),
+      map((v) => Number(v || 0)),
     );
 
     // Apply filters to ledger
@@ -373,6 +386,7 @@ export class StudentLedgerReportComponent implements OnInit, OnDestroy {
       'Payment': 'payments',
       'Invoice': 'description',
       'Allocation': 'check_circle_outline',
+      'Credit': 'account_balance_wallet',
     };
     return icons[type] || 'info';
   }

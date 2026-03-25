@@ -89,6 +89,16 @@
               </div>
             </mat-card-content>
           </mat-card>
+
+          <mat-card class="summary-card" *ngIf="(creditBalance$ | async) as creditBal">
+            <mat-card-content>
+              <mat-icon class="summary-icon" color="primary">account_balance_wallet</mat-icon>
+              <div class="summary-content">
+                <span class="summary-label">Credit Balance</span>
+                <span class="summary-value amount-in">{{ creditBal | currency:'USD':'symbol':'1.2-2' }}</span>
+              </div>
+            </mat-card-content>
+          </mat-card>
           
           <mat-card class="summary-card">
             <mat-card-content>
@@ -131,6 +141,7 @@
                     <mat-option value="Invoice">Invoice</mat-option>
                     <mat-option value="Payment">Payment</mat-option>
                     <mat-option value="Allocation">Allocation</mat-option>
+                    <mat-option value="Credit">Credit</mat-option>
                   </mat-select>
                 </mat-form-field>
 
