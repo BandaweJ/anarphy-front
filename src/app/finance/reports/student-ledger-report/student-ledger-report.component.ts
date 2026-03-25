@@ -229,9 +229,22 @@ export class StudentLedgerReportComponent implements OnInit, OnDestroy {
         const lastEntry = ledger[ledger.length - 1] as any;
         const netBalance = Number(lastEntry?.runningBalance ?? 0);
 
+        // Totals should match the effective balance changes (including any UI-level
+        // skipping of redundant credit allocations).
+        const tolerance = 0.01;
+        let totalDebits = 0;
+        let totalCredits = 0;
+        for (let i = 0; i < ledger.length; i++) {
+          const prevBalance = i === 0 ? 0 : Number((ledger[i - 1] as any)?.runningBalance ?? 0);
+          const currBalance = Number((ledger[i] as any)?.runningBalance ?? 0);
+          const delta = currBalance - prevBalance;
+          if (delta > tolerance) totalDebits += delta;
+          else if (delta < -tolerance) totalCredits += -delta;
+        }
+
         return {
-          totalDebits: ledger.filter(e => e.type === 'Invoice').reduce((sum, e) => sum + e.amount, 0),
-          totalCredits: ledger.filter(e => e.type === 'Allocation').reduce((sum, e) => sum + e.amount, 0),
+          totalDebits,
+          totalCredits,
           netBalance,
           transactionCount: ledger.length,
           oldestTransaction: dates[0] || null,

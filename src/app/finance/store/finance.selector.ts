@@ -542,11 +542,45 @@ export const getStudentLedger = (studentNumber: string) =>
       // Invoices increase outstanding, while receipt allocations and credit allocations reduce it.
       // The full receipt "Payment" cash is not used directly here; it only matters when it's allocated.
       let currentRunningBalance = 0;
+      const tolerance = 0.01;
+      const invoiceByNumber = new Map(
+        studentInvoices.map(inv => [inv.invoiceNumber, inv]),
+      );
+
+      // If an invoice is already fully covered by receipt allocations, then any credit allocations
+      // on that same invoice are redundant for the "outstanding" running balance.
+      const receiptAllocatedByInvoiceNumber = new Map<string, number>();
+      studentInvoices.forEach((inv) => {
+        const receiptAllocated = (inv.allocations || []).reduce(
+          (sum, alloc) => sum + Number(alloc.amountApplied || 0),
+          0,
+        );
+        receiptAllocatedByInvoiceNumber.set(inv.invoiceNumber, receiptAllocated);
+      });
       const ledgerWithRunningBalance: LedgerEntry[] = ledgerEntries.map(
         (entry) => {
           if (entry.type === 'Invoice') {
             currentRunningBalance += entry.amount;
           } else if (entry.type === 'Allocation') {
+            const isCreditAllocation = String(entry.id).startsWith(
+              'CREDIT-ALLOC-',
+            );
+
+            if (isCreditAllocation && entry.relatedDocNumber) {
+              const inv = invoiceByNumber.get(entry.relatedDocNumber);
+              if (inv) {
+                const receiptAllocated = receiptAllocatedByInvoiceNumber.get(
+                  entry.relatedDocNumber,
+                ) ?? 0;
+                const totalBill = Number(inv.totalBill || 0);
+
+                // Don't reduce outstanding below what receipts already covered for this invoice.
+                if (receiptAllocated >= totalBill - tolerance) {
+                  return { ...entry, runningBalance: currentRunningBalance };
+                }
+              }
+            }
+
             currentRunningBalance -= entry.amount;
           }
           return { ...entry, runningBalance: currentRunningBalance };
@@ -841,39 +875,28 @@ export const calculateStudentOverallBalance = (
 
 // === NEW: Selector to get ALL student overall outstanding balances === (no change needed here, it uses the combined data)
 export const selectAllStudentsOverallBalances = createSelector(
-  selectAllCombinedFinanceData,
-  (combinedData: FinanceDataModel[]) => {
+  selectAllInvoices,
+  (allInvoices: InvoiceModel[] | null) => {
+    // Outstanding fees report should match backend ledger semantics:
+    // use `invoice.balance` (computed from receipts + applied credit allocations).
     const studentBalances = new Map<string, number>();
 
-    const sortedCombinedData = combinedData.sort(
-      (a, b) =>
-        new Date(a.transactionDate).getTime() -
-        new Date(b.transactionDate).getTime()
-    );
-
-    sortedCombinedData.forEach((t) => {
-      const studentId = t.studentId;
+    (allInvoices || []).forEach((inv) => {
+      if (!inv || inv.isVoided) return;
+      const studentId = inv.student?.studentNumber;
       if (!studentId) return;
 
-      // Skip voided invoices
-      if (t.type === 'Invoice' && t.invoiceIsVoided) {
-        return;
-      }
+      const balance = Number(inv.balance || 0);
+      if (balance <= 0) return;
 
-      let currentBalance = studentBalances.get(studentId) || 0;
-      const amount = parseFloat(String(t.amount)) || 0;
-
-      if (t.type === 'Invoice') {
-        currentBalance += amount;
-      } else if (t.type === 'Payment') {
-        currentBalance -= amount;
-      }
-
-      studentBalances.set(studentId, currentBalance);
+      studentBalances.set(
+        studentId,
+        (studentBalances.get(studentId) || 0) + balance,
+      );
     });
 
     return studentBalances;
-  }
+  },
 );
 
 // === UPDATED: Outstanding Fees Report Selector Factory === (no changes needed for this selector directly, as it relies on `selectAllStudentsOverallBalances` which now uses filtered data)
