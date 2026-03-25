@@ -14,7 +14,7 @@ export interface ReceiptModel {
   paymentMethod: PaymentMethods;
   approved: boolean;
   servedBy: string;
-  enrol: EnrolsModel;
+  enrol: EnrolsModel | null;
   allocations: ReceiptInvoiceAllocationsModel[];
   // --- NEW PROPERTIES FOR VOIDING ---
   isVoided: boolean; // Indicates if the receipt has been voided

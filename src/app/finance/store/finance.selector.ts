@@ -228,32 +228,17 @@ export const selectStudentInvoicesAndReceiptsLoaded = createSelector(
 export const selectStudentBalance = createSelector(
   selectStudentInvoices,
   selectStudentReceipts,
-  (studentInvoices: InvoiceModel[] | null, studentReceipts: ReceiptModel[] | null): number => {
-    if (!studentInvoices && !studentReceipts) {
-      return 0;
-    }
-
-    let balance = 0;
-
-    // Filter out voided invoices
-    const validInvoices = (studentInvoices || []).filter((inv) => !inv.isVoided);
-    
-    // Add invoice amounts (debits)
-    validInvoices.forEach((invoice) => {
-      const totalBill = Number(invoice.totalBill || 0);
-      balance += totalBill;
-    });
-
-    // Subtract receipt amounts (credits)
-    // Note: studentReceipts are already filtered for non-voided by the selector
-    const validReceipts = studentReceipts || [];
-    validReceipts.forEach((receipt) => {
-      const amountPaid = Number(receipt.amountPaid || 0);
-      balance -= amountPaid;
-    });
-
-    return balance;
-  }
+  (studentInvoices: InvoiceModel[] | null, _studentReceipts: ReceiptModel[] | null): number => {
+    // Single source of truth: outstanding is computed server-side on `invoice.balance`
+    // which already includes receipt allocations + applied credit allocations.
+    const validInvoices = (studentInvoices || []).filter(
+      (inv) => !inv.isVoided,
+    );
+    return validInvoices.reduce(
+      (sum, inv) => sum + Number(inv.balance || 0),
+      0,
+    );
+  },
 );
 
 export const selectLoadStudentInvoicesErr = createSelector(
@@ -553,22 +538,17 @@ export const getStudentLedger = (studentNumber: string) =>
       // 3. Sort all entries chronologically
       ledgerEntries.sort((a, b) => a.date.getTime() - b.date.getTime());
 
-      // 4. Calculate running balance
-      // Full payment amounts reduce the balance (money received)
-      // Allocations are for display/tracking only (showing which invoice received the payment)
-      // This ensures the balance reflects actual cash flow: invoices - payments
+      // 4. Calculate running "amount owing" (outstanding) based on allocations.
+      // Invoices increase outstanding, while receipt allocations and credit allocations reduce it.
+      // The full receipt "Payment" cash is not used directly here; it only matters when it's allocated.
       let currentRunningBalance = 0;
       const ledgerWithRunningBalance: LedgerEntry[] = ledgerEntries.map(
         (entry) => {
           if (entry.type === 'Invoice') {
             currentRunningBalance += entry.amount;
-          } else if (entry.type === 'Payment') {
-            // Full payment amount reduces balance (money received)
-            // This accounts for both allocated amounts and any overpayments (credits)
+          } else if (entry.type === 'Allocation') {
             currentRunningBalance -= entry.amount;
           }
-          // Allocation entries are for display only - they don't affect the running balance
-          // because the full payment amount was already subtracted above
           return { ...entry, runningBalance: currentRunningBalance };
         }
       );

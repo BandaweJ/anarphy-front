@@ -246,9 +246,9 @@ export class StudentReportCardsComponent implements OnInit, OnDestroy {
     }
 
     if (matchingInvoice) {
-      // Check if the balance on the found invoice is zero
-
-      return +matchingInvoice.balance === 0;
+      // Check if the balance on the found invoice is zero (tolerance for decimals)
+      const balance = Number(matchingInvoice.balance || 0);
+      return Math.abs(balance) < 0.01;
     } else {
       // No matching invoice found for this report's term and year.
       // As per the requirement "display the report only if the balance on an invoice... is zero",

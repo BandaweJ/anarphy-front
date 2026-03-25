@@ -222,23 +222,17 @@ export class StudentLedgerReportComponent implements OnInit, OnDestroy {
           };
         }
 
-        // Count Invoice types for debits and Payment types for credits
-        // Use full payment amounts (money received) to match the running balance calculation
-        // This accounts for both allocated amounts and any overpayments (credits)
-        const debits = ledger
-          .filter(e => e.direction === 'out' && e.type === 'Invoice')
-          .reduce((sum, e) => sum + e.amount, 0);
-        const credits = ledger
-          .filter(e => e.direction === 'in' && e.type === 'Payment')
-          .reduce((sum, e) => sum + e.amount, 0);
+        // Single source of truth for summary:
+        // the selector's `runningBalance` is computed from backend ledger semantics:
+        // outstanding changes on `Invoice` and `Allocation` events.
         const dates = ledger.map(e => new Date(e.date)).sort((a, b) => a.getTime() - b.getTime());
-        
-        // netBalance = debits - credits (amount owed)
-        // Positive value means student owes money, negative means credit balance
+        const lastEntry = ledger[ledger.length - 1] as any;
+        const netBalance = Number(lastEntry?.runningBalance ?? 0);
+
         return {
-          totalDebits: debits,
-          totalCredits: credits,
-          netBalance: debits - credits,
+          totalDebits: ledger.filter(e => e.type === 'Invoice').reduce((sum, e) => sum + e.amount, 0),
+          totalCredits: ledger.filter(e => e.type === 'Allocation').reduce((sum, e) => sum + e.amount, 0),
+          netBalance,
           transactionCount: ledger.length,
           oldestTransaction: dates[0] || null,
           newestTransaction: dates[dates.length - 1] || null,
