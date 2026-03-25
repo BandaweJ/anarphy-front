@@ -16,7 +16,7 @@ export const initialState: State = {
 
 export const markSheetsReducer = createReducer(
   initialState,
-  on(markSheetActions.fetchMarkSheet, (state, { name, num, year }) => ({
+  on(markSheetActions.fetchMarkSheet, (state) => ({
     ...state,
     isLoading: true,
   })),

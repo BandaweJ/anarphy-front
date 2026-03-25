@@ -5,14 +5,12 @@ import { ReportsService } from 'src/app/reports/services/reports.service';
 import { markSheetActions } from './actions';
 import { catchError, map, of, switchMap, tap } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ReportsModel } from 'src/app/reports/models/reports.model';
 
 @Injectable()
 export class MarkSheetEffects {
   constructor(
     private actions$: Actions,
     private reportsService: ReportsService,
-
     private snackBar: MatSnackBar
   ) {}
 
@@ -21,9 +19,9 @@ export class MarkSheetEffects {
       ofType(markSheetActions.fetchMarkSheet),
       switchMap((data) =>
         this.reportsService
-          .generateReports(data.name, data.num, data.year, data.examType)
+          .generateReports(data.name, data.termId, data.examType)
           .pipe(
-            tap((reports) =>
+            tap(() =>
               this.snackBar.open(`Mark sheet generated successfully`, 'OK', {
                 duration: 3000,
                 verticalPosition: 'top',
@@ -40,5 +38,4 @@ export class MarkSheetEffects {
       )
     )
   );
-
 }

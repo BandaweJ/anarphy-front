@@ -6,13 +6,12 @@ import {
 } from '@ngrx/store';
 import { ReportsModel } from '../models/reports.model';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ReportModel } from '../models/report.model';
 import { HeadCommentModel, FormTeacherCommentModel } from '../models/comment.model';
 import { ExamType } from 'src/app/marks/models/examtype.enum';
 
 export const generateReports = createAction(
   '[Reports Component] generate reports',
-  props<{ name: string; num: number; year: number; termId?: number; examType: ExamType }>()
+  props<{ name: string; termId: number; examType: ExamType }>()
 );
 
 export const generateReportsSuccess = createAction(
@@ -30,9 +29,7 @@ export const saveReportActions = createActionGroup({
   events: {
     saveReports: props<{
       name: string;
-      num: number;
-      year: number;
-      termId?: number;
+      termId: number;
       reports: ReportsModel[];
       examType: ExamType;
     }>(),
@@ -46,9 +43,7 @@ export const viewReportsActions = createActionGroup({
   events: {
     viewReports: props<{
       name: string;
-      num: number;
-      year: number;
-      termId?: number;
+      termId: number;
       examType: ExamType;
     }>(),
     viewReportsSuccess: props<{ reports: ReportsModel[] }>(),
@@ -56,12 +51,9 @@ export const viewReportsActions = createActionGroup({
     fetchStudentReports: props<{ studentNumber: string }>(),
     fetchStudentReportsSuccess: props<{ reports: ReportsModel[] }>(),
     fetchStudentReportsFail: props<{ error: HttpErrorResponse }>(),
-    // --- NEW ACTION ---
     selectStudentReport: props<{ report: ReportsModel }>(),
-    // --- NEW ACTION TO CLEAR DISPLAYED REPORT ---
     clearSelectedReport: emptyProps(),
     resetReports: emptyProps(),
-
     'Set Reports Error Msg': props<{ errorMsg: string }>(),
   },
 });
@@ -89,9 +81,7 @@ export const downloadReportActions = createActionGroup({
   events: {
     downloadReport: props<{
       name: string;
-      num: number;
-      year: number;
-      termId?: number;
+      termId: number;
       examType: ExamType;
       studentNumber: string;
     }>(),

@@ -89,8 +89,6 @@ export class MarksEffects {
         this.marksService
           .getMarksInClassBySubject(
             data.name,
-            data.num,
-            data.year,
             data.subjectCode,
             data.examType,
             data.termId
@@ -199,7 +197,7 @@ export class MarksEffects {
       ofType(marksActions.perfomanceActions.fetchPerfomanceData),
       switchMap((par) =>
         this.marksService
-          .getPerfomanceData(par.num, par.year, par.name, par.examType)
+          .getPerfomanceData(par.termId, par.name, par.examType)
           .pipe(
             map((data) =>
               marksActions.perfomanceActions.fetchPerfomanceDataSuccess({
@@ -224,7 +222,7 @@ export class MarksEffects {
       ofType(marksActions.fetchMarksProgressActions.fetchMarksProgress),
       switchMap((data) =>
         this.marksService
-          .getMarksProgress(data.num, data.year, data.clas, data.examType)
+          .getMarksProgress(data.termId, data.clas, data.examType)
           .pipe(
             map((marksProgress) =>
               marksActions.fetchMarksProgressActions.fetchMarksProgressSuccess({

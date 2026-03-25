@@ -298,11 +298,14 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
     this.selectedStudent$.next(null);
 
     const { term, clas, examType } = this.analysisForm.value;
+    if (!term?.id) {
+      this.snackBar.open('Please choose a valid term.', 'Close', { duration: 3000 });
+      return;
+    }
     this.store.dispatch(
       viewReportsActions.viewReports({
         name: clas,
-        num: term.num,
-        year: term.year,
+        termId: term.id,
         examType: examType,
       })
     );
@@ -314,12 +317,10 @@ export class ResultsAnalysisComponent implements OnInit, OnDestroy {
         return o1.studentNumber === o2.studentNumber;
       }
       if (
-        typeof o1.num === 'number' &&
-        typeof o1.year === 'number' &&
-        typeof o2.num === 'number' &&
-        typeof o2.year === 'number'
+        typeof o1.id === 'number' &&
+        typeof o2.id === 'number'
       ) {
-        return o1.num === o2.num && o1.year === o2.year;
+        return o1.id === o2.id;
       }
       if (o1.id && o2.id) {
         return o1.id === o2.id;

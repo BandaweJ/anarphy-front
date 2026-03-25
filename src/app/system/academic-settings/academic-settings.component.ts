@@ -462,10 +462,13 @@ export class AcademicSettingsComponent implements OnInit, OnDestroy {
     }
 
     const term: TermsModel = this.releaseForm.value.term;
+    if (!term?.id) {
+      this.snackBar.open('Please choose a valid term', 'Close', { duration: 3000 });
+      return;
+    }
     const payload = {
       name: this.releaseForm.value.clas,
-      num: term.num,
-      year: term.year,
+      termId: term.id,
       examType: this.releaseForm.value.examType,
       released: this.releaseForm.value.released,
     };

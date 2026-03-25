@@ -161,16 +161,24 @@ export class MarksSheetsComponent implements OnInit, OnDestroy {
 
     const name = this.clas?.value;
     const term: TermsModel = this.term?.value;
-    const num = term.num;
-    const year = term.year;
+    const termId = term.id;
     const examType = this.examType?.value;
 
+    if (termId == null) {
+      this.snackBar.open(
+        'Invalid term selection. Choose a term from the list.',
+        'Close',
+        { duration: 3000, panelClass: ['warning-snackbar'] }
+      );
+      return;
+    }
+
     this.store.dispatch(
-      markSheetActions.fetchMarkSheet({ name, num, year, examType })
+      markSheetActions.fetchMarkSheet({ name, termId, examType })
     );
 
     this.snackBar.open(
-      `Generating mark sheet for ${name} - Term ${num} ${year} (${examType})`,
+      `Generating mark sheet for ${name} - Term ${term.num} ${term.year} (${examType})`,
       'Dismiss',
       { duration: 2000, panelClass: ['info-snackbar'] }
     );

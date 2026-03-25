@@ -114,16 +114,23 @@ export class MarksProgressComponent implements OnInit, OnDestroy {
     }
 
     const term: TermsModel = this.termControl?.value;
-    const num = term.num;
-    const year = term.year;
+    const termId = term.id;
 
     const clas = this.clasControl?.value;
     const examType = this.examTypeControl?.value;
 
+    if (termId == null) {
+      this.snackBar.open(
+        'Invalid term selection. Choose a term from the list.',
+        'Close',
+        { duration: 4000 }
+      );
+      return;
+    }
+
     this.store.dispatch(
       fetchMarksProgressActions.fetchMarksProgress({
-        num,
-        year,
+        termId,
         clas,
         examType,
       })

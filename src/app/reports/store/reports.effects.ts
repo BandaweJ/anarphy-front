@@ -19,22 +19,16 @@ export class ReportsEffects {
       ofType(reportsActions.generateReports),
       switchMap((data) =>
         this.reportsService
-          .generateReports(data.name, data.num, data.year, data.examType, data.termId)
+          .generateReports(data.name, data.termId, data.examType)
           .pipe(
-            tap((data) =>
-              this.snackBar.open(
-                `${data.length} Generated Successfully`,
-                'OK',
-                {
-                  duration: 3000,
-                  verticalPosition: 'top',
-                  horizontalPosition: 'center',
-                }
-              )
+            tap((rows) =>
+              this.snackBar.open(`${rows.length} Generated Successfully`, 'OK', {
+                duration: 3000,
+                verticalPosition: 'top',
+                horizontalPosition: 'center',
+              })
             ),
-            map((reports) =>
-              reportsActions.generateReportsSuccess({ reports })
-            ),
+            map((reports) => reportsActions.generateReportsSuccess({ reports })),
             catchError((error: HttpErrorResponse) =>
               of(reportsActions.generateReportsFail({ ...error }))
             )
@@ -48,14 +42,7 @@ export class ReportsEffects {
       ofType(reportsActions.saveReportActions.saveReports),
       switchMap((data) =>
         this.reportsService
-          .saveReports(
-            data.name,
-            data.num,
-            data.year,
-            data.examType,
-            data.reports,
-            data.termId
-          )
+          .saveReports(data.name, data.termId, data.examType, data.reports)
           .pipe(
             map((reports) =>
               reportsActions.saveReportActions.saveReportsSuccess({ reports })
@@ -73,7 +60,7 @@ export class ReportsEffects {
       ofType(reportsActions.viewReportsActions.viewReports),
       switchMap((data) =>
         this.reportsService
-          .viewReports(data.name, data.num, data.year, data.examType, data.termId)
+          .viewReports(data.name, data.termId, data.examType)
           .pipe(
             map((reports) =>
               reportsActions.viewReportsActions.viewReportsSuccess({ reports })
@@ -115,17 +102,12 @@ export class ReportsEffects {
         this.reportsService
           .downloadReport(
             data.name,
-            data.num,
-            data.year,
+            data.termId,
             data.examType,
             data.studentNumber,
-            data.termId
           )
-          // .unsubscribe()
           .pipe(
-            map((result) =>
-              reportsActions.downloadReportActions.downloadReportSuccess()
-            ),
+            map(() => reportsActions.downloadReportActions.downloadReportSuccess()),
             catchError((error: HttpErrorResponse) =>
               of(
                 reportsActions.downloadReportActions.downloadReportFail({

@@ -299,14 +299,21 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
     const term: TermsModel = this.termControl?.value;
     const subject: SubjectsModel = this.subjectControl?.value;
 
-    const num = term.num;
-    const year = term.year;
     const subjectCode = subject.code;
     const examType = this.examTypeControl?.value;
     const termId = term.id;
 
+    if (termId == null) {
+      this.snackBar.open(
+        'Invalid term selection. Choose a term from the list.',
+        'Close',
+        { duration: 4000 }
+      );
+      return;
+    }
+
     this.store.dispatch(
-      fetchSubjectMarksInClass({ name, num, year, subjectCode, examType, termId })
+      fetchSubjectMarksInClass({ name, subjectCode, examType, termId })
     );
   }
 
@@ -538,6 +545,25 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
     const formGroup = this.getMarkFormGroup(index);
 
     if (formGroup.valid) {
+      const term = this.termControl?.value as TermsModel | null | undefined;
+      const rawExam = this.examTypeControl?.value as ExamType | '' | null | undefined;
+      const examType =
+        rawExam === '' || rawExam == null
+          ? markModel.examType
+          : rawExam;
+
+      const termId =
+        term?.id ?? markModel.termId ?? markModel.term?.id;
+
+      if (termId == null) {
+        this.snackBar.open(
+          'Cannot save: term is missing. Re-select Term and try again.',
+          'Close',
+          { duration: 4000 }
+        );
+        return;
+      }
+
       // Add to saving set
       this.savingMarks.add(index);
 
@@ -546,10 +572,8 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
         mark: formGroup.value.mark!,
         termMark: formGroup.value.termMark ?? null,
         comment: formGroup.value.comment!,
-        examType: this.examTypeControl?.value,
-        termId: this.termControl?.value.id,
-        year: this.termControl?.value.year,
-        num: this.termControl?.value.num,
+        examType,
+        termId,
       };
 
       this.store.dispatch(saveMarkAction({ mark: updatedMark }));

@@ -176,28 +176,22 @@ export class ReportComponent implements OnInit {
     const { report } = this.report; // Destructure for cleaner access
     const {
       className: name,
-      termNumber: num,
-      termYear: year,
       examType: examType,
-      studentNumber,
     } = report;
+    const termId = this.report.termId;
 
-    if (examType) {
+    if (examType && termId != null) {
       // Check if examType exists before dispatching
       this.store.dispatch(
         downloadReportActions.downloadReport({
           name,
-          num,
-          year,
-          termId: (this.report as any).termId,
-          // Re-evaluate if you need `examType` if you already have it from `report.report.examType`
-          // If the action expects `ExamType`, ensure 'examType' from 'report.report' is that type.
-          examType: examType, // Explicit cast if necessary
-          studentNumber: this.report.studentNumber, // Use this.report.studentNumber from the top level
+          termId,
+          examType: examType,
+          studentNumber: this.report.studentNumber,
         })
       );
     } else {
-      console.warn('Cannot download report: ExamType is missing.');
+      console.warn('Cannot download report: termId or examType is missing.');
     }
   }
 }

@@ -125,13 +125,15 @@ export class ReportsComponent implements OnInit, OnDestroy {
   // Consolidated method for fetching reports based on form selections
   fetchReportsBasedOnForm() {
     const { term, clas, examType } = this.reportsForm.value;
+    if (!term?.id) {
+      console.warn('Invalid term selected.');
+      return;
+    }
 
     if (this.reportsForm.valid) {
       this.store.dispatch(
         reportsActions.viewReportsActions.viewReports({
           name: clas,
-          num: term.num,
-          year: term.year,
           termId: term.id,
           examType: examType,
         })
@@ -149,8 +151,12 @@ export class ReportsComponent implements OnInit, OnDestroy {
       return;
     }
     const { term, clas, examType } = this.reportsForm.value;
+    if (!term?.id) {
+      this.selectedRelease = null;
+      return;
+    }
     this.reportsService
-      .getReportReleaseStatus(clas, term.num, term.year, examType)
+      .getReportReleaseStatus(clas, term.id, examType)
       .pipe(take(1))
       .subscribe((rows) => {
         this.selectedRelease = rows?.length ? rows[0] : null;
@@ -160,11 +166,11 @@ export class ReportsComponent implements OnInit, OnDestroy {
   setReleaseStatus(released: boolean): void {
     if (this.reportsForm.invalid) return;
     const { term, clas, examType } = this.reportsForm.value;
+    if (!term?.id) return;
     this.reportsService
       .setReportReleaseStatus({
         name: clas,
-        num: term.num,
-        year: term.year,
+        termId: term.id,
         examType,
         released,
       })
@@ -177,13 +183,15 @@ export class ReportsComponent implements OnInit, OnDestroy {
   generate() {
     this.mode = 'generate';
     const { term, clas, examType } = this.reportsForm.value;
+    if (!term?.id) {
+      console.warn('Invalid term selected.');
+      return;
+    }
 
     if (this.reportsForm.valid) {
       this.store.dispatch(
         reportsActions.generateReports({
           name: clas,
-          num: term.num,
-          year: term.year,
           termId: term.id,
           examType: examType,
         })
@@ -197,13 +205,12 @@ export class ReportsComponent implements OnInit, OnDestroy {
     // Use take(1) to get the current reports value once and complete the subscription
     this.reports$.pipe(take(1)).subscribe((reportsToSave) => {
       const { term, clas, examType } = this.reportsForm.value;
+      if (!term?.id) return;
 
       if (this.reportsForm.valid && reportsToSave && reportsToSave.length > 0) {
         this.store.dispatch(
           reportsActions.saveReportActions.saveReports({
             name: clas,
-            num: term.num,
-            year: term.year,
             termId: term.id,
             reports: reportsToSave,
             examType: examType,

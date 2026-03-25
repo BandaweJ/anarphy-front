@@ -54,9 +54,7 @@ export const fetchSubjectMarksInClass = createAction(
   '[Enter Marks Component] fetch subject marks for the class',
   props<{
     name: string;
-    num: number;
-    year: number;
-    termId?: number;
+    termId: number;
     subjectCode: string;
     examType: ExamType;
   }>()
@@ -109,8 +107,7 @@ export const perfomanceActions = createActionGroup({
   source: 'Perfomance component',
   events: {
     fetchPerfomanceData: props<{
-      num: number;
-      year: number;
+      termId: number;
       name: string;
       examType: ExamType;
     }>(),
@@ -132,10 +129,8 @@ export const fetchMarksProgressActions = createActionGroup({
   source: 'Marks Progress component',
   events: {
     fetchMarksProgress: props<{
-      num: number;
-      year: number;
+      termId: number;
       clas: string;
-      // fom: number;
       examType: ExamType;
     }>(),
     fetchMarksProgressFail: props<{ error: HttpErrorResponse }>(),
