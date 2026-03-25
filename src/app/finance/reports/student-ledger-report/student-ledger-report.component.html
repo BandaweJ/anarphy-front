@@ -60,10 +60,17 @@
               <p class="student-number">Student Number: {{ selectedStudent.studentNumber }}</p>
             </div>
             <div class="balance-display" *ngIf="ledgerSummary$ | async as summary">
-              <div class="balance-value" [class]="getBalanceClass(summary.netBalance)">
-                <span class="balance-label">{{ getBalanceLabel(summary.netBalance) }}</span>
-                <span class="balance-amount">{{ summary.netBalance | currency:'USD':'symbol':'1.2-2' }}</span>
-              </div>
+              <ng-container *ngIf="creditBalance$ | async as creditBal">
+                <div
+                  class="balance-value"
+                  [class]="getTopBalanceClass(summary.netBalance, creditBal)"
+                >
+                  <span class="balance-label">{{ getTopBalanceLabel(summary.netBalance, creditBal) }}</span>
+                  <span class="balance-amount">
+                    {{ getTopBalanceAmount(summary.netBalance, creditBal) | currency:'USD':'symbol':'1.2-2' }}
+                  </span>
+                </div>
+              </ng-container>
             </div>
           </div>
         </div>

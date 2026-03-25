@@ -406,4 +406,25 @@ export class StudentLedgerReportComponent implements OnInit, OnDestroy {
     if (balance < 0) return 'Credit Balance';
     return 'Balance';
   }
+
+  getTopBalanceLabel(amountOwed: number, creditBalance: number): string {
+    const tolerance = 0.01;
+    if (amountOwed > tolerance) return 'Amount Owed';
+    if (creditBalance > tolerance) return 'Credit Balance';
+    return 'Balance';
+  }
+
+  getTopBalanceAmount(amountOwed: number, creditBalance: number): number {
+    const tolerance = 0.01;
+    if (amountOwed > tolerance) return amountOwed;
+    if (creditBalance > tolerance) return creditBalance;
+    return 0;
+  }
+
+  getTopBalanceClass(amountOwed: number, creditBalance: number): string {
+    const tolerance = 0.01;
+    if (amountOwed > tolerance) return 'balance-debit';
+    if (creditBalance > tolerance) return 'balance-credit';
+    return 'balance-zero';
+  }
 }
