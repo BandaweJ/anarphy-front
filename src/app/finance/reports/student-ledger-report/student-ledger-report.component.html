@@ -60,17 +60,17 @@
               <p class="student-number">Student Number: {{ selectedStudent.studentNumber }}</p>
             </div>
             <div class="balance-display" *ngIf="ledgerSummary$ | async as summary">
-              <ng-container *ngIf="creditBalance$ | async as creditBal">
-                <div
-                  class="balance-value"
-                  [class]="getTopBalanceClass(summary.netBalance, creditBal)"
-                >
-                  <span class="balance-label">{{ getTopBalanceLabel(summary.netBalance, creditBal) }}</span>
-                  <span class="balance-amount">
-                    {{ getTopBalanceAmount(summary.netBalance, creditBal) | currency:'USD':'symbol':'1.2-2' }}
-                  </span>
-                </div>
-              </ng-container>
+              <div
+                class="balance-value"
+                [class]="getTopBalanceClass(summary.netBalance, (creditBalance$ | async) ?? 0)"
+              >
+                <span class="balance-label">
+                  {{ getTopBalanceLabel(summary.netBalance, (creditBalance$ | async) ?? 0) }}
+                </span>
+                <span class="balance-amount">
+                  {{ getTopBalanceAmount(summary.netBalance, (creditBalance$ | async) ?? 0) | currency:'USD':'symbol':'1.2-2' }}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -97,12 +97,12 @@
             </mat-card-content>
           </mat-card>
 
-          <mat-card class="summary-card" *ngIf="(creditBalance$ | async) as creditBal">
+          <mat-card class="summary-card">
             <mat-card-content>
               <mat-icon class="summary-icon" color="primary">account_balance_wallet</mat-icon>
               <div class="summary-content">
                 <span class="summary-label">Credit Balance</span>
-                <span class="summary-value amount-in">{{ creditBal | currency:'USD':'symbol':'1.2-2' }}</span>
+                <span class="summary-value amount-in">{{ ((creditBalance$ | async) ?? 0) | currency:'USD':'symbol':'1.2-2' }}</span>
               </div>
             </mat-card-content>
           </mat-card>
