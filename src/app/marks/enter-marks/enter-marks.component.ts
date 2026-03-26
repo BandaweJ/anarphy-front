@@ -39,6 +39,8 @@ import {
   fetchSubjectMarksInClass,
   fetchSubjects,
   saveMarkAction,
+  saveMarkActionFail,
+  saveMarkActionSuccess,
   deleteMarkActions,
 } from '../store/marks.actions';
 import { selectMarks, selectSubjects, isLoading } from '../store/marks.selectors';
@@ -47,6 +49,9 @@ import { ExamType } from '../models/examtype.enum';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { MarksService } from '../services/marks.service';
+import { Actions, ofType } from '@ngrx/effects';
+import { fromEvent } from 'rxjs';
+import { MarksOfflineQueueService } from '../services/marks-offline-queue.service';
 // ConfirmDialogComponent will be lazy loaded
 
 interface MarkFormGroup {
@@ -76,6 +81,13 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
   value = 0;
   maxValue = 0;
   savingMarks = new Set<number>(); // Track which marks are being saved
+  queuedOfflineRows = new Set<number>();
+  isOffline = !navigator.onLine;
+  offlineQueueCount = 0;
+  lastSyncedAt: string | null = null;
+  private readonly lastSyncedStorageKey = 'anarphy.marks.lastSyncedAt';
+  private lastSaveKeyByRow = new Map<number, string>();
+  private flushingOfflineQueue = false;
   generatingAiComments = new Set<number>();
   aiCommentOptions = new Map<number, string[]>();
   /** When last fetch ran for a row, keyed by mark (so changing mark refetches). */
@@ -99,7 +111,9 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
     private marksService: MarksService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private actions$: Actions,
+    private offlineQueue: MarksOfflineQueueService
   ) {
     this.store.dispatch(fetchClasses());
     this.store.dispatch(fetchTerms());
@@ -143,6 +157,53 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
       subject: new FormControl('', Validators.required),
       examType: new FormControl('', Validators.required),
     });
+
+    // Offline mode is marks-only (scoped to this screen). We keep a local queue and flush when online.
+    this.lastSyncedAt = this.readLastSyncedAt();
+    this.refreshOfflineQueueCount();
+    if (!this.isOffline && this.offlineQueueCount > 0) {
+      this.flushOfflineQueue();
+    }
+    fromEvent(window, 'online')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.isOffline = false;
+        this.refreshOfflineQueueCount();
+        this.flushOfflineQueue();
+      });
+    fromEvent(window, 'offline')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.isOffline = true;
+      });
+
+    // Only show "saved" after API success; also used to clear queued items after sync.
+    this.actions$
+      .pipe(ofType(saveMarkActionSuccess), takeUntil(this.destroy$))
+      .subscribe((action) => {
+        const mark = action?.mark;
+        if (!mark) return;
+        const key = this.offlineQueue.makeKey(mark);
+        this.offlineQueue.removeByKey(key);
+        this.refreshOfflineQueueCount();
+        this.updateLastSyncedAt();
+
+        // Clear saving indicator for the row that last triggered this key.
+        for (const [rowIndex, rowKey] of this.lastSaveKeyByRow.entries()) {
+          if (rowKey === key) {
+            this.savingMarks.delete(rowIndex);
+            this.queuedOfflineRows.delete(rowIndex);
+            break;
+          }
+        }
+      });
+
+    this.actions$
+      .pipe(ofType(saveMarkActionFail), takeUntil(this.destroy$))
+      .subscribe(() => {
+        // Stop any "saving..." state; the effect shows the error toast.
+        this.savingMarks.clear();
+      });
   }
 
   ngAfterViewInit(): void {
@@ -576,15 +637,26 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
         termId,
       };
 
-      this.store.dispatch(saveMarkAction({ mark: updatedMark }));
-      
-      // Simulate a brief delay to show saving state
-      setTimeout(() => {
+      const saveKey = this.offlineQueue.makeKey(updatedMark);
+      this.lastSaveKeyByRow.set(index, saveKey);
+
+      // When offline, queue locally (do NOT claim "saved" until it actually syncs).
+      if (this.isOffline || !navigator.onLine) {
+        this.offlineQueue.upsert(updatedMark);
+        this.refreshOfflineQueueCount();
         this.savingMarks.delete(index);
-        this.snackBar.open('Mark saved successfully!', 'Dismiss', {
-          duration: 2000,
-        });
-      }, 500);
+        this.queuedOfflineRows.add(index);
+        this.snackBar.open(
+          'Offline: mark queued locally and will sync when back online.',
+          'Close',
+          { duration: 3000 }
+        );
+      } else {
+        // Online: dispatch and rely on effect to show success toast after response.
+        this.savingMarks.add(index);
+        this.queuedOfflineRows.delete(index);
+        this.store.dispatch(saveMarkAction({ mark: updatedMark }));
+      }
 
       formGroup.markAsPristine();
       formGroup.markAsUntouched();
@@ -606,6 +678,49 @@ export class EnterMarksComponent implements OnInit, AfterViewInit, OnDestroy {
 
   isSavingMark(index: number): boolean {
     return this.savingMarks.has(index);
+  }
+
+  isQueuedOffline(index: number): boolean {
+    return this.queuedOfflineRows.has(index);
+  }
+
+  flushOfflineQueue(): void {
+    if (this.flushingOfflineQueue) return;
+    if (this.isOffline || !navigator.onLine) return;
+    const queued = this.offlineQueue.getAll();
+    if (queued.length === 0) return;
+
+    this.flushingOfflineQueue = true;
+    try {
+      // Dispatch all queued saves; queue items are removed only on saveMarkActionSuccess.
+      queued.forEach((q) => {
+        this.store.dispatch(saveMarkAction({ mark: q.mark }));
+      });
+    } finally {
+      this.flushingOfflineQueue = false;
+    }
+  }
+
+  private refreshOfflineQueueCount(): void {
+    this.offlineQueueCount = this.offlineQueue.count();
+  }
+
+  private updateLastSyncedAt(): void {
+    const nowIso = new Date().toISOString();
+    this.lastSyncedAt = nowIso;
+    try {
+      localStorage.setItem(this.lastSyncedStorageKey, nowIso);
+    } catch {
+      // ignore storage write errors
+    }
+  }
+
+  private readLastSyncedAt(): string | null {
+    try {
+      return localStorage.getItem(this.lastSyncedStorageKey);
+    } catch {
+      return null;
+    }
   }
 
   async deleteMark(mark: MarksModel): Promise<void> {

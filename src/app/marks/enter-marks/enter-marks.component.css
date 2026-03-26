@@ -80,6 +80,78 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
+/* Marks-only offline banner (scoped to Enter Marks screen) */
+.offline-banner {
+  max-width: 1200px;
+  margin: 0 auto 12px auto;
+  padding: 12px 14px;
+  border-radius: 12px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  background: rgba(255, 243, 224, 0.95);
+  border: 1px solid rgba(255, 152, 0, 0.35);
+  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.12);
+  backdrop-filter: blur(10px);
+}
+
+.offline-icon {
+  color: #e65100;
+  margin-top: 2px;
+}
+
+.offline-title {
+  font-weight: 700;
+  color: #5d4037;
+  line-height: 1.2;
+}
+
+.offline-subtitle {
+  color: #6d4c41;
+  font-size: 0.92rem;
+  line-height: 1.35;
+}
+
+.offline-count {
+  font-weight: 700;
+  margin-left: 6px;
+}
+
+.sync-banner {
+  max-width: 1200px;
+  margin: 0 auto 12px auto;
+  padding: 12px 14px;
+  border-radius: 12px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background: rgba(232, 245, 233, 0.95);
+  border: 1px solid rgba(76, 175, 80, 0.35);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.12);
+  backdrop-filter: blur(10px);
+}
+
+.sync-icon {
+  color: #2e7d32;
+}
+
+.sync-text {
+  flex: 1 1 auto;
+  color: #1b5e20;
+  font-weight: 600;
+}
+
+.last-synced {
+  max-width: 1200px;
+  margin: 0 auto 12px auto;
+  padding: 8px 12px;
+  border-radius: 10px;
+  color: #263238;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(96, 125, 139, 0.25);
+  font-size: 0.9rem;
+}
+
 /* Ensure the body or a main container allows scrolling */
 body,
 html {

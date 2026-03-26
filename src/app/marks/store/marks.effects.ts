@@ -110,27 +110,40 @@ export class MarksEffects {
       ofType(marksActions.saveMarkAction),
       switchMap((data) =>
         this.marksService.saveMark(data.mark).pipe(
-          tap((data) =>
-            this.snackBar.open(
-              `${data.student.name} ${data.student.surname}\'s ${data.mark} in ${data.subject.name}  Saved`,
-              'OK',
-              {
-                duration: 3000,
-                verticalPosition: 'top',
-                horizontalPosition: 'center',
-              }
-            )
-          ),
           map((mark) => {
             // console.log(teacher);
             return marksActions.saveMarkActionSuccess({ mark });
           }),
-          catchError((error: HttpErrorResponse) =>
-            of(marksActions.saveMarkActionFail({ ...error }))
-          )
+          catchError((error: HttpErrorResponse) => {
+            this.snackBar.open('Failed to save mark. Please try again.', 'OK', {
+              duration: 3500,
+              verticalPosition: 'top',
+              horizontalPosition: 'center',
+            });
+            return of(marksActions.saveMarkActionFail({ ...error }));
+          })
         )
       )
     )
+  );
+
+  saveMarkSuccessToast$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(marksActions.saveMarkActionSuccess),
+        tap(({ mark }) =>
+          this.snackBar.open(
+            `${mark.student.name} ${mark.student.surname}'s ${mark.mark} in ${mark.subject.name} Saved`,
+            'OK',
+            {
+              duration: 3000,
+              verticalPosition: 'top',
+              horizontalPosition: 'center',
+            }
+          )
+        )
+      ),
+    { dispatch: false }
   );
 
   aditSubject$ = createEffect(() =>

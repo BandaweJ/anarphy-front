@@ -9,6 +9,31 @@
 <div class="main-container">
   <mat-toolbar class="title">{{ title.getTitle() }}</mat-toolbar>
 
+  <div class="offline-banner" *ngIf="isOffline">
+    <mat-icon class="offline-icon">wifi_off</mat-icon>
+    <div class="offline-text">
+      <div class="offline-title">Offline mode (Marks capture only)</div>
+      <div class="offline-subtitle">
+        Marks you enter are stored on this device and will sync automatically when back online.
+        <span class="offline-count" *ngIf="offlineQueueCount > 0">Pending: {{ offlineQueueCount }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sync-banner" *ngIf="!isOffline && offlineQueueCount > 0">
+    <mat-icon class="sync-icon">sync</mat-icon>
+    <div class="sync-text">
+      Pending offline marks: {{ offlineQueueCount }}
+    </div>
+    <button mat-stroked-button color="primary" type="button" (click)="flushOfflineQueue()">
+      Sync now
+    </button>
+  </div>
+
+  <div class="last-synced" *ngIf="lastSyncedAt as syncedAt">
+    Last synced: {{ syncedAt | date:'medium' }}
+  </div>
+
   <div class="sticky-progress-bar" matTooltip="{{ value }} out of {{ maxValue }} marks entered">
     <div class="mat-elevation-z1 progress-bar-container">
         <mat-progress-bar color="primary" [value]="(value/maxValue * 100)" mode="determinate"></mat-progress-bar>
