@@ -25,7 +25,13 @@ export class PaymentsService {
     num?: number,
     year?: number,
   ): Observable<InvoiceResponseModel> {
-    const url = `${this.baseURL}invoice/${studentNumber}/term/${termId}`;
+    if (!Number.isFinite(Number(termId))) {
+      return throwError(
+        () =>
+          new Error('Cannot load invoice: missing valid termId.'),
+      );
+    }
+    const url = `${this.baseURL}invoice/${studentNumber}/term/${Number(termId)}`;
     return this.httpClient
       .get<InvoiceResponseModel>(url)
       .pipe(
@@ -45,9 +51,14 @@ export class PaymentsService {
     num?: number,
     year?: number,
   ): Observable<InvoiceStatsModel[]> {
-    return this.httpClient.get<InvoiceStatsModel[]>(
-      `${this.baseURL}invoice/stats/term/${termId}`
-    );
+    if (!Number.isFinite(Number(termId))) {
+      return throwError(
+        () =>
+          new Error('Cannot load invoice stats: missing valid termId.'),
+      );
+    }
+    const url = `${this.baseURL}invoice/stats/term/${Number(termId)}`;
+    return this.httpClient.get<InvoiceStatsModel[]>(url);
   }
 
   getTermInvoices(
@@ -55,9 +66,14 @@ export class PaymentsService {
     num?: number,
     year?: number,
   ): Observable<InvoiceModel[]> {
-    return this.httpClient.get<InvoiceModel[]>(
-      `${this.baseURL}invoice/term/${termId}`
-    );
+    if (!Number.isFinite(Number(termId))) {
+      return throwError(
+        () =>
+          new Error('Cannot load term invoices: missing valid termId.'),
+      );
+    }
+    const url = `${this.baseURL}invoice/term/${Number(termId)}`;
+    return this.httpClient.get<InvoiceModel[]>(url);
   }
 
   getAllInvoices(): Observable<InvoiceModel[]> {

@@ -31,9 +31,9 @@
           <mat-label>Academic Term</mat-label>
           <mat-select
             (selectionChange)="termChanged($event.value)"
-            [(ngModel)]="selectedTerm"
+            [(ngModel)]="selectedTermId"
             [disabled]="(loadingInvoice$ | async) || false">
-            <mat-option *ngFor="let term of terms$ | async" [value]="term">
+            <mat-option *ngFor="let term of terms$ | async" [value]="term.id" [disabled]="term.id == null">
               Term {{ term.num }} - {{ term.year }}
             </mat-option>
           </mat-select>

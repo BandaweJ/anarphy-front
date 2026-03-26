@@ -62,8 +62,10 @@ export class StudentFinanceComponent implements OnInit, OnDestroy {
   invoiceWarning$: Observable<{ message: string; voidedInvoiceNumber?: string; voidedAt?: Date; voidedBy?: string } | null>;
   
   selectedTerm: TermsModel | null = null;
+  selectedTermId: number | null = null;
   selectedStudentNumber: string | null = null;
   selectedStudent: StudentsModel | null = null;
+  private termsSnapshot: TermsModel[] = [];
 
   private destroy$ = new Subject<void>();
   currentTheme: Theme = 'light';
@@ -85,6 +87,17 @@ export class StudentFinanceComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.terms$.pipe(takeUntil(this.destroy$)).subscribe((terms) => {
+      this.termsSnapshot = Array.isArray(terms) ? terms : [];
+      if (this.selectedTermId != null) {
+        this.selectedTerm =
+          this.termsSnapshot.find(
+            (t) => Number(t.id) === Number(this.selectedTermId),
+          ) || null;
+      }
+      this.cdr.markForCheck();
+    });
+
     // Subscribe to theme changes
     this.themeService.theme$.pipe(takeUntil(this.destroy$)).subscribe(theme => {
       this.currentTheme = theme;
@@ -101,26 +114,33 @@ export class StudentFinanceComponent implements OnInit, OnDestroy {
     this.selectedStudentNumber = student.studentNumber;
   }
 
-  termChanged(term: TermsModel): void {
-    this.selectedTerm = term;
+  termChanged(termId: number): void {
+    const parsedTermId = Number(termId);
+    if (!Number.isFinite(parsedTermId)) {
+      this.selectedTermId = null;
+      this.selectedTerm = null;
+      return;
+    }
+    this.selectedTermId = parsedTermId;
+    this.selectedTerm =
+      this.termsSnapshot.find((t) => Number(t.id) === parsedTermId) || null;
   }
 
   generateInvoice(): void {
-    if (
-      this.selectedStudentNumber &&
-      this.selectedTerm?.id !== undefined &&
-      this.selectedTerm?.num !== undefined &&
-      this.selectedTerm?.year !== undefined
-    ) {
-      this.store.dispatch(
-        invoiceActions.fetchInvoice({
-          studentNumber: this.selectedStudentNumber,
-          termId: this.selectedTerm.id,
-          num: this.selectedTerm.num,
-          year: this.selectedTerm.year,
-        })
-      );
+    if (!this.selectedStudentNumber || this.selectedTermId == null) return;
+    const termId = Number(this.selectedTermId);
+    if (!Number.isFinite(termId)) {
+      return;
     }
+
+    this.store.dispatch(
+      invoiceActions.fetchInvoice({
+        studentNumber: this.selectedStudentNumber,
+        termId,
+        num: this.selectedTerm?.num,
+        year: this.selectedTerm?.year,
+      })
+    );
   }
 
   saveInvoice(): void {
@@ -139,10 +159,11 @@ export class StudentFinanceComponent implements OnInit, OnDestroy {
   clearSelection(): void {
     this.selectedStudent = null;
     this.selectedStudentNumber = null;
+    this.selectedTermId = null;
     this.selectedTerm = null;
   }
 
   isFormValid(): boolean {
-    return !!(this.selectedStudentNumber && this.selectedTerm);
+    return !!(this.selectedStudentNumber && this.selectedTermId != null);
   }
 }
