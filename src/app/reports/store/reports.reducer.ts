@@ -143,6 +143,28 @@ export const reportsReducer = createReducer(
       errorMessage: error.message,
     })
   ),
+  on(
+    reportsActions.saveExtraActivitiesActions.saveExtraActivitiesSuccess,
+    (state, { report }) => ({
+      ...state,
+      reports: [
+        ...state.reports.map((rep) =>
+          rep.studentNumber === report.studentNumber ? report : rep,
+        ),
+      ],
+      selectedReport:
+        state.selectedReport?.studentNumber === report.studentNumber
+          ? report
+          : state.selectedReport,
+    }),
+  ),
+  on(
+    reportsActions.saveExtraActivitiesActions.saveExtraActivitiesFail,
+    (state, { error }) => ({
+      ...state,
+      errorMessage: error.message,
+    }),
+  ),
   on(reportsActions.generatePdfActions.generatePdf, (state) => ({
     ...state,
     isLoading: true,

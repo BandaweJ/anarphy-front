@@ -163,4 +163,26 @@ export class ReportsEffects {
       )
     )
   );
+
+  saveExtraActivities$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(reportsActions.saveExtraActivitiesActions.saveExtraActivities),
+      switchMap((data) =>
+        this.reportsService.saveExtraActivities(data.payload).pipe(
+          map((report) =>
+            reportsActions.saveExtraActivitiesActions.saveExtraActivitiesSuccess({
+              report,
+            }),
+          ),
+          catchError((error: HttpErrorResponse) =>
+            of(
+              reportsActions.saveExtraActivitiesActions.saveExtraActivitiesFail({
+                ...error,
+              }),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
 }

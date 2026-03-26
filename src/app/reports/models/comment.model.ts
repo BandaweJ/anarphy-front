@@ -9,3 +9,8 @@ export interface FormTeacherCommentModel {
   comment: string;
   report: ReportsModel;
 }
+
+export interface ExtraActivitiesModel {
+  activities: string[];
+  report: ReportsModel;
+}

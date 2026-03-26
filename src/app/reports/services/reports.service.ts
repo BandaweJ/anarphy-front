@@ -2,7 +2,11 @@ import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ReportsModel } from '../models/reports.model';
-import { HeadCommentModel, FormTeacherCommentModel } from '../models/comment.model';
+import {
+  HeadCommentModel,
+  FormTeacherCommentModel,
+  ExtraActivitiesModel,
+} from '../models/comment.model';
 import { environment } from 'src/environments/environment';
 import { ExamType } from 'src/app/marks/models/examtype.enum';
 
@@ -54,6 +58,13 @@ export class ReportsService {
 
   saveFormTeacherComment(comment: FormTeacherCommentModel): Observable<ReportsModel> {
     return this.httpClient.post<ReportsModel>(`${this.baseUrl}save/form-teacher-comment`, comment);
+  }
+
+  saveExtraActivities(payload: ExtraActivitiesModel): Observable<ReportsModel> {
+    return this.httpClient.post<ReportsModel>(
+      `${this.baseUrl}save/extra-activities`,
+      payload,
+    );
   }
 
   viewReports(

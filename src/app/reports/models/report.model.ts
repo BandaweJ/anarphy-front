@@ -21,4 +21,6 @@ export interface ReportModel {
   subjectsPassed: number;
   symbols: number[];
   examType?: ExamType;
+  nextTermOpeningDay?: string | null;
+  extraCurricularActivities?: string[];
 }

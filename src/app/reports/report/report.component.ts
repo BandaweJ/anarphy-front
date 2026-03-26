@@ -1,14 +1,19 @@
 import { Component, Input, OnInit } from '@angular/core'; // No OnDestroy needed here if no subscriptions are kept
 import { ReportsModel } from '../models/reports.model';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import {
   downloadReportActions,
+  saveExtraActivitiesActions,
   saveHeadCommentActions,
   saveFormTeacherCommentActions,
 } from '../store/reports.actions';
 
-import { HeadCommentModel, FormTeacherCommentModel } from '../models/comment.model';
+import {
+  HeadCommentModel,
+  FormTeacherCommentModel,
+  ExtraActivitiesModel,
+} from '../models/comment.model';
 import { selectUser } from 'src/app/auth/store/auth.selectors';
 
 import { selectIsLoading } from '../store/reports.selectors';
@@ -61,6 +66,7 @@ export class ReportComponent implements OnInit {
 
   commentForm!: FormGroup;
   formTeacherCommentForm!: FormGroup;
+  extraActivitiesForm!: FormGroup;
 
   ngOnInit(): void {
     this.commentForm = new FormGroup({
@@ -74,6 +80,12 @@ export class ReportComponent implements OnInit {
       ]),
     });
     this.studentNumber = this.report.report.studentNumber;
+    this.extraActivitiesForm = new FormGroup({
+      activities: new FormArray([]),
+    });
+    this.initializeActivitiesForm(
+      this.report.report.extraCurricularActivities || [],
+    );
 
     this.userSubscription = this.store.select(selectUser).subscribe((user) => {
       if (user) {
@@ -86,7 +98,8 @@ export class ReportComponent implements OnInit {
       .pipe(
         ofType(
           saveHeadCommentActions.saveHeadCommentSuccess,
-          saveFormTeacherCommentActions.saveFormTeacherCommentSuccess
+          saveFormTeacherCommentActions.saveFormTeacherCommentSuccess,
+          saveExtraActivitiesActions.saveExtraActivitiesSuccess,
         ),
         filter((action): action is typeof action & { report: ReportsModel } => {
           return 'report' in action && 
@@ -104,6 +117,13 @@ export class ReportComponent implements OnInit {
           this.commentForm.get('comment')?.setValue(report.report.headComment);
         } else if (action.type === saveFormTeacherCommentActions.saveFormTeacherCommentSuccess.type) {
           this.formTeacherCommentForm.get('comment')?.setValue(report.report.classTrComment);
+        } else if (
+          action.type ===
+          saveExtraActivitiesActions.saveExtraActivitiesSuccess.type
+        ) {
+          this.initializeActivitiesForm(
+            report.report.extraCurricularActivities || [],
+          );
         }
       });
   }
@@ -123,6 +143,10 @@ export class ReportComponent implements OnInit {
 
   get formTeacherComment() {
     return this.formTeacherCommentForm.get('comment');
+  }
+
+  get activitiesArray(): FormArray {
+    return this.extraActivitiesForm.get('activities') as FormArray;
   }
 
   saveComment() {
@@ -193,5 +217,38 @@ export class ReportComponent implements OnInit {
     } else {
       console.warn('Cannot download report: termId or examType is missing.');
     }
+  }
+
+  private initializeActivitiesForm(values: string[]): void {
+    const arr = this.activitiesArray;
+    while (arr.length) {
+      arr.removeAt(0);
+    }
+    const source = values.length > 0 ? values : [''];
+    source.forEach((item) => arr.push(new FormControl(item)));
+  }
+
+  addActivityField(): void {
+    this.activitiesArray.push(new FormControl(''));
+  }
+
+  removeActivityField(index: number): void {
+    this.activitiesArray.removeAt(index);
+    this.saveExtraActivities();
+  }
+
+  saveExtraActivities(): void {
+    const activities = this.activitiesArray.controls
+      .map((control) => String(control.value || '').trim())
+      .filter((value) => value.length > 0);
+
+    const payload: ExtraActivitiesModel = {
+      report: this.report,
+      activities,
+    };
+
+    this.store.dispatch(
+      saveExtraActivitiesActions.saveExtraActivities({ payload }),
+    );
   }
 }
