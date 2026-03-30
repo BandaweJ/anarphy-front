@@ -28,7 +28,8 @@
         [exemption]="exemption"
         [isSelected]="isSelected(exemption)"
         (edit)="onEdit(exemption)"
-        (delete)="onDelete(exemption)">
+        (delete)="onDelete(exemption)"
+        (toggleActive)="onToggleActive(exemption)">
       </app-exemption-item>
     </mat-list-item>
   </mat-list>

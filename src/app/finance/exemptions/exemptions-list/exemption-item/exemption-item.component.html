@@ -60,6 +60,14 @@
       matTooltip="Delete Exemption">
       <mat-icon>delete</mat-icon>
     </button>
+
+    <button
+      mat-icon-button
+      color="primary"
+      (click)="onToggleActive($event)"
+      matTooltip="{{ exemption.isActive ? 'Deactivate Exemption' : 'Activate Exemption' }}">
+      <mat-icon>{{ exemption.isActive ? 'cancel' : 'check_circle' }}</mat-icon>
+    </button>
   </div>
 </div>
 

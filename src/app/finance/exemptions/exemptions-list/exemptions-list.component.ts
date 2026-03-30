@@ -29,6 +29,7 @@ export class ExemptionsListComponent implements OnInit, OnDestroy {
   @Output() exemptionSelected = new EventEmitter<ExemptionModel>();
   @Output() editExemption = new EventEmitter<ExemptionModel>();
   @Output() deleteExemption = new EventEmitter<ExemptionModel>();
+  @Output() toggleActiveExemption = new EventEmitter<ExemptionModel>();
   @Input() exemptions: ExemptionModel[] = [];
   @Input() selectedExemption: ExemptionModel | null = null;
   @Input() isLoading = false;
@@ -76,6 +77,10 @@ export class ExemptionsListComponent implements OnInit, OnDestroy {
       event.stopPropagation();
     }
     this.deleteExemption.emit(exemption);
+  }
+
+  onToggleActive(exemption: ExemptionModel): void {
+    this.toggleActiveExemption.emit(exemption);
   }
 }
 

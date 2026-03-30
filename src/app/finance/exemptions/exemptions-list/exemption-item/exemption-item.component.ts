@@ -31,6 +31,7 @@ export class ExemptionItemComponent implements OnInit, OnDestroy {
   @Input() isSelected = false;
   @Output() edit = new EventEmitter<void>();
   @Output() delete = new EventEmitter<void>();
+  @Output() toggleActive = new EventEmitter<void>();
   
   currentTheme: Theme = 'light';
   
@@ -115,6 +116,11 @@ export class ExemptionItemComponent implements OnInit, OnDestroy {
   onDelete(event: Event): void {
     event.stopPropagation();
     this.delete.emit();
+  }
+
+  onToggleActive(event: Event): void {
+    event.stopPropagation();
+    this.toggleActive.emit();
   }
 }
 

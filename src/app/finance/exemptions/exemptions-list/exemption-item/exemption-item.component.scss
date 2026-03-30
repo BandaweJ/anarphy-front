@@ -18,7 +18,7 @@ $border-dark: #424242;
 .exemption-item {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   padding: 1rem 1.5rem;
   background: var(--surface, $surface-light);
   border: 1px solid var(--border-color, $border-light);
@@ -83,7 +83,6 @@ $border-dark: #424242;
   }
 
   &:hover {
-    transform: translateY(-3px) scale(1.01);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
     border-color: $primary-blue;
 
@@ -93,7 +92,6 @@ $border-dark: #424242;
   }
 
   &:active {
-    transform: translateY(-1px) scale(0.99);
   }
 }
 
@@ -259,6 +257,11 @@ $border-dark: #424242;
   .description-text {
     flex: 1;
     line-height: 1.4;
+    word-break: break-word;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
   }
 }
 
@@ -305,11 +308,7 @@ $border-dark: #424242;
   display: flex;
   gap: 0.75rem;
   margin-left: 1.5rem;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.exemption-item:hover .exemption-actions {
   opacity: 1;
 }
+
 

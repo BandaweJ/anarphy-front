@@ -159,11 +159,11 @@ $border-dark: #424242;
   }
 
   &:hover {
-    transform: translateX(4px);
+    transform: none;
   }
 
   &:active {
-    transform: translateX(2px);
+    transform: none;
   }
 
   &.selected {

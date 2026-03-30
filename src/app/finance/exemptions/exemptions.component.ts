@@ -134,6 +134,10 @@ export class ExemptionsComponent implements OnInit, OnDestroy {
     this.confirmDelete(exemption);
   }
 
+  onToggleActiveClick(exemption: ExemptionModel): void {
+    this.confirmToggleActive(exemption);
+  }
+
   onExemptionSaved(exemption: ExemptionModel): void {
     this.currentView = 'list';
     this.selectedExemption = null;
@@ -243,6 +247,63 @@ export class ExemptionsComponent implements OnInit, OnDestroy {
             verticalPosition: 'top',
           });
         }
+      });
+  }
+
+  private async confirmToggleActive(exemption: ExemptionModel): Promise<void> {
+    if (!exemption.id) return;
+
+    const { ConfirmDialogComponent } = await import('src/app/shared/confirm-dialog/confirm-dialog.component');
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '450px',
+      maxWidth: '90vw',
+      data: {
+        title: exemption.isActive ? 'Deactivate Exemption' : 'Activate Exemption',
+        message: `${exemption.isActive ? 'Deactivate' : 'Activate'} the exemption for ${exemption.student.name} ${exemption.student.surname} (${exemption.student.studentNumber})?`,
+        confirmText: exemption.isActive ? 'Deactivate' : 'Activate',
+        cancelText: 'Cancel',
+        type: exemption.isActive ? 'warning' : 'info',
+      },
+    });
+
+    dialogRef.afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((confirmed) => {
+        if (!confirmed) return;
+        this.toggleActiveExemption(exemption.id!, !exemption.isActive);
+      });
+  }
+
+  private toggleActiveExemption(id: number, nextIsActive: boolean): void {
+    this.exemptionService.updateExemption(id, { isActive: nextIsActive })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.loadExemptions();
+          this.selectedExemption = null;
+          this.snackBar.open(
+            nextIsActive ? 'Exemption activated successfully!' : 'Exemption deactivated successfully!',
+            'Close',
+            {
+              duration: 3000,
+              panelClass: ['success-snackbar'],
+              horizontalPosition: 'center',
+              verticalPosition: 'top',
+            },
+          );
+          this.cdr.markForCheck();
+        },
+        error: (error) => {
+          console.error('Error toggling exemption active status:', error);
+          const errorMessage = error?.error?.message || error?.message || 'Failed to update exemption';
+          this.snackBar.open(`Error: ${errorMessage}`, 'Close', {
+            duration: 5000,
+            panelClass: ['error-snackbar'],
+            horizontalPosition: 'center',
+            verticalPosition: 'top',
+          });
+          this.cdr.markForCheck();
+        },
       });
   }
 }
