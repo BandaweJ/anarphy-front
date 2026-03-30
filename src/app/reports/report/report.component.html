@@ -33,7 +33,7 @@
       <span><b>Subjects Passed: </b> <span class="blue-text"> {{ report.report.subjectsPassed }} </span> </span>
     </div>
     <div class="names-row">
-      <span><b>Next Term Opening Day: </b> <span class="blue-text">{{ report.report.nextTermOpeningDay ? (report.report.nextTermOpeningDay | date:'mediumDate') : 'TBA' }}</span></span>
+      <span><b>Next Term Begins: </b> <span class="blue-text">{{ report.report.nextTermOpeningDay ? (report.report.nextTermOpeningDay | date:'mediumDate') : 'TBA' }}</span></span>
     </div>
     <div class="names-row">
       <span><b>Extra Curricular Activities: </b></span>
@@ -52,10 +52,10 @@
           <tr>
             <th class="small-column">Ser</th>
             <th>Subject</th>
-            <th>Mark</th>
+            <th>Exam Mark</th>
             <th>Term Mark</th>
             <th>Average</th>
-            <th>Position</th>
+            <th>Subject Position</th>
             <th>Grade</th>
             <th>Teacher's Comment</th>
           </tr>

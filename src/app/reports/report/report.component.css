@@ -115,6 +115,12 @@ th {
   color: #333;
 }
 
+.table-responsive-wrapper td:last-child {
+  /* Ensure long comments don't overflow horizontally or visually bleed */
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
 .small-column {
   width: 30px;
 }
