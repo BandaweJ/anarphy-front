@@ -100,11 +100,20 @@ export class ExemptionService {
       payload.type = exemption.type;
     }
 
-    if (exemption.fixedAmount !== undefined) {
+    // Only send numeric amounts; avoid null/'' which fails backend validation.
+    if (
+      exemption.fixedAmount !== undefined &&
+      exemption.fixedAmount !== null &&
+      exemption.fixedAmount !== ('' as any)
+    ) {
       payload.fixedAmount = exemption.fixedAmount;
     }
 
-    if (exemption.percentageAmount !== undefined) {
+    if (
+      exemption.percentageAmount !== undefined &&
+      exemption.percentageAmount !== null &&
+      exemption.percentageAmount !== ('' as any)
+    ) {
       payload.percentageAmount = exemption.percentageAmount;
     }
 
