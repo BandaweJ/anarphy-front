@@ -44,29 +44,33 @@
     </div>
   </div>
 
-  <!-- Action Buttons -->
+  <!-- Actions (explicit + always visible) -->
   <div class="exemption-actions">
-    <button 
-      mat-icon-button 
+    <button
+      mat-stroked-button
       color="primary"
       (click)="onEdit($event)"
       matTooltip="Edit Exemption">
       <mat-icon>edit</mat-icon>
+      Edit
     </button>
-    <button 
-      mat-icon-button 
+
+    <button
+      mat-stroked-button
+      color="accent"
+      (click)="onToggleActive($event)"
+      matTooltip="{{ exemption.isActive ? 'Deactivate Exemption' : 'Activate Exemption' }}">
+      <mat-icon>{{ exemption.isActive ? 'cancel' : 'check_circle' }}</mat-icon>
+      {{ exemption.isActive ? 'Deactivate' : 'Activate' }}
+    </button>
+
+    <button
+      mat-stroked-button
       color="warn"
       (click)="onDelete($event)"
       matTooltip="Delete Exemption">
       <mat-icon>delete</mat-icon>
-    </button>
-
-    <button
-      mat-icon-button
-      color="primary"
-      (click)="onToggleActive($event)"
-      matTooltip="{{ exemption.isActive ? 'Deactivate Exemption' : 'Activate Exemption' }}">
-      <mat-icon>{{ exemption.isActive ? 'cancel' : 'check_circle' }}</mat-icon>
+      Delete
     </button>
   </div>
 </div>

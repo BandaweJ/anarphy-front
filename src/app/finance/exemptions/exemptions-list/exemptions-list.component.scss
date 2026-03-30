@@ -176,3 +176,14 @@ $border-dark: #424242;
   }
 }
 
+// Material list items sometimes force fixed height/overflow + nowrap,
+// which can make multi-line cards appear on top of each other.
+::ng-deep mat-list-item.exemption-list-item,
+::ng-deep .mat-mdc-list-item.exemption-list-item,
+::ng-deep .mdc-list-item.exemption-list-item {
+  height: auto !important;
+  overflow: visible !important;
+  white-space: normal !important;
+  padding: 0 !important;
+}
+
