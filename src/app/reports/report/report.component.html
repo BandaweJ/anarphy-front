@@ -35,14 +35,6 @@
     <div class="names-row">
       <span><b>Next Term Begins: </b> <span class="blue-text">{{ report.report.nextTermOpeningDay ? (report.report.nextTermOpeningDay | date:'mediumDate') : 'TBA' }}</span></span>
     </div>
-    <div class="names-row">
-      <span><b>Extra Curricular Activities: </b></span>
-      <mat-chip-listbox aria-label="Extra curricular activities">
-        <mat-chip-option *ngFor="let activity of report.report.extraCurricularActivities || []" [disabled]="true">
-          {{ activity }}
-        </mat-chip-option>
-      </mat-chip-listbox>
-    </div>
   </mat-card-subtitle>
   <hr class="hr" />
   <mat-card-content>
@@ -88,26 +80,6 @@
     </div>
   </mat-card-content>
   <mat-card-footer class="footer">
-    <div class="comment-section" *ngIf="canEditCommentAndNotStudent$ | async">
-      <h3 class="underline">Extra Curricular Activities</h3>
-      <form [formGroup]="extraActivitiesForm">
-        <div formArrayName="activities">
-          <div *ngFor="let control of activitiesArray.controls; let i = index" class="activity-row">
-            <mat-form-field appearance="outline" class="full-width-textarea">
-              <mat-label>Activity {{ i + 1 }}</mat-label>
-              <input matInput [formControlName]="i" (blur)="saveExtraActivities()" />
-            </mat-form-field>
-            <button mat-icon-button color="warn" type="button" (click)="removeActivityField(i)">
-              <mat-icon>remove_circle</mat-icon>
-            </button>
-          </div>
-        </div>
-        <button mat-stroked-button color="primary" type="button" (click)="addActivityField()">
-          Add Activity
-        </button>
-      </form>
-    </div>
-
     <div class="comment-section form-teacher-comment-section">
       <h3 class="underline">Form Teacher's Comment</h3>
       <form [formGroup]="formTeacherCommentForm" class="form-teacher-comment-form">
